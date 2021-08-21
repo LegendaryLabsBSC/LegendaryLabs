@@ -1,0 +1,5 @@
+const LegendaryLabs = await ethers.getContractFactory("LegendsNFT"); // The string can be the name of any .sol file inside ./contracts
+const CONTRACT_ADDRESS = process.env.CONTRACT
+const Labratory = LegendaryLabs.attach(CONTRACT_ADDRESS); // Create instance of smart-contract caller
+
+const read_ipfs = await Labratory.tokenURI(tokenID); // Labratory.<any function inside the contract.()
