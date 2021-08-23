@@ -1,4 +1,4 @@
-pragma solidity 0.8.6;
+pragma solidity ^0.8.0;
 
 // import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -21,7 +21,7 @@ contract LegendaryTests is ERC721URIStorage {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
-        _setTokenURI(newItemId,metadata);
+        _setTokenURI(newItemId, metadata);
         return newItemId;
     }
 }

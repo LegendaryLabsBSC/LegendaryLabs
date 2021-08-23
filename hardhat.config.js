@@ -1,49 +1,45 @@
 require("@nomiclabs/hardhat-waffle");
-require("hardhat-watcher");
-require('dotenv').config();
+require('dotenv').config()
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY
+const PRIVATEKEY = process.env.PRIVATEKEY
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
+
+// You need to export an object to set up your config
+// Go to https://hardhat.org/config/ to learn more
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  defaultNetwork: "bsct",
+  solidity: "0.8.4",
+  paths: {
+    // artifacts: './src/artifacts'
+    artifacts: './frontend/src/artifacts'
+  },
   networks: {
     hardhat: {
+      chainId: 1337
     },
-    bsct: {
-      url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
-      accounts: [PRIVATE_KEY]
-    }
-  },
-  solidity: {
-    version: "0.8.6",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200
-      }
-    }
-  },
-  paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
-  },
-  mocha: {
-    timeout: 20000
-  },
-  watcher: {
-    compilation: {
-      tasks: ["compile"],
-      files: ["./contracts"],
-      verbose: true,
+    ropsten: {
+      url: "https://ropsten.infura.io/v3/2f043014c2934ebc9a70d822c22f5837",
+      accounts: [`0x${PRIVATEKEY}`]
     },
-    ci: {
-      tasks: ["clean", { command: "compile", params: { quiet: true } }, { command: "test", params: { noCompile: true, testFiles: ["testfile.ts"] } }],
+    // bsctest: {
+    //   url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
+    //   accounts: [`0x${process.env.PRIVATEKEY}`]
+    // }
+    bsctest: {
+      url: "https://apis-sj.ankr.com/3993586e443942098e59d5b71e4a7e09/7eb7caa0231f32a5cc5bbcb5dbeab631/binance/full/test",
+      accounts: [`0x${PRIVATEKEY}`]
     }
   }
-}
-
+};
