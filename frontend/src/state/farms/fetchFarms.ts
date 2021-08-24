@@ -48,14 +48,8 @@ const fetchFarms = async () => {
         },
       ]
 
-      const [
-        tokenBalanceLP,
-        quoteTokenBlanceLP,
-        lpTokenBalanceMC,
-        lpTotalSupply,
-        tokenDecimals,
-        quoteTokenDecimals,
-      ] = await multicall(erc20, calls)
+      const [tokenBalanceLP, quoteTokenBlanceLP, lpTokenBalanceMC, lpTotalSupply, tokenDecimals, quoteTokenDecimals] =
+        await multicall(erc20, calls)
 
       let tokenAmount
       let lpTotalInQuoteToken

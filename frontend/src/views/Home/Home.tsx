@@ -15,7 +15,7 @@ import TotalValueLockedCard from './components/TotalValueLockedCard'
 //   const CONTRACT_ADDRESS = process.env.CONTRACT
 
 //   const Labratory = async () => {
-//     await ethers.getContractFactory("LegendsNFT"); 
+//     await ethers.getContractFactory("LegendsNFT");
 //   } // The string can be the name of any .sol file inside ./contracts
 //   const CONTRACT_ADDRESS = process.env.CONTRACT;
 //   LegendaryLabs.attach(CONTRACT_ADDRESS);
