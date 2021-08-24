@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 // import './App.css';
 // import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json'
 // import Token from './artifacts/contracts/Token.sol/Token.json'
-import LegendNFT from '../../artifacts/contracts/LegendNFT.sol/LegendsNFT.json'
+import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
 
 // const greeterAddress = "0xbbd72e3c67D83B99b019fC516FA062E15A7E7C68"
 // const tokenAddress = "0xFE1DFAD21F0EdA0e9509dE3B4a4d26525591480d"
@@ -44,7 +44,7 @@ function App() {
     if (typeof window.ethereum !== 'undefined') {
       // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const contract = new ethers.Contract(legendAddress, LegendNFT.abi, provider)
+      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
       const ipfsURL = await contract.tokenURI(id)
       console.log('IPFS: ', ipfsURL)
     }
