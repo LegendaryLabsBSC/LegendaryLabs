@@ -3,7 +3,7 @@
     "import/resolver": {
       "node": {
         "paths": [
-          "./src"
+          "src"
         ]
       }
     }
