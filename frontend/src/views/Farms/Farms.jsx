@@ -7,12 +7,14 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // const greeterAddress = "0xbbd72e3c67D83B99b019fC516FA062E15A7E7C68"
 // const tokenAddress = "0xFE1DFAD21F0EdA0e9509dE3B4a4d26525591480d"
-const legendAddress = '0xBCcA0265B15133E04926a7fE518b1c31a4acDC78'
+const legendAddress = '0x5f30f55aF99B2FBc5ca67d396695612a4Cce1d59'
 
 function App() {
   // const [userAccount, setUserAccount] = useState('')
   // const [amount, setAmount] = useState(0)
   const [id, setID] = useState(0)
+  const [prefix, setPrefix] = useState('')
+  const [postfix, setPostfix] = useState('')
 
   // async function requestAccount() {
   //   await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -50,13 +52,36 @@ function App() {
     }
   }
 
+  async function mintRandom() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
+      const mint = async () => {
+        await contract.mintRandom(account, prefix, postfix);
+      }
+      console.log(mint)
+    }
+  }
+
   return (
     <div>
       <header>
+
+        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
         <button type="submit" onClick={fetchIPFS}>
           Fetch IPFS URL
         </button>
-        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+
+        <br /> <br />
+
+        <input type="text" placeholder="Enter Prefix" onChange={(e) => setPrefix(e.target.value)} />
+        <input type="text" placeholder="Enter Postfix" onChange={(e) => setPostfix(e.target.value)} />
+        <button type="submit" onClick={mintRandom}>
+          Mint Random NFT
+        </button>
+
       </header>
     </div>
   )

@@ -11,7 +11,7 @@ interface ILegendMetadata {
         // uint256 cooldownEndBlock;
         // uint256 cooldownIndex; // Make cool down ~24h
         uint256 dna;
-        uint256 level; // v1 1-5
+        // uint256 level; // v1 1-5
         // uint256 stats;
         // uint256 health;
         // uint256 strength;
@@ -20,9 +20,9 @@ interface ILegendMetadata {
         // uint256 speed;
         // uint256 accuracy;
         // uint256 destruction;
-        uint256 generation;
-        uint256 season;
-        uint256 breedingCost;
-        bool isLegendary;
+        // uint256 generation;
+        // uint256 season;
+        // uint256 breedingCost;
+        // bool isLegendary;
     }
 }
