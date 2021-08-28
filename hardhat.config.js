@@ -32,13 +32,13 @@ module.exports = {
       url: "https://ropsten.infura.io/v3/2f043014c2934ebc9a70d822c22f5837",
       accounts: [`0x${PRIVATEKEY}`]
     },
-    // bsctest: {
-    //   url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
-    //   accounts: [`0x${process.env.PRIVATEKEY}`]
-    // }
     bsctest: {
-      url: "https://apis-sj.ankr.com/3993586e443942098e59d5b71e4a7e09/7eb7caa0231f32a5cc5bbcb5dbeab631/binance/full/test",
-      accounts: [`0x${PRIVATEKEY}`]
+      url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
+      accounts: [`0x${process.env.PRIVATEKEY}`]
     }
+    // bsctest: {
+    //   url: "https://apis-sj.ankr.com/3993586e443942098e59d5b71e4a7e09/7eb7caa0231f32a5cc5bbcb5dbeab631/binance/full/test",
+    //   accounts: [`0x${PRIVATEKEY}`]
+    // }
   }
 };
