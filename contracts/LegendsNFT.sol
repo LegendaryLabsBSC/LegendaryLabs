@@ -19,13 +19,26 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
 
     mapping(uint256 => LegendMetadata) public legendData;
 
+    event createdDNA(uint256[9] dna);
+
     constructor() ERC721("Legend", "LEGEND") {}
+
+    // function _setTokenURI(uint256 tokenId, string memory _tokenURI)
+    //     internal
+    //     virtual
+    // {
+    //     _tokenURIs[tokenId] = _tokenURI;
+    // }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
         internal
         virtual
     {
         _tokenURIs[tokenId] = _tokenURI;
+    }
+
+    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+        _setTokenURI(tokenId, _tokenURI);
     }
 
     // Returns IPFS url associated with Legend as string
@@ -44,22 +57,40 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
         return _tokenURI;
     }
 
+    function tokenDATA(uint256 tokenId)
+        public
+        view
+        virtual
+        returns (uint256[9] memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        // legendData[newItemId] = LegendMetadata(newItemId, prefix, postfix, dna);
+        LegendMetadata memory _legendData = legendData[tokenId];
+        return _legendData.dna;
+    }
+
     // Will need addition security
     // only master check + send to private function (mint to)
     // Will need IPFS URL + set URI
     // Link generator
+
     function mintRandom(
         address recipient,
         string memory prefix,
-        string memory postfix
+        string memory postfix,
+        string memory uri
     ) public returns (uint256) {
-        uint256 dna = createDNA();
+        
+        uint256[9] memory dna = createDNA();
+        emit createdDNA(dna);
 
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
-
         _mint(recipient, newItemId);
-
+        _setTokenURI(newItemId, uri);
         legendData[newItemId] = LegendMetadata(newItemId, prefix, postfix, dna);
 
         return newItemId;
