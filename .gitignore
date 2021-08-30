@@ -30,3 +30,5 @@ cache
 artifacts
 oldcontracts
 
+#
+*-rc*.*

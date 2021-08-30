@@ -10,7 +10,7 @@ interface ILegendMetadata {
         uint256 id;
         string prefix;
         string postfix;
-        uint256[9] dna; //for testing
+        uint256[10] dna; //for testing
         // string dna; // in the form of IPFS hash
         // string[] parents;
         // uint256 birthDay;

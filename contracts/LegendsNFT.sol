@@ -19,7 +19,7 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
 
     mapping(uint256 => LegendMetadata) public legendData;
 
-    event createdDNA(uint256[9] dna);
+    event createdDNA(uint256 newItemId);
 
     constructor() ERC721("Legend", "LEGEND") {}
 
@@ -61,7 +61,7 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
         public
         view
         virtual
-        returns (uint256[9] memory)
+        returns (uint256[10] memory)
     {
         require(
             _exists(tokenId),
@@ -84,14 +84,19 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
         string memory uri
     ) public returns (uint256) {
         
-        uint256[9] memory dna = createDNA();
-        emit createdDNA(dna);
-
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
-        _setTokenURI(newItemId, uri);
+
+        uint256[10] memory dna = createDNA(newItemId);
+
         legendData[newItemId] = LegendMetadata(newItemId, prefix, postfix, dna);
+
+        // LegendMetadata memory legendpp = legendData[newItemId];
+
+        emit createdDNA(newItemId);
+    
+        _setTokenURI(newItemId, uri); // have this wait for IPFS to finish
 
         return newItemId;
     }

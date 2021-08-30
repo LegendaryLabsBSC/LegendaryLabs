@@ -6,6 +6,7 @@ pragma solidity ^0.8.0;
 
 contract LegendsDNA {
     struct DNAData {
+        uint256 id;
         uint256 CdR1;
         uint256 CdG1;
         uint256 CdB1;
@@ -17,10 +18,11 @@ contract LegendsDNA {
         uint256 CdB3;
     }
 
-    function createDNA() public view returns (uint256[9] memory) {
+    function createDNA(uint256 id) public view returns (uint256[10] memory) {
         uint256 randomValue1 = random(255);
         uint256 randomValue2 = random(100);
         DNAData memory data = DNAData(
+            id,
             randomValue1 - 8,
             randomValue2 + 81,
             randomValue1 - 4,
@@ -32,7 +34,8 @@ contract LegendsDNA {
             randomValue1 - 10
         );
 
-        uint256[9] memory dna = [
+        uint256[10] memory dna = [
+            id,
             data.CdR1,
             data.CdG1,
             data.CdB1,

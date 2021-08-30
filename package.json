@@ -11,12 +11,17 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.0",
+    "@pinata/ipfs-gateway-tools": "^1.1.6",
     "dotenv": "^10.0.0",
     "hardhat-watcher": "^2.1.1",
+    "husky": "^7.0.2",
+    "json2csv": "^5.0.6",
+    "mv": "^2.1.1",
     "typescript": "^4.4.2"
   },
   "scripts": {
     "load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
-    "com": "npx hardhat compile"
+    "com": "npx hardhat compile",
+    "api": "nodemon scripts/generateLegend.js"
   }
 }
