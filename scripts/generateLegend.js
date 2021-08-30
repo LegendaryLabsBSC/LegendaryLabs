@@ -99,8 +99,8 @@ function writetoCSV(metadata, dt) {
         setTimeout(() => {
 
             var newLine = '\r\n';
-            // var new_metadata = JSON.parse(metadata);
             var new_metadata = metadata
+
 
             fs.stat(dt, function (err, stat) {
                 if (err == null) {
@@ -339,11 +339,12 @@ const mint = async (rgb) => {
 }
 
 
-async function randomMintGen(dna){
-    let append_csv = await writetoCSV(dna, generator_datatable) // Step-2
+async function randomMintGen(dna) {
+    const append_csv = await writetoCSV(dna, generator_datatable) // Step-2
     console.log(append_csv)
-    // let call_gen = await callGenerator(get_id)
-    // console.log(call_gen)
+    console.log('yyy', dna.ipfss.split(',', 1))
+    const call_gen = await callGenerator(dna.ipfss.split(',', 1))
+    console.log(call_gen)
     // let watch_mint = await watchPNG(generator_png_dir, generated_png) // Step-3
     // console.log(watch_mint)
     // let png_hash = await pinPNG(generator_png_dir, generated_png) // Step-4
