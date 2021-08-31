@@ -20,6 +20,9 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
     mapping(uint256 => LegendMetadata) public legendData;
 
     event createdDNA(uint256 newItemId);
+    event Minted(uint256 tokenId);
+    event Breed(uint256 parent1, uint256 parent2, uint256 child);
+    
 
     constructor() ERC721("Legend", "LEGEND") {}
 
@@ -100,4 +103,52 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
 
         return newItemId;
     }
+
+        function mintTo(
+        address receiver,
+        uint256 newItemId,
+        string memory prefix,
+        string memory postfix,
+        uint256[10] memory dna
+    ) private returns (uint256) {
+        _mint(receiver, newItemId);
+        legendData[newItemId] = LegendMetadata(
+            newItemId,
+            prefix,
+            postfix,
+            dna
+        );
+        emit Minted(newItemId);
+        return newItemId;
+    }
+
+    function breed(
+        uint256 _parent1,
+        uint256 _parent2
+        ) public {
+            require(
+                ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
+        );
+        LegendMetadata storage parent1 = legendData[_parent1];
+        LegendMetadata storage parent2 = legendData[_parent2];
+
+        _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
+
+        uint256[10] memory newDNA = mixDNA(newItemId,parent1.dna, parent2.dna);
+
+        bool mix = block.number % 2 == 0; 
+
+        mintTo(
+            msg.sender,
+            newItemId,
+            mix ? parent1.prefix : parent2.prefix,
+            mix ? parent2.postfix : parent1.postfix,
+            newDNA
+            );
+
+        emit Breed(parent1.id, parent2.id, newItemId);
+    }
+
 }
+

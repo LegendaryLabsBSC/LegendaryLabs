@@ -47,9 +47,8 @@ function App() {
       const ipfsDNA = await contract.tokenDATA(idd)
       console.log('nextOne: ', ipfsDNA.toString())
       const ipfss = ipfsDNA.toString()
-      // ipfss.push
 
-      axios.post('http://localhost:3001/api/random', { ipfss }).finally(() => {
+      const newHash = await axios.post('http://localhost:3001/api/random', { ipfss }).finally(() => {
         // document.location.reload()
       })
     }

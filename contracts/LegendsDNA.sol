@@ -50,6 +50,74 @@ contract LegendsDNA {
         return dna;
     }
 
+    // change to strain
+    // function createDNA(uint256 id) public view returns (uint256[10] memory) {
+    //     uint256 randomValue1 = random(255);
+    //     uint256 randomValue2 = random(100);
+    //     DNAData memory data = DNAData(
+    //         id,
+    //         randomValue1 - 8,
+    //         randomValue2 + 81,
+    //         randomValue1 - 4,
+    //         randomValue2 + 31,
+    //         randomValue1 - 13,
+    //         randomValue2 + 33,
+    //         randomValue1 - 22,
+    //         randomValue2 + 5,
+    //         randomValue1 - 10
+    //     );
+
+    //     uint256 memory dna = [
+    //         id,
+    //         data.CdR1,
+    //         data.CdG1,
+    //         data.CdB1,
+    //         data.CdR2,
+    //         data.CdG2,
+    //         data.CdB2,
+    //         data.CdR3,
+    //         data.CdG3,
+    //         data.CdB3
+    //     ];
+
+    //     return dna;
+    // }
+
+    function mixDNA(
+        uint256 childId,
+        uint256[10] memory parent1,
+        uint256[10] memory parent2
+    ) public view returns (uint256[10] memory) {
+        // uint256 randomValue = random(256);
+        DNAData memory childData = DNAData(
+            childId,
+            parent1[0],
+            parent2[1],
+            parent1[2],
+            parent2[3],
+            parent1[4],
+            parent2[5],
+            parent1[6],
+            parent2[7],
+            parent1[8]
+        );
+
+        uint256[10] memory childDNA = [
+            childId,
+            childData.CdR1,
+            childData.CdG1,
+            childData.CdB1,
+            childData.CdR2,
+            childData.CdG2,
+            childData.CdB2,
+            childData.CdR3,
+            childData.CdG3,
+            childData.CdB3
+        ];
+
+        return childDNA;
+    }
+
     // Random Number oracle call could go here
     function random(uint256 range) internal view returns (uint256) {
         return
