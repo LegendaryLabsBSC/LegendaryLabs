@@ -8,7 +8,6 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 // const greeterAddress = "0xbbd72e3c67D83B99b019fC516FA062E15A7E7C68"
 // const tokenAddress = "0xFE1DFAD21F0EdA0e9509dE3B4a4d26525591480d"
 // const legendAddress = '0xBCcA0265B15133E04926a7fE518b1c31a4acDC78' // Original address, useful for testing
-// const legendAddress = '0x5f30f55aF99B2FBc5ca67d396695612a4Cce1d59' // Previous test address -- mintRandom
 const legendAddress = '0xea9021be20206F802eABd85D45021bfF0E7CDeA8' // Current Test address
 
 function App() {

@@ -25,10 +25,7 @@ const gatewayTools = new IPFSGatewayTools();
 const PORT = process.env.PORT || 3001;
 
 // Endpoints
-const MINT_ENDPOINT = '/api/test'
-const ID_ENDPOINT = '/api/id'
-const BREED_ENDPOINT = '/api/breed'
-const EASY_ENDPOINT = '/api/easy'
+
 const RANDOM_ENDPOINT = '/api/random'
 
 // App variables
@@ -71,26 +68,6 @@ function jsonReader(filePath, cb) {
             return cb && cb(err);
         }
     });
-}
-
-// make this into a more secure function
-// have function read last id from smart contract, not from csv
-function new_id() {
-    return new Promise(resolve => {
-        fs.readFile(generator_datatable, 'ascii', function (err, data) {
-            if (err) throw err;
-
-            let lines = data.trim().split('\n');
-            let lastLine = lines.slice(-1)[0];
-
-            let fields = lastLine.split(',');
-            let counter = fields.slice(0)[0].replace('file:\\\\', '');
-            let _id = ++counter
-
-            resolve(_id)
-        });
-    })
-
 }
 
 
@@ -214,170 +191,51 @@ function pinPNG(dir, file) {
 // load nft-img ipfs hash into metadata 
 //     5-update_data.js 
 
-function appendDNA(old_file, new_file, hash) {
+// mock function for breeding demo
+
+function appendDNA(id, hash) {
     return new Promise(resolve => {
         setTimeout(() => {
-            jsonReader(old_file, (err, dna) => {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-
-                dna.image = "ipfs://" + hash
-
-                fs.writeFile(new_file, JSON.stringify(dna), err => {
-                    if (err) {
-                        console.log("Error writing file:", err);
-                    }
-
-                    console.log('\nNFT-DNA ready to upload:\n', dna);
-                    resolve('\nStep-5 Complete')
-                });
-            });
-        }, 500)
-    })
-}
-
-// ipfs/pinata senf off entire NFT
-//     6-uploadFile.js
-
-function pinNFT(dir) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-
-            const pinFileToIPFS = async () => {
-                const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
-
-                let data = new FormData();
-                let new_dna = dir
-
-                data.append("file", fs.createReadStream(new_dna));
-
-                const res = await axios.post(url, data, {
-                    maxContentLength: "Infinity",
-                    headers: {
-                        "Content-Type": `multipart/form-data; boundary=${data._boundary}`,
-                        pinata_api_key: pinataApiKey,
-                        pinata_secret_api_key: pinataSecretApiKey,
-                    },
-                });
-
-                var dna_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
-
-                console.log('\nNFT-DNA pinned to IPFS: ', dna_hash)
-                console.log('\nStep-6 Complete')
-                resolve(dna_hash)
-            };
-            pinFileToIPFS();
-        }, 500)
-    })
-}
-
-// Load DNA metadata into NFT solidity contract
-//  7-load-nft.js / 8-toMint.sol
-
-function mintNFT(hash) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-
             async function main() {
                 const NFT = await ethers.getContractFactory("LegendsNFT");
                 const URI = "ipfs://" + hash;
                 const WALLET_ADDRESS = "0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52" // Using BSC testnet wallet
-                // const CONTRACT_ADDRESS = "0xE0E0bD78F6F509514F4A1E066E5C9B90950624Fb" // using a basic test NFT contract
-                const CONTRACT_ADDRESS = "0xBCcA0265B15133E04926a7fE518b1c31a4acDC78" // put into .env
+                const CONTRACT_ADDRESS = "0xea9021be20206F802eABd85D45021bfF0E7CDeA8"
                 const contract = NFT.attach(CONTRACT_ADDRESS);
-                const newItemId = await contract.mint(WALLET_ADDRESS, URI);
-                console.log('\nNew NFT Minted!')
-                console.log('\nStep-7 Complete')
-                resolve(newItemId)
+                await contract.setTokenURI(id, hash)
+                const ipfsURL = await contract.tokenURI(id)
+                resolve(ipfsURL)
+                // test out event listers
+                //contract.on("createdDNA", (data, event) => {
+                //   console.log('good1', data.toString());
+                //   const idd = data.toString()
+                //   nextOne(idd);
+                // })
             }
             main().then(() => process.exit(0)).catch(error => {
                 console.error(error);
                 process.exit(1);
             });
-        })
+        }, 500)
     })
-}
-
-const mint = async (rgb) => {
-
-    const get_id = await new_id()
-    const generated_png = get_id + ".png"
-
-    let fe_metadata = {
-        id: get_id,
-        CdR1: rgb.CdR1,
-        CdG1: rgb.CdG1,
-        CdB1: rgb.CdB1,
-        CdR2: rgb.CdR2,
-        CdG2: rgb.CdG2,
-        CdB2: rgb.CdB2,
-        CdR3: rgb.CdR3,
-        CdG3: rgb.CdG3,
-        CdB3: rgb.CdB3
-    }
-    console.log(fe_metadata)
-
-    // let initiate = await testBreedNFT(new_metadata_location, get_id) // Step-0
-    // console.log(initiate)
-    // let read_meta = await readNFTMetadata(new_metadata_location) // Step-1
-    // console.log(read_meta)
-    let append_csv = await writetoCSV(fe_metadata, generator_datatable) // Step-2
-    console.log(append_csv)
-    let call_gen = await callGenerator(get_id)
-    console.log(call_gen)
-    let watch_mint = await watchPNG(generator_png_dir, generated_png) // Step-3
-    console.log(watch_mint)
-    let png_hash = await pinPNG(generator_png_dir, generated_png) // Step-4
-    let write_meta = await appendDNA(new_metadata_location, meta_with_png_location, png_hash) // Step-5
-    console.log(write_meta)
-    let send_nft = await pinNFT(meta_with_png_location) // Step-6
-    let mint_nft = await mintNFT(send_nft) // Step-7
-    // sleep.sleep(5)
-    console.log('\nNew NFT Contract:\n', mint_nft)
 }
 
 
 async function randomMintGen(dna) {
-    const append_csv = await writetoCSV(dna, generator_datatable) // Step-2
-    console.log(append_csv)
-    console.log('yyy', dna.ipfss.split(',', 1))
-    const call_gen = await callGenerator(dna.ipfss.split(',', 1))
-    console.log(call_gen)
-    // let watch_mint = await watchPNG(generator_png_dir, generated_png) // Step-3
-    // console.log(watch_mint)
-    // let png_hash = await pinPNG(generator_png_dir, generated_png) // Step-4
-    // let write_meta = await appendDNA(new_metadata_location, meta_with_png_location, png_hash) // Step-5
-    // console.log(write_meta)
-    // let send_nft = await pinNFT(meta_with_png_location) // Step-6
-    // let mint_nft = await mintNFT(send_nft) // Step-7
-    // sleep.sleep(5)
-    // console.log('\nNew NFT Contract:\n', mint_nft)
+
+    const id = dna.ipfss.split(',', 1)
+
+    await writetoCSV(dna, generator_datatable)
+    await callGenerator(id)
+    await watchPNG(generator_png_dir, generated_png)
+    const png_hash = await pinPNG(generator_png_dir, generated_png)
+    await appendDNA(id, png_hash)
 }
 
 
 app.post(RANDOM_ENDPOINT, (req, res) => {
     console.log('good', req.body)
     randomMintGen(req.body)
-    res.send('')
-})
-
-app.post(ID_ENDPOINT, (req, res) => {
-    console.log('good', req.body)
-    URI_IPFS(req.body)
-    res.send('')
-})
-
-app.post(EASY_ENDPOINT, (req, res) => {
-    console.log('good-easy', req.body)
-    easy_breed(req.body.parent1, req.body.parent2)
-    res.send('')
-})
-
-app.post(BREED_ENDPOINT, (req, res) => {
-    console.log('good', req.body)
-    breed(req.body.parent1, req.body.parent2)
     res.send('')
 })
 
