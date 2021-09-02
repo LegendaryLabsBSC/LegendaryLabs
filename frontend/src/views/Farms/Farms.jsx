@@ -8,7 +8,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 // const greeterAddress = "0xbbd72e3c67D83B99b019fC516FA062E15A7E7C68"
 // const tokenAddress = "0xFE1DFAD21F0EdA0e9509dE3B4a4d26525591480d"
 // const legendAddress = '0xBCcA0265B15133E04926a7fE518b1c31a4acDC78' // Original address, useful for testing
-const legendAddress = '0xea9021be20206F802eABd85D45021bfF0E7CDeA8' // Current Test address
+const legendAddress = '0xD93AeCa38D4f02BeE5D8216B79868dFf12b68634' // Current Test address
 
 function App() {
   // const [userAccount, setUserAccount] = useState('')
@@ -17,6 +17,10 @@ function App() {
   const [prefix, setPrefix] = useState('')
   const [postfix, setPostfix] = useState('')
   const [_newURI, setURI] = useState('')
+  const [parent1, setP1] = useState('')
+  const [parent2, setP2] = useState('')
+
+
 
 
   async function fetchIPFS() {
@@ -48,12 +52,48 @@ function App() {
       console.log('nextOne: ', ipfsDNA.toString())
       const ipfss = ipfsDNA.toString()
 
-      const newHash = await axios.post('http://localhost:3001/api/random', { ipfss }).finally(() => {
-        // document.location.reload()
-      })
+      await axios
+        .post('http://localhost:3001/api/random', { ipfss })
+        .then(res => {
+          const hash = res.data
+          console.log('res.data', hash)
+          assignIPFS(idd, hash)
+        })
+
+
+      // const newHash = await axios.post('http://localhost:3001/api/random', { ipfss }).finally(() => {
+      //   // document.location.reload()
+
+      // })
+
+      // console.log(newHash.data)
     }
   }
 
+  async function assignIPFS(idd, hash) {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
+      await contract.setTokenURI(idd, hash)
+    }
+  }
+
+  async function breed() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
+      await contract.breed(parent1, parent2)
+      contract.on("createdDNA", (data, event) => {
+        console.log('good1', data.toString());
+        const idd = data.toString()
+        nextOne(idd);
+      });
+    }
+  }
 
   async function newURI() {
     if (typeof window.ethereum !== 'undefined') {
@@ -89,9 +129,9 @@ function App() {
               return struct dna : Mix DNA of legend.parent1 + legend.parent2
             Send dna to API:
               Send dna to generator (find out solution for 'Name', currently using off-chain counter, non-id corresponding):
-  
-  
-  
+   
+   
+   
       */
 
       // left off: having dna generated, piped to generator, pinned to ipfs, returned to contract, minted
@@ -141,6 +181,15 @@ function App() {
         <button type="submit" onClick={mintRandom}>
           Mint Random NFT
         </button>
+
+        <br /> <br />
+
+        <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setP1(e.target.value)} />
+        <input type="number" placeholder="Parent 2 Token ID" onChange={(e) => setP2(e.target.value)} />
+        <button type="submit" onClick={breed}>
+          Breed
+        </button>
+
       </header>
     </div>
   )

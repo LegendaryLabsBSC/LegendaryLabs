@@ -14,13 +14,15 @@ const bodyParser = require('body-parser')
 const { idText } = require('typescript')
 const fetch = require('node-fetch')
 const IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');
+const { BigNumber } = require("ethers");
+const { connected } = require("process");
 
 
 // env variables
 
 require('dotenv').config();
-const pinataApiKey = process.env.YOURAPIKEY;
-const pinataSecretApiKey = process.env.YOURSECRETKEY;
+const pinataApiKey = process.env.PINATAAPIKEY;
+const pinataSecretApiKey = process.env.PINATASECRETKEY;
 const gatewayTools = new IPFSGatewayTools();
 const PORT = process.env.PORT || 3001;
 
@@ -163,6 +165,8 @@ function pinPNG(dir, file) {
                         "Content-Type": `multipart/form-data; boundary=${data._boundary}`,
                         pinata_api_key: pinataApiKey,
                         pinata_secret_api_key: pinataSecretApiKey,
+
+
                     },
                 });
 
@@ -171,7 +175,7 @@ function pinPNG(dir, file) {
                 console.log('png pinned to IPFS: ', img_hash)
 
                 const currentPath = image
-                const destinationPath = path.join(__dirname, '../MINTED', file);
+                const destinationPath = path.join(__dirname, './minted', file);
 
                 mv(currentPath, destinationPath, function (err) {
                     if (err) {
@@ -193,50 +197,50 @@ function pinPNG(dir, file) {
 
 // mock function for breeding demo
 
-function appendDNA(id, hash) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            async function main() {
-                const NFT = await ethers.getContractFactory("LegendsNFT");
-                const URI = "ipfs://" + hash;
-                const WALLET_ADDRESS = "0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52" // Using BSC testnet wallet
-                const CONTRACT_ADDRESS = "0xea9021be20206F802eABd85D45021bfF0E7CDeA8"
-                const contract = NFT.attach(CONTRACT_ADDRESS);
-                await contract.setTokenURI(id, hash)
-                const ipfsURL = await contract.tokenURI(id)
-                resolve(ipfsURL)
-                // test out event listers
-                //contract.on("createdDNA", (data, event) => {
-                //   console.log('good1', data.toString());
-                //   const idd = data.toString()
-                //   nextOne(idd);
-                // })
-            }
-            main().then(() => process.exit(0)).catch(error => {
-                console.error(error);
-                process.exit(1);
-            });
-        }, 500)
-    })
+async function appendDNA(id, hash) {
+    async function main() {
+        const NFT = await ethers.getContractFactory("LegendsNFT");
+        const URI = "ipfs://" + hash;
+        const WALLET_ADDRESS = "0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52" // Using BSC testnet wallet
+        const CONTRACT_ADDRESS = "0xD93AeCa38D4f02BeE5D8216B79868dFf12b68634"
+        const contract = NFT.attach(CONTRACT_ADDRESS);
+        const set_uri = await contract.setTokenURI(1, URI)
+        console.log(set_uri)
+        // const ipfsURL = await contract.tokenURI(1)
+        // test out event listers
+        //contract.on("createdDNA", (data, event) => {
+        //   console.log('good1', data.toString());
+        //   const idd = data.toString()
+        //   nextOne(idd);
+        // })
+    }
+    main().then(() => process.exit(0)).catch(error => {
+        console.error(error);
+        process.exit(1);
+    });
 }
 
 
 async function randomMintGen(dna) {
 
     const id = dna.ipfss.split(',', 1)
+    const generated_png = id + ".png"
 
     await writetoCSV(dna, generator_datatable)
     await callGenerator(id)
     await watchPNG(generator_png_dir, generated_png)
     const png_hash = await pinPNG(generator_png_dir, generated_png)
+    console.log(png_hash)
     await appendDNA(id, png_hash)
+    return png_hash
 }
 
 
-app.post(RANDOM_ENDPOINT, (req, res) => {
+app.post(RANDOM_ENDPOINT, async (req, res) => {
     console.log('good', req.body)
-    randomMintGen(req.body)
-    res.send('')
+    const _newHash = await randomMintGen(req.body)
+    console.log(_newHash)
+    return res.send(`ipfs://${_newHash}`)
 })
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
