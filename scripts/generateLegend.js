@@ -231,7 +231,7 @@ async function randomMintGen(dna) {
     await watchPNG(generator_png_dir, generated_png)
     const png_hash = await pinPNG(generator_png_dir, generated_png)
     console.log(png_hash)
-    await appendDNA(id, png_hash)
+    // await appendDNA(id, png_hash)
     return png_hash
 }
 

@@ -7,8 +7,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // const greeterAddress = "0xbbd72e3c67D83B99b019fC516FA062E15A7E7C68"
 // const tokenAddress = "0xFE1DFAD21F0EdA0e9509dE3B4a4d26525591480d"
-// const legendAddress = '0xBCcA0265B15133E04926a7fE518b1c31a4acDC78' // Original address, useful for testing
-const legendAddress = '0xD93AeCa38D4f02BeE5D8216B79868dFf12b68634' // Current Test address
+const legendAddress = '0xe4fB686B4d62F5405871FF6Afb059E4391b9bE8A'
 
 function App() {
   // const [userAccount, setUserAccount] = useState('')
@@ -55,6 +54,7 @@ function App() {
       await axios
         .post('http://localhost:3001/api/random', { ipfss })
         .then(res => {
+          console.log('wehere')
           const hash = res.data
           console.log('res.data', hash)
           assignIPFS(idd, hash)
