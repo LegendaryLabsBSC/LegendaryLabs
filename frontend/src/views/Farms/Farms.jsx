@@ -41,11 +41,12 @@ function App() {
         .post('http://localhost:3001/api/mint', { tokenDNA })
         .then(res => {
           const hash = res.data
-          console.log('res.data', hash)
+          console.log('New NFT IPFS URL:', hash)
           assignIPFS(newToken, hash)
-        }).finally(() => {
-          document.location.reload()
         })
+        // .finally(() => {
+        //   document.location.reload()
+        // })
     }
   }
 
@@ -68,7 +69,7 @@ function App() {
       await contract.breed(parent1, parent2)
         .then( // Truncate
           contract.on("createdDNA", (data, event) => {
-            console.log('DNA Created:', data.toString());
+            console.log('New Token Created:', data.toString());
             const newToken = data.toString()
             generateImage(newToken);
           }));
@@ -84,7 +85,7 @@ function App() {
       await contract.mintRandom(account, prefix, postfix, 'blankURI')
         .then(
           contract.on("createdDNA", (data, event) => {
-            console.log('DNA Created:', data.toString());
+            console.log('New Token Created:', data.toString());
             const newToken = data.toString()
             generateImage(newToken);
           }));

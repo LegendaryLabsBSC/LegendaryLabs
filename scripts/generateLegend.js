@@ -8,7 +8,6 @@ const FormData = require("form-data");
 const mv = require('mv');
 // const { ethers } = require("hardhat");
 const express = require('express')
-const IPFSGatewayTools = require('@pinata/ipfs-gateway-tools/dist/node');;
 
 // ENV variables
 
@@ -134,7 +133,7 @@ function pinPNG(dir, file) {
                 if (err) {
                     throw err
                 } else {
-                    resolve('PNG pinned to IPFS: ', img_hash)
+                    resolve(img_hash)
                 }
             });
         };
@@ -144,19 +143,19 @@ function pinPNG(dir, file) {
 
 async function generateNewLegend(dna) {
 
-    const id = dna.ipfss.split(',', 1)
+    const id = dna.tokenDNA.split(',', 1)
     const generated_png = id + ".png"
 
     await appendCSV(dna, generator_datatable)
     await generatePNG(id)
     await watchPNG(generator_png_dir, generated_png)
-    const png_hash = await pinPNG(generator_png_dir, generated_png)
-    return png_hash
+    const child_hash = await pinPNG(generator_png_dir, generated_png)
+    return child_hash
 }
 
 app.post(MINT_ENDPOINT, async (req, res) => {
-    const childhash = await generateNewLegend(req.body)
-    return res.sendStatus(`ipfs://${childhash}`)
+    const child_hash = await generateNewLegend(req.body)
+    return res.status(200).send(`ipfs://${child_hash}`)
 })
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
