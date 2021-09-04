@@ -2,15 +2,13 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./LegendsDNA.sol";
 import "./LegendsMetadata.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-// import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-
-contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
+contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
@@ -19,7 +17,7 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
 
     mapping(uint256 => LegendMetadata) public legendData;
 
-    // uint256 incubationPeriod = _incubationPeriod;
+    uint256 incubationPeriod;
 
     event createdDNA(uint256 newItemId);
     event Minted(uint256 tokenId);
@@ -28,16 +26,9 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
     constructor() ERC721("Legend", "LEGEND") {}
 
 
-    // function _setIncubationPeriod(uint256 tokenId, string memory _tokenURI)
-    //     internal
-    //     virtual
-    // {
-    //     _tokenURIs[tokenId] = _tokenURI;
-    // }
-
-    // function setIncubationPeriod(uint256 _) public {
-    //     _setIncubationPeriod(tokenId, _tokenURI);
-    // }
+    function setIncubationPeriod(uint256 _incubationPeriod) public {
+        incubationPeriod = _incubationPeriod;
+    }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
         internal
@@ -50,7 +41,6 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
         _setTokenURI(tokenId, _tokenURI);
     }
 
-    // Returns IPFS url associated with Legend as string
     function tokenURI(uint256 tokenId)
         public
         view
@@ -81,12 +71,22 @@ contract LegendsNFT is ERC721, Ownable, LegendsDNA, ILegendMetadata {
         return _legendData.dna;
     }
 
-    // Will need addition security
-    // only master check + send to private function (mint to)
-    // Will need IPFS URL + set URI
-    // Link generator
+    // function getTokensByOwner(address legendOwner)
+    //     public
+    //     view
+    //     virtual
+    //     returns (uint256[])
+    // {
+    //     uint256 numberOfTokens = balanceOf(msg.sender);
+    //     require(numberOfTokens > 0);
+    //     for (uint256 i = 0; i < numberOfTokens; i++) {
+    //         LegendMetadata storage legend = legendData[
+    //             tokenOfOwnerByIndex(msg.sender, i)
+    //         ];
+    //     }
+    // }
 
-    function mintRandom(
+    function mintPromo(
         address recipient,
         string memory prefix,
         string memory postfix,

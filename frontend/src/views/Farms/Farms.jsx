@@ -5,7 +5,11 @@ import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'uniqu
 
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
 
-const legendAddress = '0xe4fB686B4d62F5405871FF6Afb059E4391b9bE8A' // During testing this address will change frequently
+const legendAddress = '0x19c2912Df779126bb69b63C88020b5c02991Ff4F' // During testing this address will change frequently
+const provider = new ethers.providers.Web3Provider(window.ethereum)
+const signer = provider.getSigner()
+const contractRead = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
+const contractWrite = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
 
 const prefixConfig = {
   dictionaries: [adjectives],
@@ -22,33 +26,94 @@ function App() {
   const [parent1, setParent1] = useState('')
   const [parent2, setParent2] = useState('')
 
+  // Leaving in for easier testing: check if a tokenID has an IPFS URL
+  // Not needed for DApp/Demo 
   async function fetchIPFS() {
     if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
-      const ipfsURL = await contract.tokenURI(id)
+      const ipfsURL = await contractRead.tokenURI(id)
       console.log('IPFS: ', ipfsURL)
     }
   }
 
+  // Leaving in for easier testing: check if a tokenID has DNA
+  // Not needed for DApp/Demo 
+  // Create a fetchMetadata
   async function fetchDNA() {
     if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
-      const ipfsDNA = await contract.tokenDATA(id)
-      console.log('IPFS: ', ipfsDNA.toString())
+      const ipfsDNA = await contractRead.tokenDATA(id)
+      console.log('DNA: ', ipfsDNA.toString())
     }
   }
 
+  /* To test this feature do one the falling options:
+  
+    Option 1 : Use my test wallets
+      Uncomment either of the testing wallets,
+      switch between wallets to demonstrate functionality of only displaying tokens owned by given account wallet
+
+    Option 2 : Create test wallets
+      Make sure you have two accounts on your Metamask
+      if you need testnet-BSC I can send you some or show you the faucet
+
+      Click 'Mint Promotional NFTs', with API running you should be able to generate new NFTS
+      as well as breed new NFTs with tokenIDs your accounts own
+
+      Create new NFTs on both accounts*
+      switch between wallets to demonstrate functionality of only displaying tokens owned by given account wallet
+
+      *Currently the API server will need to be manually restarted after each mint
+
+    Clicking 'Print Owned Legends IDs' will print ID and URL owned by given wallet
+    logic for rending NFT image should able able to use this output
+*/
+  async function getTokensByOwner() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      contractRead.balanceOf(account)
+        .then(res => {
+          const totalLegends = parseInt(res);
+          for (let i = 0; i < totalLegends; i++) {
+            // Testing wallet 1: This has Legend Tokens generated on one of my test wallets
+            // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
+            // contractRead.tokenOfOwnerByIndex("0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52", i)
+
+            // Testing wallet 2: This has Legend Tokens generated on one of my test wallets
+            // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
+            // contractRead.tokenOfOwnerByIndex("0xDfcada61FD3698F0421d7a3E129de522D8450B38", i)
+
+            // Keep this uncommented if you are using Option 2 to test
+            contractRead.tokenOfOwnerByIndex(account, i)
+              .then(result => {
+                if (result > 0) {
+                  const ownedTokens = result.toString()
+                  // console.log('Owned Token IDs: ', ownedTokens) // Uncomment for some additional logging
+                  loadLegends(ownedTokens)
+                }
+              })
+          }
+        })
+    }
+  }
+
+  async function loadLegends(tokenID) {
+
+    const imgURL = await contractRead.tokenURI(tokenID)
+    console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
+
+    // Logic for rendering Legend Card Component here from pinata ?
+
+  }
+
+  // Send new NFT DNA to API/Generator
   async function generateImage(newToken) {
     if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
-      const _tokenDNA = await contract.tokenDATA(newToken)
+
+      const _tokenDNA = await contractRead.tokenDATA(newToken)
       const tokenDNA = _tokenDNA.toString()
 
       await axios
-        .post('http://localhost:3001/api/mint', { tokenDNA })
+        // .post('http://localhost:3001/api/mint', { tokenDNA }) // Use this if your main host is Windows
+        .post('http://192.168.1.157:3001/api/mint', { tokenDNA }) // using my laptop to run the generator API
         .then(res => {
           const hash = res.data
           console.log('New NFT IPFS URL:', hash)
@@ -62,30 +127,23 @@ function App() {
 
   async function assignIPFS(newToken, hash) {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
-      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
-      await contract.setTokenURI(newToken, hash)
+      await contractWrite.setTokenURI(newToken, hash)
     }
   }
 
   async function breed() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
-      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
-      await contract.breed(parent1, parent2)
-        .then( // Truncate
-          contract.on("createdDNA", (data, event) => {
-            console.log('New Token Created:', data.toString());
-            const newToken = data.toString()
-            generateImage(newToken);
+      await contractWrite.breed(parent1, parent2)
+        .then(
+          contractWrite.once("createdDNA", (data, event) => {
+            const newTokenID = data.toString()
+            console.log('New Token Created:', newTokenID); // Debug logging
+            generateImage(newTokenID);
           }));
     }
   }
 
+  // Mints Legend with "random" DNA
   async function mintPromo() {
     if (typeof window.ethereum !== 'undefined') {
 
@@ -93,12 +151,9 @@ function App() {
       const postfix = uniqueNamesGenerator(postfixConfig);
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      const signer = provider.getSigner()
-      const contract = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
-      await contract.mintRandom(account, prefix, postfix, 'blankURI')
+      await contractWrite.mintPromo(account, prefix, postfix, 'blankURI')
         .then(
-          contract.on("createdDNA", (data, event) => {
+          contractWrite.once("createdDNA", (data, event) => {
             console.log('New Token Created:', data.toString());
             const newToken = data.toString()
             generateImage(newToken);
@@ -119,6 +174,12 @@ function App() {
         <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
         <button type="submit" onClick={fetchDNA}>
           Fetch IPFS DNA
+        </button>
+
+        <br /> <br />
+
+        <button type="submit" onClick={getTokensByOwner}>
+          Print Owned Legend IDs
         </button>
 
         <br /> <br />

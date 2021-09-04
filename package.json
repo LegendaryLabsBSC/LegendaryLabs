@@ -22,6 +22,6 @@
   "scripts": {
     "load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
     "com": "npx hardhat compile",
-    "api": "nodemon scripts/generateLegend.js"
+    "start:api": "nodemon scripts/generateLegend.js"
   }
 }

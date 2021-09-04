@@ -91,15 +91,15 @@ contract LegendsDNA {
         // uint256 randomValue = random(256);
         DNAData memory childData = DNAData(
             childId,
-            parent1[0],
-            parent2[1],
-            parent1[2],
-            parent2[3],
-            parent1[4],
-            parent2[5],
-            parent1[6],
-            parent2[7],
-            parent1[8]
+            parent1[1],
+            parent2[2],
+            parent1[3],
+            parent2[4],
+            parent1[5],
+            parent2[6],
+            parent1[7],
+            parent2[8],
+            parent1[9]
         );
 
         uint256[10] memory childDNA = [
