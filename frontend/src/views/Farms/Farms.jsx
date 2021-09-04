@@ -1,14 +1,24 @@
 import { React, useState } from 'react'
 import { ethers } from 'ethers'
 import axios from 'axios'
+import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
+
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
 
 const legendAddress = '0xe4fB686B4d62F5405871FF6Afb059E4391b9bE8A' // During testing this address will change frequently
 
+const prefixConfig = {
+  dictionaries: [adjectives],
+  length: 1,
+};
+
+const postfixConfig = {
+  dictionaries: [animals],
+  length: 1,
+};
+
 function App() {
   const [id, setID] = useState(0)
-  const [prefix, setPrefix] = useState('') // remove in place of name generator
-  const [postfix, setPostfix] = useState('') // remove in place of name generator
   const [parent1, setParent1] = useState('')
   const [parent2, setParent2] = useState('')
 
@@ -44,9 +54,9 @@ function App() {
           console.log('New NFT IPFS URL:', hash)
           assignIPFS(newToken, hash)
         })
-        // .finally(() => {
-        //   document.location.reload()
-        // })
+      // .finally(() => {
+      //   document.location.reload()
+      // })
     }
   }
 
@@ -78,6 +88,10 @@ function App() {
 
   async function mintPromo() {
     if (typeof window.ethereum !== 'undefined') {
+
+      const prefix = uniqueNamesGenerator(prefixConfig);
+      const postfix = uniqueNamesGenerator(postfixConfig);
+
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
@@ -109,8 +123,6 @@ function App() {
 
         <br /> <br />
 
-        <input type="text" placeholder="Enter Prefix" onChange={(e) => setPrefix(e.target.value)} />
-        <input type="text" placeholder="Enter Postfix" onChange={(e) => setPostfix(e.target.value)} />
         <button type="submit" onClick={mintPromo}>
           Mint Promotional NFT
         </button>
