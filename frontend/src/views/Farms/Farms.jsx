@@ -1,13 +1,15 @@
 import { React, useState } from 'react'
 import { ethers } from 'ethers'
 import axios from 'axios'
-import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
+import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator';
 
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
 
-const legendAddress = '0x19c2912Df779126bb69b63C88020b5c02991Ff4F' // During testing this address will change frequently
+const legendAddress = '0x18d551e95f318955F149A73aEc91B68940312E4a' // During testing this address will change frequently
+
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
+
 const contractRead = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
 const contractWrite = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
 
@@ -42,6 +44,28 @@ function App() {
     if (typeof window.ethereum !== 'undefined') {
       const ipfsDNA = await contractRead.tokenDATA(id)
       console.log('DNA: ', ipfsDNA.toString())
+    }
+  }
+
+  async function fetchMeta() {
+    if (typeof window.ethereum !== 'undefined') {
+      // const legendMeta = await contractRead.legendData(id) // fix returning array , this is probably the more intuitive way
+      // console.log(legendMeta.toString())
+      const legendMeta = await contractRead.tokenMeta(id)
+      const metameta = legendMeta.toString()
+      console.log('Meta: 1', legendMeta.prefix)
+      console.log('Meta: 2', legendMeta.dna[1].toString())
+      console.log('Meta: 3', JSON.parse(JSON.stringify(legendMeta)))
+      console.log('Meta: 4', JSON.stringify(metameta))
+    }
+  }
+
+  async function fetchMeta1() {
+    if (typeof window.ethereum !== 'undefined') {
+      const legendMeta = await contractRead.tokenMeta1(id)
+      console.log(legendMeta.toString())
+      console.log(JSON.stringify(legendMeta.toString()))
+      console.log(legendMeta[2])
     }
   }
 
@@ -175,6 +199,21 @@ function App() {
         <button type="submit" onClick={fetchDNA}>
           Fetch IPFS DNA
         </button>
+
+        <br /> <br />
+
+        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+        <button type="submit" onClick={fetchMeta}>
+          Fetch Legend Metadata
+        </button>
+
+        <br /> <br />
+
+        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+        <button type="submit" onClick={fetchMeta1}>
+          Fetch Legend Metadata ALT
+        </button>
+
 
         <br /> <br />
 

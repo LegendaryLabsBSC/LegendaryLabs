@@ -25,7 +25,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
     constructor() ERC721("Legend", "LEGEND") {}
 
-
     function setIncubationPeriod(uint256 _incubationPeriod) public {
         incubationPeriod = _incubationPeriod;
     }
@@ -66,25 +65,47 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"
         );
-        // legendData[newItemId] = LegendMetadata(newItemId, prefix, postfix, dna);
         LegendMetadata memory _legendData = legendData[tokenId];
         return _legendData.dna;
     }
 
-    // function getTokensByOwner(address legendOwner)
-    //     public
-    //     view
-    //     virtual
-    //     returns (uint256[])
-    // {
-    //     uint256 numberOfTokens = balanceOf(msg.sender);
-    //     require(numberOfTokens > 0);
-    //     for (uint256 i = 0; i < numberOfTokens; i++) {
-    //         LegendMetadata storage legend = legendData[
-    //             tokenOfOwnerByIndex(msg.sender, i)
-    //         ];
-    //     }
-    // }
+    function tokenMeta(uint256 tokenId)
+        public
+        view
+        virtual
+        returns (LegendMetadata memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        // LegendMetadata memory _legendData = legendData[tokenId];
+        return legendData[tokenId];
+    }
+
+    function tokenMeta1(uint256 tokenId)
+        public
+        view
+        virtual
+        returns (
+            uint256,
+            string memory,
+            string memory,
+            uint256[10] memory
+        )
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        LegendMetadata memory _legendData = legendData[tokenId];
+        return (
+            _legendData.id,
+            _legendData.prefix,
+            _legendData.postfix,
+            _legendData.dna
+        );
+    }
 
     function mintPromo(
         address recipient,
