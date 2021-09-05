@@ -45,7 +45,7 @@ function App() {
     }
   }
 
-  /* To test this feature do one the falling options:
+  /* To test this feature do one the following options:
   
     Option 1 : Use my test wallets
       Uncomment either of the testing wallets,
