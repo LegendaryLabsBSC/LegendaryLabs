@@ -3,15 +3,14 @@
 pragma solidity ^0.8.0;
 
 // Metadata is a representation of all attributes that a Legend is composed of
-// IPFS URLs should be stored here* 
+// IPFS URLs should be stored here*
 
 interface ILegendMetadata {
     struct LegendMetadata {
         uint256 id;
         string prefix;
         string postfix;
-        uint256[10] dna; //for testing
-        // string dna; // in the form of IPFS hash
+        string dna;
         // string[] parents;
         // uint256 birthDay;
         // uint256 cooldownEndBlock;

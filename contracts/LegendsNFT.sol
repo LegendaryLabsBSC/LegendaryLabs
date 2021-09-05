@@ -11,10 +11,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-
     using Strings for uint256;
-    mapping(uint256 => string) private _tokenURIs;
 
+    mapping(uint256 => string) private _tokenURIs;
     mapping(uint256 => LegendMetadata) public legendData;
 
     uint256 incubationPeriod;
@@ -59,7 +58,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         public
         view
         virtual
-        returns (uint256[10] memory)
+        returns (string memory)
     {
         require(
             _exists(tokenId),
@@ -83,29 +82,29 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         return legendData[tokenId];
     }
 
-    function tokenMeta1(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (
-            uint256,
-            string memory,
-            string memory,
-            uint256[10] memory
-        )
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        LegendMetadata memory _legendData = legendData[tokenId];
-        return (
-            _legendData.id,
-            _legendData.prefix,
-            _legendData.postfix,
-            _legendData.dna
-        );
-    }
+    // function tokenMeta1(uint256 tokenId)
+    //     public
+    //     view
+    //     virtual
+    //     returns (
+    //         uint256,
+    //         string memory,
+    //         string memory,
+    //         uint256[10] memory
+    //     )
+    // {
+    //     require(
+    //         _exists(tokenId),
+    //         "ERC721Metadata: URI query for nonexistent token"
+    //     );
+    //     LegendMetadata memory _legendData = legendData[tokenId];
+    //     return (
+    //         _legendData.id,
+    //         _legendData.prefix,
+    //         _legendData.postfix,
+    //         _legendData.dna
+    //     );
+    // }
 
     function mintPromo(
         address recipient,
@@ -117,7 +116,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         uint256 newItemId = _tokenIds.current();
         _mint(recipient, newItemId);
 
-        uint256[10] memory dna = createDNA(newItemId);
+        string memory dna = createDNA(newItemId);
 
         legendData[newItemId] = LegendMetadata(newItemId, prefix, postfix, dna);
 
@@ -135,7 +134,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         uint256 newItemId,
         string memory prefix,
         string memory postfix,
-        uint256[10] memory dna
+        string memory dna
     ) private returns (uint256) {
         _mint(receiver, newItemId);
         legendData[newItemId] = LegendMetadata(newItemId, prefix, postfix, dna);
@@ -143,29 +142,29 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         return newItemId;
     }
 
-    function breed(uint256 _parent1, uint256 _parent2) public {
-        require(
-            ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
-        );
-        LegendMetadata storage parent1 = legendData[_parent1];
-        LegendMetadata storage parent2 = legendData[_parent2];
+    // function breed(uint256 _parent1, uint256 _parent2) public {
+    //     require(
+    //         ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
+    //     );
+    //     LegendMetadata storage parent1 = legendData[_parent1];
+    //     LegendMetadata storage parent2 = legendData[_parent2];
 
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
+    //     _tokenIds.increment();
+    //     uint256 newItemId = _tokenIds.current();
 
-        uint256[10] memory newDNA = mixDNA(newItemId, parent1.dna, parent2.dna);
+    //     uint256[10] memory newDNA = mixDNA(newItemId, parent1.dna, parent2.dna);
 
-        bool mix = block.number % 2 == 0;
+    //     bool mix = block.number % 2 == 0;
 
-        mintTo(
-            msg.sender,
-            newItemId,
-            mix ? parent1.prefix : parent2.prefix,
-            mix ? parent2.postfix : parent1.postfix,
-            newDNA
-        );
+    //     mintTo(
+    //         msg.sender,
+    //         newItemId,
+    //         mix ? parent1.prefix : parent2.prefix,
+    //         mix ? parent2.postfix : parent1.postfix,
+    //         newDNA
+    //     );
 
-        emit createdDNA(newItemId);
-        emit Breed(parent1.id, parent2.id, newItemId);
-    }
+    //     emit createdDNA(newItemId);
+    //     emit Breed(parent1.id, parent2.id, newItemId);
+    // }
 }

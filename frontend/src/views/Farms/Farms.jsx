@@ -4,8 +4,8 @@ import axios from 'axios'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator';
 
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
-
-const legendAddress = '0x18d551e95f318955F149A73aEc91B68940312E4a' // During testing this address will change frequently
+// 0x18d551e95f318955F149A73aEc91B68940312E4a
+const legendAddress = '0x2c1f47C6085c0a52654f269A9e12adD34b769614' // During testing this address will change frequently
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
@@ -68,6 +68,8 @@ function App() {
       console.log(legendMeta[2])
     }
   }
+
+  
 
   /* To test this feature do one the falling options:
   
