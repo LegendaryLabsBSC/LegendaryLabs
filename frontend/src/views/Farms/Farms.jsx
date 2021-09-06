@@ -1,7 +1,7 @@
 import { React, useState } from 'react'
 import { ethers } from 'ethers'
 import axios from 'axios'
-import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
+// import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
 
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
 
@@ -11,15 +11,15 @@ const signer = provider.getSigner()
 const contractRead = new ethers.Contract(legendAddress, LegendsNFT.abi, provider)
 const contractWrite = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
 
-const prefixConfig = {
-  dictionaries: [adjectives],
-  length: 1,
-};
+// const prefixConfig = {
+//   dictionaries: [adjectives],
+//   length: 1,
+// };
 
-const postfixConfig = {
-  dictionaries: [animals],
-  length: 1,
-};
+// const postfixConfig = {
+//   dictionaries: [animals],
+//   length: 1,
+// };
 
 function App() {
   const [id, setID] = useState(0)
@@ -68,25 +68,33 @@ function App() {
 */
   async function getTokensByOwner() {
     if (typeof window.ethereum !== 'undefined') {
+
+      // Testing wallet 1: This has Legend Tokens generated on one of my test wallets
+      // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
+      // const account = "0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52"
+
+      // Testing wallet 2: This has Legend Tokens generated on one of my test wallets
+      // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
+      // const account = "0xDfcada61FD3698F0421d7a3E129de522D8450B38"
+
+      // Keep this uncommented if you are using Option 2 to test
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+
+
       contractRead.balanceOf(account)
         .then(res => {
+          // console.log('test1: ', res)
           const totalLegends = parseInt(res);
+          console.log('test2: ', totalLegends)
           for (let i = 0; i < totalLegends; i++) {
-            // Testing wallet 1: This has Legend Tokens generated on one of my test wallets
-            // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
-            // contractRead.tokenOfOwnerByIndex("0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52", i)
 
-            // Testing wallet 2: This has Legend Tokens generated on one of my test wallets
-            // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
-            // contractRead.tokenOfOwnerByIndex("0xDfcada61FD3698F0421d7a3E129de522D8450B38", i)
 
-            // Keep this uncommented if you are using Option 2 to test
+
             contractRead.tokenOfOwnerByIndex(account, i)
               .then(result => {
                 if (result > 0) {
                   const ownedTokens = result.toString()
-                  // console.log('Owned Token IDs: ', ownedTokens) // Uncomment for some additional logging
+                  console.log('Owned Token IDs: ', ownedTokens) // Uncomment for some additional logging
                   loadLegends(ownedTokens)
                 }
               })
@@ -112,8 +120,8 @@ function App() {
       const tokenDNA = _tokenDNA.toString()
 
       await axios
-        // .post('http://localhost:3001/api/mint', { tokenDNA }) // Use this if your main host is Windows
-        .post('http://192.168.1.157:3001/api/mint', { tokenDNA }) // using my laptop to run the generator API
+        .post('http://localhost:3001/api/mint', { tokenDNA }) // Use this if your main host is Windows
+        // .post('http://192.168.1.157:3001/api/mint', { tokenDNA }) // using my laptop to run the generator API
         .then(res => {
           const hash = res.data
           console.log('New NFT IPFS URL:', hash)
@@ -147,11 +155,11 @@ function App() {
   async function mintPromo() {
     if (typeof window.ethereum !== 'undefined') {
 
-      const prefix = uniqueNamesGenerator(prefixConfig);
-      const postfix = uniqueNamesGenerator(postfixConfig);
+      // const prefix = uniqueNamesGenerator(prefixConfig);
+      // const postfix = uniqueNamesGenerator(postfixConfig);
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contractWrite.mintPromo(account, prefix, postfix, 'blankURI')
+      await contractWrite.mintPromo(account, "First", "Last", 'blankURI')
         .then(
           contractWrite.once("createdDNA", (data, event) => {
             console.log('New Token Created:', data.toString());
