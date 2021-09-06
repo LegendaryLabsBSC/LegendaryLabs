@@ -83,13 +83,8 @@ function App() {
 
       contractRead.balanceOf(account)
         .then(res => {
-          // console.log('test1: ', res)
           const totalLegends = parseInt(res);
-          console.log('test2: ', totalLegends)
           for (let i = 0; i < totalLegends; i++) {
-
-
-
             contractRead.tokenOfOwnerByIndex(account, i)
               .then(result => {
                 if (result > 0) {
