@@ -75,10 +75,10 @@ function App() {
 
       // Testing wallet 2: This has Legend Tokens generated on one of my test wallets
       // Uncomment if you are using Option 1 to test ; only uncomment one testing wallet at a time
-      // const account = "0xDfcada61FD3698F0421d7a3E129de522D8450B38"
+      const account = "0xDfcada61FD3698F0421d7a3E129de522D8450B38"
 
       // Keep this uncommented if you are using Option 2 to test
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
 
       contractRead.balanceOf(account)
