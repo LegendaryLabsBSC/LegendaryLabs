@@ -25,6 +25,7 @@ function App() {
   const [id, setID] = useState(0)
   const [parent1, setParent1] = useState('')
   const [parent2, setParent2] = useState('')
+  const [legends, setLegends] = useState([])
 
   // Leaving in for easier testing: check if a tokenID has an IPFS URL
   // Not needed for DApp/Demo 
@@ -107,6 +108,7 @@ function App() {
 
     const imgURL = await contractRead.tokenURI(tokenID)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
+    setLegends([...legends, { tokenID, imgURL }])
 
     // Logic for rendering Legend Card Component here from pinata ?
 
@@ -205,6 +207,11 @@ function App() {
         </button>
 
       </header>
+
+      {/* {legends.length > 0 && legends.map((legend) => {
+        
+      })} */}
+
     </div>
   )
 }
