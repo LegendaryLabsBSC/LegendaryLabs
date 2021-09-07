@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import axios from 'axios'
 // import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
 
+import NftCard from 'views/Nft/components/NftCard'
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
 
 const legendAddress = '0x19c2912Df779126bb69b63C88020b5c02991Ff4F' // During testing this address will change frequently
@@ -208,9 +209,11 @@ function App() {
 
       </header>
 
-      {/* {legends.length > 0 && legends.map((legend) => {
-        
-      })} */}
+      {legends.length > 0 && legends.map((legend) => (
+        <NftCard>
+          {JSON.stringify(legend)}
+        </NftCard>
+      ))}
 
     </div>
   )
