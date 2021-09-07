@@ -18,12 +18,25 @@ contract LegendsDNA {
         uint256 CdB3;
     }
 
-    event DNA(DNAData data);
-    event GENE(DNAData data2);
+    mapping(uint256 => DNAData) public legendDNA;
+
+    event dnaGenerated(DNAData data);
 
     function getGene(uint256 dna, uint256 n) public pure returns (uint256) {
         return (dna / (10**(15 - n))) % 9;
     }
+
+    //     Kitty memory _kitty = Kitty({
+    //     genes: _genes,
+    //     birthTime: uint64(now),
+    //     cooldownEndBlock: 0,
+    //     matronId: uint32(_matronId),
+    //     sireId: uint32(_sireId),
+    //     siringWithId: 0,
+    //     cooldownIndex: cooldownIndex,
+    //     generation: uint16(_generation)
+    // });
+    // uint256 newKittenId = kitties.push(_kitty) - 1;
 
     function createDNA(uint256 id) public returns (string memory) {
         uint256 randomValue1 = random(255);
@@ -41,6 +54,21 @@ contract LegendsDNA {
             (randomValue1 - 10)
         );
 
+        legendDNA[id] = DNAData(
+            data.id,
+            data.CdR1,
+            data.CdG1,
+            data.CdB1,
+            data.CdR2,
+            data.CdG2,
+            data.CdB2,
+            data.CdR3,
+            data.CdG3,
+            data.CdB3
+        );
+
+        emit dnaGenerated(data);
+
         string memory dna = (
             append(
                 uint2str(data.id),
@@ -56,45 +84,49 @@ contract LegendsDNA {
             )
         );
 
-        emit DNA(data);
-
         return dna;
     }
 
-    // function mixDNA(
-    //     uint256 childId,
-    //     uint256[10] memory parent1,
-    //     uint256[10] memory parent2
-    // ) public view returns (uint256[10] memory) {
-    //     // uint256 randomValue = random(256);
-    //     DNAData memory childData = DNAData(
-    //         childId,
-    //         parent1[1],
-    //         parent2[2],
-    //         parent1[3],
-    //         parent2[4],
-    //         parent1[5],
-    //         parent2[6],
-    //         parent1[7],
-    //         parent2[8],
-    //         parent1[9]
-    //     );
+    function mixDNA(
+        uint256 childId,
+        uint256 _parent1,
+        uint256 _parent2
+    ) public returns (string memory) {
+        DNAData storage parent1 = legendDNA[_parent1];
+        DNAData storage parent2 = legendDNA[_parent2];
 
-    //     uint256[10] memory childDNA = [
-    //         childId,
-    //         childData.CdR1,
-    //         childData.CdG1,
-    //         childData.CdB1,
-    //         childData.CdR2,
-    //         childData.CdG2,
-    //         childData.CdB2,
-    //         childData.CdR3,
-    //         childData.CdG3,
-    //         childData.CdB3
-    //     ];
+        DNAData memory data = DNAData(
+            childId,
+            parent1.CdR1,
+            parent2.CdG1,
+            parent1.CdB1,
+            parent2.CdR2,
+            parent1.CdG2,
+            parent2.CdB2,
+            parent1.CdR3,
+            parent2.CdG3,
+            parent1.CdB3
+        );
 
-    //     return childDNA;
-    // }
+        emit dnaGenerated(data);
+
+        string memory dna = (
+            append(
+                uint2str(data.id),
+                uint2str(data.CdR1),
+                uint2str(data.CdG1),
+                uint2str(data.CdB1),
+                uint2str(data.CdR2),
+                uint2str(data.CdG2),
+                uint2str(data.CdB2),
+                uint2str(data.CdR3),
+                uint2str(data.CdG3),
+                uint2str(data.CdB3)
+            )
+        );
+
+        return dna;
+    }
 
     // Random Number oracle call could go here
     function random(uint256 range) internal view returns (uint256) {
@@ -104,6 +136,7 @@ contract LegendsDNA {
             ) % range;
     }
 
+    // already in String; look into importing
     function uint2str(uint256 _i)
         internal
         pure

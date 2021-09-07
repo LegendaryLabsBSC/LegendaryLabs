@@ -33,7 +33,7 @@ module.exports = {
       accounts: [`0x${PRIVATEKEY}`]
     },
     bsctest: {
-      url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
+      url: "https://data-seed-prebsc-1-s3.binance.org:8545/",
       accounts: [`0x${process.env.PRIVATEKEY}`]
     }
     // bsctest: {

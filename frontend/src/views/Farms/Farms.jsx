@@ -4,8 +4,8 @@ import axios from 'axios'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator';
 
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
-// 0x18d551e95f318955F149A73aEc91B68940312E4a
-const legendAddress = '0x2c1f47C6085c0a52654f269A9e12adD34b769614' // During testing this address will change frequently
+// 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
+const legendAddress = '0xC05690e1D97180De4A7EbCB33eBa58828aeC1033' // During testing this address will change frequently
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
@@ -25,8 +25,10 @@ const postfixConfig = {
 
 function App() {
   const [id, setID] = useState(0)
-  const [parent1, setParent1] = useState('')
-  const [parent2, setParent2] = useState('')
+  const [parent1, setParent1] = useState(0)
+  const [parent2, setParent2] = useState(0)
+  const [value, setValue] = useState(0)
+  const [season, setSeasonValue] = useState('')
 
   // Leaving in for easier testing: check if a tokenID has an IPFS URL
   // Not needed for DApp/Demo 
@@ -49,27 +51,70 @@ function App() {
 
   async function fetchMeta() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contractRead.legendData(id) // fix returning array , this is probably the more intuitive way
+      const legendMeta = await contractRead.legendData(id) // fix returning array , this is probably the more intuitive way
       // console.log(legendMeta.toString())
-      const legendMeta = await contractRead.tokenMeta(id)
-      const metameta = legendMeta.toString()
-      console.log('Meta: 1', legendMeta.prefix)
-      console.log('Meta: 2', legendMeta.dna[1].toString())
-      console.log('Meta: 3', JSON.parse(JSON.stringify(legendMeta)))
-      console.log('Meta: 4', JSON.stringify(metameta))
+      // const legendMeta = await contractRead.tokenMeta(id)
+      console.log(`Meta: ${legendMeta}`)
+      console.log(`id: ${legendMeta.id}`)
+      console.log(`prefix: ${legendMeta.prefix}`)
+      console.log(`postfix: ${legendMeta.postfix}`)
+      console.log(`dna: ${legendMeta.dna}`)
+      console.log(`parents: ${legendMeta.parents}`)
+      console.log(`birthday: ${legendMeta.birthDay}`)
+      console.log(`incubation duration: ${legendMeta.incubationDuration}`)
+      console.log(`breeding cooldown: ${legendMeta.breedingCooldown}`)
+      console.log(`offspring limit: ${legendMeta.offspringLimit}`)
+      console.log(`level: ${legendMeta.level}`)
+      console.log(`season: ${legendMeta.season}`)
+      console.log(`is legendary: ${legendMeta.isLegendary}`)
     }
   }
 
   async function fetchMeta1() {
     if (typeof window.ethereum !== 'undefined') {
       const legendMeta = await contractRead.tokenMeta1(id)
-      console.log(legendMeta.toString())
-      console.log(JSON.stringify(legendMeta.toString()))
-      console.log(legendMeta[2])
+      console.log(`Meta ALT: ${legendMeta}`)
+      console.log(`id: ${legendMeta[0]}`)
+      console.log(`prefix: ${legendMeta[1]}`)
+      console.log(`postfix: ${legendMeta[2]}`)
+      console.log(`dna: ${legendMeta[3]}`)
+      console.log(`parents: ${legendMeta[4]}`)
+      console.log(`birthday: ${legendMeta[5]}`)
+      console.log(`incubation duration: ${legendMeta[6]}`)
+      console.log(`breeding cooldown: ${legendMeta[7]}`)
+      console.log(`offspring limit: ${legendMeta[8]}`)
+      console.log(`level: ${legendMeta[9]}`)
+      console.log(`season: ${legendMeta[10]}`)
+      console.log(`is legendary: ${legendMeta[11]}`)
     }
   }
 
-  
+  async function setIncubationDuration() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contractWrite.setIncubationDuration(value)
+    }
+  }
+
+  async function setBreedingCooldown() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contractWrite.setBreedingCooldown(value)
+    }
+  }
+  async function setOffspringLimit() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contractWrite.setOffspringLimit(value)
+    }
+  }
+  async function setSeason() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contractWrite.setSeason(season)
+    }
+  }
+
 
   /* To test this feature do one the falling options:
   
@@ -173,11 +218,13 @@ function App() {
   async function mintPromo() {
     if (typeof window.ethereum !== 'undefined') {
 
-      const prefix = uniqueNamesGenerator(prefixConfig);
-      const postfix = uniqueNamesGenerator(postfixConfig);
+      const prefix = uniqueNamesGenerator(prefixConfig); // for testing
+      const postfix = uniqueNamesGenerator(postfixConfig); // for testing
+      const level = 1 // for testing
+      const isLegendary = false // for testing
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contractWrite.mintPromo(account, prefix, postfix, 'blankURI')
+      await contractWrite.mintPromo(account, prefix, postfix, 'blankURI', level, isLegendary)
         .then(
           contractWrite.once("createdDNA", (data, event) => {
             console.log('New Token Created:', data.toString());
@@ -216,8 +263,29 @@ function App() {
           Fetch Legend Metadata ALT
         </button>
 
+        <br /> <br /> <br />
 
-        <br /> <br />
+        <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
+        <button type="submit" onClick={setIncubationDuration}>
+          Set Base Incubation Duration
+        </button>
+
+        <button type="submit" onClick={setBreedingCooldown}>
+          Set Base Breeding Cooldown
+        </button>
+
+        <button type="submit" onClick={setOffspringLimit}>
+          Set Offspring Limit
+        </button>
+
+        <br />
+
+        <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
+        <button type="submit" onClick={setSeason}>
+          Set Season
+        </button>
+
+        <br /> <br /> <br />
 
         <button type="submit" onClick={getTokensByOwner}>
           Print Owned Legend IDs
