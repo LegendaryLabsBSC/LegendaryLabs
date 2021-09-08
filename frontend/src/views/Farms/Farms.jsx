@@ -3,8 +3,10 @@ import { ethers } from 'ethers'
 import axios from 'axios'
 // import { uniqueNamesGenerator, Config, adjectives, colors, animals } from 'unique-names-generator';
 
-import NftCard from 'views/Nft/components/NftCard'
+import styled from 'styled-components'
+import { NftCard } from './components/nftCard'
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
+import gif from '../../eater.gif'
 
 const legendAddress = '0x19c2912Df779126bb69b63C88020b5c02991Ff4F' // During testing this address will change frequently
 const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -27,6 +29,7 @@ function App() {
   const [parent1, setParent1] = useState('')
   const [parent2, setParent2] = useState('')
   const [legends, setLegends] = useState([])
+  const [gettingLegends, setGettingLegends] = useState(false)
 
   // Leaving in for easier testing: check if a tokenID has an IPFS URL
   // Not needed for DApp/Demo 
@@ -69,6 +72,7 @@ function App() {
     logic for rending NFT image should able able to use this output
 */
   async function getTokensByOwner() {
+    setGettingLegends(true)
     if (typeof window.ethereum !== 'undefined') {
 
       // Testing wallet 1: This has Legend Tokens generated on one of my test wallets
@@ -86,16 +90,20 @@ function App() {
       contractRead.balanceOf(account)
         .then(res => {
           const totalLegends = parseInt(res);
+          const legendsData = []
           for (let i = 0; i < totalLegends; i++) {
             contractRead.tokenOfOwnerByIndex(account, i)
               .then(result => {
                 if (result > 0) {
                   const ownedTokens = result.toString()
                   console.log('Owned Token IDs: ', ownedTokens) // Uncomment for some additional logging
-                  loadLegends(ownedTokens)
+                  loadLegends(ownedTokens).then(resp => {
+                    legendsData.push(resp)
+                  })
                 }
               })
           }
+          setLegends(legendsData)
         })
     }
   }
@@ -104,7 +112,7 @@ function App() {
 
     const imgURL = await contractRead.tokenURI(tokenID)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
-    setLegends([...legends, { tokenID, imgURL }])
+    return { tokenID, imgURL }
 
     // Logic for rendering Legend Card Component here from pinata ?
 
@@ -167,6 +175,24 @@ function App() {
     }
   }
 
+  const NftContainer = styled.div`
+  & {
+    padding: 25px;
+    display: inline-flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+    div {
+      margin: 25px;
+    }
+  }`
+
+  const pinataGeteway = 'https://gateway.pinata.cloud/ipfs/'
+
+  const cidToUrl = (cid) => {
+    return pinataGeteway + cid.split('//')[1]
+  }
+
   return (
     <div>
       <header>
@@ -203,12 +229,19 @@ function App() {
         </button>
 
       </header>
-
-      {legends.length > 0 && legends.map((legend) => (
-        <NftCard>
-          {JSON.stringify(legend)}
-        </NftCard>
-      ))}
+      <NftContainer>  
+        {gettingLegends && (
+          legends.length > 0 
+          ? legends.map((legend) => {
+            console.log(legends)
+            return (
+              <NftCard>
+                <h3>Legend ID: {legend.tokenID}</h3>
+                <img alt="legend" src={cidToUrl(legend.imgURL)} />
+              </NftCard>
+            )})
+          : <img alt="eater" src={gif} />)}
+      </NftContainer>
 
     </div>
   )
