@@ -8,6 +8,11 @@ import "./LegendsDNA.sol";
 import "./LegendsMetadata.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+/*
+TODO: URI should be full metadata-ipfs url
+TODO: image-ipfs url is appended to metadata.image
+*/
+
 contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -19,11 +24,13 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
     uint256 incubationDuration;
     uint256 breedingCooldown;
     uint256 offspringLimit;
+    uint256 baseBreedingCost;
     string season;
 
     event createdDNA(uint256 newItemId);
     event Minted(uint256 tokenId);
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
+    event Immolated(uint256 tokenId);
 
     constructor() ERC721("Legend", "LEGEND") {}
 
@@ -39,6 +46,10 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         offspringLimit = _offspringLimit;
     }
 
+    function setBaseBreedingCost(uint256 _baseBreedingCost) public {
+        baseBreedingCost = _baseBreedingCost;
+    }
+
     function setSeason(string memory _season) public {
         season = _season;
     }
@@ -50,7 +61,16 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         _tokenURIs[tokenId] = _tokenURI;
     }
 
-    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+    function setImageURL(uint256 tokenId, string memory imageURL) public {
+        require(ownerOf(tokenId) == msg.sender);
+        // Needs another layer of security to prevent owner calling without reason ?
+        LegendMetadata memory legend = legendData[tokenId];
+        legend.image = imageURL;
+    }
+
+    function correctTokenURI(uint256 tokenId, string memory _tokenURI) public {
+        require(ownerOf(tokenId) == msg.sender);
+        // Needs another layer of security to prevent owner calling without reason ?
         _setTokenURI(tokenId, _tokenURI);
     }
 
@@ -69,18 +89,30 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         return _tokenURI;
     }
 
-    function tokenDATA(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (string memory)
-    {
+    function tokenDATA(
+        uint256 tokenId // TODO: Clean this up, possibly not needed at all
+    ) public view virtual returns (string memory) {
         require(
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"
         );
         LegendMetadata memory _legendData = legendData[tokenId];
         return _legendData.dna;
+    }
+
+    function totalLegends() public view virtual returns (uint256) {
+        require(_tokenIds.current() > 0, "No Legends have been minted");
+        return _tokenIds.current();
+    }
+
+    function immolate(uint256 tokenId) public {
+        require(ownerOf(tokenId) == msg.sender);
+
+        LegendMetadata storage legend = legendData[tokenId];
+        legend.isDestroyed = true;
+        _burn(tokenId);
+
+        emit Immolated(tokenId);
     }
 
     function tokenMeta(uint256 tokenId)
@@ -97,54 +129,13 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         return legendData[tokenId];
     }
 
-    function tokenMeta1(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (
-            uint256,
-            string memory,
-            string memory,
-            string memory,
-            uint256[2] memory,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            string memory,
-            bool
-        )
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        LegendMetadata memory legend = legendData[tokenId];
-        return (
-            legend.id,
-            legend.prefix,
-            legend.postfix,
-            legend.dna,
-            legend.parents,
-            legend.birthDay,
-            legend.incubationDuration,
-            legend.breedingCooldown,
-            legend.offspringLimit,
-            legend.level,
-            legend.season,
-            legend.isLegendary
-
-        );
-    }
-
     function mintPromo(
         address recipient,
         string memory prefix,
         string memory postfix,
         string memory uri,
-        uint256 level,
-        bool isLegendary
+        bool isLegendary,
+        bool skipIncubation
     ) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
@@ -155,7 +146,11 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
         uint256 parent0 = 0;
 
-        uint256[2] memory parents = [parent0, parent0]; // promotional Legends wont have parents ; non-existent may cause issue
+        uint256[2] memory parents = [parent0, parent0]; // promotional Legends wont have parents
+
+        if (skipIncubation == true) {
+            incubationDuration = 0;
+        }
 
         legendData[newItemId] = LegendMetadata(
             newItemId,
@@ -166,13 +161,12 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             block.timestamp,
             incubationDuration,
             breedingCooldown,
+            baseBreedingCost,
             offspringLimit,
-            level,
             season,
-            isLegendary
+            isLegendary,
+            false
         );
-
-        // LegendMetadata memory legendpp = legendData[newItemId];
 
         emit createdDNA(newItemId);
 
@@ -188,8 +182,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         string memory postfix,
         string memory dna,
         uint256[2] memory parents,
-        uint256 birthDay,
-        uint256 level
+        uint256 birthDay
     ) private returns (uint256) {
         bool isLegendary = false; // only one of a kind handmade Legends can be "Legendary"
 
@@ -204,12 +197,14 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             birthDay,
             incubationDuration,
             breedingCooldown,
+            baseBreedingCost,
             offspringLimit,
-            level,
             season,
-            isLegendary
+            isLegendary,
+            false
         );
 
+        // make tempory URI id+dna+parents+birthday+generation
         // _setTokenURI(newItemId, uri); // set tempoary URI
 
         emit Minted(newItemId);
@@ -232,7 +227,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
         uint256[2] memory parents = [_parent1, _parent2];
 
-        uint256 level = 1;
+        // uint256 level = 1;
 
         mintTo(
             msg.sender,
@@ -241,8 +236,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             mix ? parent2.postfix : parent1.postfix,
             newDNA,
             parents,
-            block.timestamp,
-            level
+            block.timestamp
         );
 
         emit createdDNA(newItemId);

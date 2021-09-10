@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 
 // DNA is a representation of PhoenixGenerator CSV data minus 'Name'/ID
 
+
+// look at the websites we saw for returning/manipulating structs
 contract LegendsDNA {
     struct DNAData {
         uint256 id;
@@ -26,61 +28,48 @@ contract LegendsDNA {
         return (dna / (10**(15 - n))) % 9;
     }
 
-    //     Kitty memory _kitty = Kitty({
-    //     genes: _genes,
-    //     birthTime: uint64(now),
-    //     cooldownEndBlock: 0,
-    //     matronId: uint32(_matronId),
-    //     sireId: uint32(_sireId),
-    //     siringWithId: 0,
-    //     cooldownIndex: cooldownIndex,
-    //     generation: uint16(_generation)
-    // });
-    // uint256 newKittenId = kitties.push(_kitty) - 1;
-
     function createDNA(uint256 id) public returns (string memory) {
         uint256 randomValue1 = random(255);
         uint256 randomValue2 = random(100);
-        DNAData memory data = DNAData(
-            id,
-            (randomValue1 - 8),
-            (randomValue2 + 81),
-            (randomValue1 - 4),
-            (randomValue2 + 31),
-            (randomValue1 - 13),
-            (randomValue2 + 33),
-            (randomValue1 - 22),
-            (randomValue2 + 5),
-            (randomValue1 - 10)
-        );
+        DNAData memory d;
+        d.id = id;
+        d.CdR1 = (randomValue1 - 8);
+        d.CdG1 = (randomValue2 + 81);
+        d.CdB1 = (randomValue1 - 4);
+        d.CdR2 = (randomValue2 + 31);
+        d.CdG2 = (randomValue1 - 13);
+        d.CdB2 = (randomValue2 + 33);
+        d.CdR3 = (randomValue1 - 22);
+        d.CdG3 = (randomValue2 + 5);
+        d.CdB3 = (randomValue1 - 10);
 
         legendDNA[id] = DNAData(
-            data.id,
-            data.CdR1,
-            data.CdG1,
-            data.CdB1,
-            data.CdR2,
-            data.CdG2,
-            data.CdB2,
-            data.CdR3,
-            data.CdG3,
-            data.CdB3
+            d.id,
+            d.CdR1,
+            d.CdG1,
+            d.CdB1,
+            d.CdR2,
+            d.CdG2,
+            d.CdB2,
+            d.CdR3,
+            d.CdG3,
+            d.CdB3
         );
 
-        emit dnaGenerated(data);
+        emit dnaGenerated(d);
 
         string memory dna = (
             append(
-                uint2str(data.id),
-                uint2str(data.CdR1),
-                uint2str(data.CdG1),
-                uint2str(data.CdB1),
-                uint2str(data.CdR2),
-                uint2str(data.CdG2),
-                uint2str(data.CdB2),
-                uint2str(data.CdR3),
-                uint2str(data.CdG3),
-                uint2str(data.CdB3)
+                uint2str(d.id),
+                uint2str(d.CdR1),
+                uint2str(d.CdG1),
+                uint2str(d.CdB1),
+                uint2str(d.CdR2),
+                uint2str(d.CdG2),
+                uint2str(d.CdB2),
+                uint2str(d.CdR3),
+                uint2str(d.CdG3),
+                uint2str(d.CdB3)
             )
         );
 
