@@ -6,7 +6,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0x1861FA84eE4bB19A790f7b785adcd17C85651158'
+const legendAddress = '0xb2ECaa062701bd9a88BB598725090651f1905453'
 
 // TODO: generate map = false temp fix
 
@@ -131,8 +131,8 @@ function App() {
               })
             })
           }
-          console.log('test',legendsData)
-          console.log('test1',legendsData[1])
+          console.log('test', legendsData)
+          console.log('test1', legendsData[1])
           // setLegends(legendsData)
         } else {
           console.log('Account does not own any Legend Tokens')
@@ -175,7 +175,7 @@ function App() {
 
       await axios
         .post('http://localhost:3001/api/mint', { legendInterface }) // Use this if your main host is Windows
-        // .post('http://192.168.1.157:3001/api/mint', { legend }) // using my laptop to run the generator API
+        // .post('http://192.168.1.157:3001/api/mint', { legendInterface }) // using my laptop to run the generator API
         .then((res) => {
           const url = res.data
           console.log('New NFT IPFS URL:', url)

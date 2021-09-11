@@ -68,10 +68,10 @@ contract LegendsDNA {
         return dna;
     }
 
-    function mixDNA(
-        uint256 _parent1,
-        uint256 _parent2
-    ) public returns (string memory) {
+    function mixDNA(uint256 _parent1, uint256 _parent2)
+        public
+        returns (string memory)
+    {
         DNAData storage parent1 = legendDNA[_parent1];
         DNAData storage parent2 = legendDNA[_parent2];
 
