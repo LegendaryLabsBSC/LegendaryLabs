@@ -1,27 +1,29 @@
 const fs = require("fs");
 const { exec } = require("child_process");
-const json2csv = require('json2csv').parse;
+// const json2csv = require('json2csv').parse;
 const path = require('path');
 const chokidar = require('chokidar');
 const axios = require("axios");
 const FormData = require("form-data");
 const mv = require('mv');
 // const { ethers } = require("hardhat");
-const express = require('express')
+const express = require('express');
 
 // ENV variables
-
 require('dotenv').config();
 const pinataApiKey = process.env.PINATAAPIKEY;
 const pinataSecretApiKey = process.env.PINATASECRETKEY;
 const PORT = process.env.PORT || 3001;
 
-// Endpoints
+// Generator Paths
+const generator_datatable = path.join(__dirname, '../phoenixGenerator_1.1/Engine/Content/Files/dataPhoenix.csv') // put in env
+const generator_png_dir = path.join(__dirname, '../phoenixGenerator_1.1/Engine/Content/Images/')
+const tmp_uriLink = path.join(__dirname, '../test/tmp_uri-link.csv')
 
+// Endpoints
 const MINT_ENDPOINT = '/api/mint'
 
 // App variables
-
 const app = express()
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -37,24 +39,13 @@ app.all('*', function (req, res, next) {
     next();
 });
 
-// Generator Paths
-
-const generator_datatable = path.join(__dirname, '../phoenixGenerator_1.1/Engine/Content/Files/dataPhoenix.csv') // put in env
-const generator_png_dir = path.join(__dirname, '../phoenixGenerator_1.1/Engine/Content/Images/')
-
-
-function appendCSV(metadata, dt) {
+function appendCSV(legend, dt) {
     return new Promise(resolve => {
-
         const newLine = '\r\n';
-        const new_metadata = metadata
-
+        const generatorData = (legend.id + ',' + legend.dna + '\n')
         fs.stat(dt, function (err, stat) {
             if (err == null) {
-
-                const csv = json2csv(new_metadata, { header: false, quote: '' }) + newLine;
-
-                fs.appendFile(dt, csv, function (err) {
+                fs.appendFile(dt, generatorData, function (err) {
                     if (err) throw err;
                     resolve('NFT DNA Appended!')
                 });
@@ -65,13 +56,9 @@ function appendCSV(metadata, dt) {
     })
 }
 
-QmNzLWQfqshqp48dSj6FspcpiQ5GNnDd6UoG5jN1kCJG87
-
 function generatePNG(id) {
     return new Promise(resolve => {
-
         const command = path.join(__dirname, `../phoenixGenerator_1.1/genPhoenix.exe id=${id}`)
-
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.log(`error: ${error.message}`);
@@ -87,12 +74,11 @@ function generatePNG(id) {
     })
 }
 
-function watchPNG(dir, file) { // merge with above or below function
+// ? merge with above or below function
+function watchPNG(dir, file) {
     return new Promise(resolve => {
-
         const output_png = path.join(dir, file);
         const watcher = chokidar.watch(output_png, { ignored: /^\./, persistent: true });
-
         watcher
             .on('ready', () => { console.log('\nWatching for', output_png, 'output'); })
             .on('add', function (output_png) {
@@ -104,16 +90,21 @@ function watchPNG(dir, file) { // merge with above or below function
     })
 }
 
-function pinPNG(dir, file) {
+function pinPNG(dir, file, meta) {
     return new Promise(resolve => {
-
         const pinFileToIPFS = async () => {
             const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
-
-            let data = new FormData();
-            let image = path.join(dir, file)
+            const data = new FormData();
+            const image = path.join(dir, file)
 
             data.append("file", fs.createReadStream(image));
+
+            // TODO: look into querying wrapped hashes more
+            // const pinataOptions = JSON.stringify({
+            //     cidVersion: 1,
+            //     wrapWithDirectory: true
+            // });
+            // data.append('pinataOptions', pinataOptions);
 
             const res = await axios.post(url, data, {
                 maxContentLength: "Infinity",
@@ -121,17 +112,13 @@ function pinPNG(dir, file) {
                     "Content-Type": `multipart/form-data; boundary=${data._boundary}`,
                     pinata_api_key: pinataApiKey,
                     pinata_secret_api_key: pinataSecretApiKey,
-
-
                 },
             });
-
-            let img_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
-
-            const current_path = image
-            const destination_path = path.join(__dirname, './minted', file);
-
-            mv(current_path, destination_path, function (err) {
+            const img_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
+            
+            const currentPath = image
+            const destination_path = path.join(__dirname, '../test/minted', file);
+            mv(currentPath, destination_path, function (err) {
                 if (err) {
                     throw err
                 } else {
@@ -143,20 +130,49 @@ function pinPNG(dir, file) {
     })
 }
 
-async function generateNewLegend(dna) {
+// TODO: work in querying from Pinata API
+function getIPFS(dir, file, meta) {
+    return new Promise(resolve => {
+        const pinFileToIPFS = async () => {
+            const url = `https://api.pinata.cloud/data/pinList`;
 
-    const id = dna.tokenDNA.split(',', 1)
-    const generated_png = id + ".png"
+            const res = await axios.get(url, data, {
+                maxContentLength: "Infinity",
+                headers: {
+                    "Content-Type": `multipart/form-data; boundary=${data._boundary}`,
+                    pinata_api_key: pinataApiKey,
+                    pinata_secret_api_key: pinataSecretApiKey,
+                },
+            });
+            const img_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
 
-    await appendCSV(dna, generator_datatable)
-    await generatePNG(id)
+            const destination_path = path.join(__dirname, '../test/minted', file);
+            mv(image, destination_path, function (err) {
+                if (err) {
+                    throw err
+                } else {
+                    resolve(img_hash)
+                }
+            });
+        };
+        pinFileToIPFS(dir, file);
+    })
+}
+
+async function generateNewLegend(legend) {
+    const generated_png = (legend.id + ".png")
+    await appendCSV(legend, generator_datatable)
+    await generatePNG(legend.id)
     await watchPNG(generator_png_dir, generated_png)
-    const child_hash = await pinPNG(generator_png_dir, generated_png)
+    const child_hash = await pinPNG(generator_png_dir, generated_png, legend)
+
     return child_hash
 }
 
 app.post(MINT_ENDPOINT, async (req, res) => {
-    const child_hash = await generateNewLegend(req.body)
+    const legend = req.body.legendInterface
+    console.log('good', legend)
+    const child_hash = await generateNewLegend(legend)
     return res.status(200).send(`ipfs://${child_hash}`)
 })
 

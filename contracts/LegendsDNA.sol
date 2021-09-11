@@ -2,13 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-// DNA is a representation of PhoenixGenerator CSV data minus 'Name'/ID
-
-
-// look at the websites we saw for returning/manipulating structs
 contract LegendsDNA {
     struct DNAData {
-        uint256 id;
         uint256 CdR1;
         uint256 CdG1;
         uint256 CdB1;
@@ -32,7 +27,6 @@ contract LegendsDNA {
         uint256 randomValue1 = random(255);
         uint256 randomValue2 = random(100);
         DNAData memory d;
-        d.id = id;
         d.CdR1 = (randomValue1 - 8);
         d.CdG1 = (randomValue2 + 81);
         d.CdB1 = (randomValue1 - 4);
@@ -44,7 +38,6 @@ contract LegendsDNA {
         d.CdB3 = (randomValue1 - 10);
 
         legendDNA[id] = DNAData(
-            d.id,
             d.CdR1,
             d.CdG1,
             d.CdB1,
@@ -60,7 +53,6 @@ contract LegendsDNA {
 
         string memory dna = (
             append(
-                uint2str(d.id),
                 uint2str(d.CdR1),
                 uint2str(d.CdG1),
                 uint2str(d.CdB1),
@@ -77,7 +69,6 @@ contract LegendsDNA {
     }
 
     function mixDNA(
-        uint256 childId,
         uint256 _parent1,
         uint256 _parent2
     ) public returns (string memory) {
@@ -85,7 +76,6 @@ contract LegendsDNA {
         DNAData storage parent2 = legendDNA[_parent2];
 
         DNAData memory data = DNAData(
-            childId,
             parent1.CdR1,
             parent2.CdG1,
             parent1.CdB1,
@@ -101,7 +91,6 @@ contract LegendsDNA {
 
         string memory dna = (
             append(
-                uint2str(data.id),
                 uint2str(data.CdR1),
                 uint2str(data.CdG1),
                 uint2str(data.CdB1),
@@ -161,8 +150,7 @@ contract LegendsDNA {
         string memory f,
         string memory g,
         string memory h,
-        string memory i,
-        string memory j
+        string memory i
     ) internal pure returns (string memory) {
         return
             string(
@@ -183,9 +171,7 @@ contract LegendsDNA {
                     ",",
                     h,
                     ",",
-                    i,
-                    ",",
-                    j
+                    i
                 )
             );
     }

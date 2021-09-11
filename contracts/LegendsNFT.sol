@@ -8,11 +8,6 @@ import "./LegendsDNA.sol";
 import "./LegendsMetadata.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-/*
-TODO: URI should be full metadata-ipfs url
-TODO: image-ipfs url is appended to metadata.image
-*/
-
 contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -61,14 +56,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         _tokenURIs[tokenId] = _tokenURI;
     }
 
-    function setImageURL(uint256 tokenId, string memory imageURL) public {
-        require(ownerOf(tokenId) == msg.sender);
-        // Needs another layer of security to prevent owner calling without reason ?
-        LegendMetadata memory legend = legendData[tokenId];
-        legend.image = imageURL;
-    }
-
-    function correctTokenURI(uint256 tokenId, string memory _tokenURI) public {
+    // Leaving in for testing ; "Hatch" function will replace and call internally(safer)
+    function assignIPFS(uint256 tokenId, string memory _tokenURI) public {
         require(ownerOf(tokenId) == msg.sender);
         // Needs another layer of security to prevent owner calling without reason ?
         _setTokenURI(tokenId, _tokenURI);
@@ -133,7 +122,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         address recipient,
         string memory prefix,
         string memory postfix,
-        string memory uri,
         bool isLegendary,
         bool skipIncubation
     ) public returns (uint256) {
@@ -144,34 +132,39 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
         string memory dna = createDNA(newItemId);
 
-        uint256 parent0 = 0;
+        uint256 promoParent = 0;
 
-        uint256[2] memory parents = [parent0, parent0]; // promotional Legends wont have parents
+        uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents
 
         if (skipIncubation == true) {
             incubationDuration = 0;
         }
 
-        legendData[newItemId] = LegendMetadata(
-            newItemId,
-            prefix,
-            postfix,
-            dna,
-            parents,
-            block.timestamp,
-            incubationDuration,
-            breedingCooldown,
-            baseBreedingCost,
-            offspringLimit,
-            season,
-            isLegendary,
-            false
-        );
+        LegendMetadata memory l;
+        l.id = newItemId;
+        l.prefix = prefix;
+        l.postfix = postfix;
+        l.dna = dna;
+        l.parents = parents;
+        l.birthDay = block.timestamp;
+        l.incubationDuration = incubationDuration;
+        l.breedingCooldown = breedingCooldown;
+        l.breedingCost = baseBreedingCost;
+        l.offspringLimit = offspringLimit;
+        l.season = season;
+        l.isLegendary = isLegendary;
+        l.isDestroyed = false;
+
+        legendData[newItemId] = l;
+
+        // TODO: Generate "enumEgg" function
+
+        string
+            memory enumEgg = "QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
+
+        _setTokenURI(newItemId, enumEgg);
 
         emit createdDNA(newItemId);
-
-        _setTokenURI(newItemId, uri); // have this wait for IPFS to finish
-
         return newItemId;
     }
 
@@ -204,9 +197,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             false
         );
 
-        // make tempory URI id+dna+parents+birthday+generation
-        // _setTokenURI(newItemId, uri); // set tempoary URI
-
         emit Minted(newItemId);
         return newItemId;
     }
@@ -221,7 +211,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
-        string memory newDNA = mixDNA(newItemId, parent1.id, parent2.id);
+        string memory newDNA = mixDNA(parent1.id, parent2.id);
 
         bool mix = block.number % 2 == 0;
 
