@@ -160,7 +160,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         // TODO: Generate "enumEgg" function
 
         string
-            memory enumEgg = "QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
+            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
 
         _setTokenURI(newItemId, enumEgg);
 

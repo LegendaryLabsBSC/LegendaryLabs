@@ -118,16 +118,22 @@ function App() {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.read.balanceOf(account).then((balance) => {
         if (balance > 0) {
+          const legendsData = []
           for (let i = 0; i < balance; i++) {
             // Testing wallets
-            // contract.read.tokenOfOwnerByIndex("0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52", i)
+            // contract.read.tokenOfOwnerByIndex("0x55f76D8a3AE95944dA55Ea5dBAAa78Da4D29A52", i)
             // contract.read.tokenOfOwnerByIndex("0xDfcada61FD3698F0421d7a3E129de522D8450B38", i)
             // Keep this uncommented if you are using Option 2 to test
             contract.read.tokenOfOwnerByIndex(account, i).then((token) => {
               const ownedToken = token.toString()
-              loadLegends(ownedToken)
+              loadLegends(ownedToken).then((res) => {
+                legendsData.push(res)
+              })
             })
           }
+          console.log('test',legendsData)
+          console.log('test1',legendsData[1])
+          // setLegends(legendsData)
         } else {
           console.log('Account does not own any Legend Tokens')
         }
@@ -136,17 +142,16 @@ function App() {
   }
 
   async function loadLegends(tokenID) {
-
     const imgURL = await contract.read.tokenURI(tokenID)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
-
+    return { tokenID, imgURL }
     // Logic for rendering Legend Card Component here from pinata ?
   }
 
   // Send new NFT DNA to API/Generator
-  async function generateImage(newToken) {
+  async function generateImage(newItemId) {
     if (typeof window.ethereum !== 'undefined') {
-      const legend = await contract.read.tokenMeta(newToken)
+      const legend = await contract.read.tokenMeta(newItemId)
       // TODO: Make into interface(convert js -> ts)
       const legendInterface = {
         id: `${legend.id}`,
@@ -174,17 +179,17 @@ function App() {
         .then((res) => {
           const url = res.data
           console.log('New NFT IPFS URL:', url)
-          assignIPFS(newToken, url)
+          assignIPFS(legend.id, url)
         })
-        // .finally(() => {
-        //   document.location.reload()
-        // })
+      // .finally(() => {
+      //   document.location.reload()
+      // })
     }
   }
 
-  async function assignIPFS(newToken, hash) {
+  async function assignIPFS(newItemId, hash) {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.write.assignIPFS(newToken, hash)
+      await contract.write.assignIPFS(newItemId, hash)
     }
   }
 
@@ -192,9 +197,9 @@ function App() {
     if (typeof window.ethereum !== 'undefined') {
       await contract.write.breed(parent1, parent2).then(
         contract.write.once('createdDNA', (data, event) => {
-          const newTokenID = data.toString()
-          console.log('New Token Created:', newTokenID) // Debug logging
-          generateImage(newTokenID)
+          const newItemId = data.toString()
+          console.log('New Token Created:', newItemId) // Debug logging
+          generateImage(newItemId)
         }),
       )
     }
@@ -221,8 +226,8 @@ function App() {
         // ? is .then even needed
         contract.write.once('createdDNA', (data, event) => {
           console.log('New Token Created:', data.toString())
-          const newToken = data.toString()
-          generateImage(newToken)
+          const newItemId = data.toString()
+          generateImage(newItemId)
         }),
       )
     }
