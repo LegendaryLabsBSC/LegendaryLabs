@@ -1,0 +1,15 @@
+# docker exec -it frontend_web_1 sh
+version: '3'
+services:
+    web:
+        image: nginx:latest
+        ports:
+            - "8080:80"
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
+            - ./godlike:/app
+            - ./godlike/dist:/usr/share/nginx/html
+    php:
+        image: php:fpm
+        volumes:
+            - ./godlike:/app
