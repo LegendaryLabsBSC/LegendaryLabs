@@ -80,12 +80,12 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
 
     function tokenDATA(
         uint256 tokenId // TODO: Clean this up, possibly not needed at all
-    ) public view virtual returns (LegendDNA memory) {
+    ) public view virtual returns (LegendGenetics memory) {
         require(
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"
         );
-        return legendDNA[tokenId];
+        return legendGenetics[tokenId];
     }
 
     function tokenMeta(uint256 tokenId)
@@ -175,7 +175,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
 
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
-        mixDNA(parent1.id, parent2.id, newItemId);
+        mixGenetics(parent1.id, parent2.id, newItemId);
 
         uint256[2] memory parents = [_parent1, _parent2];
         bool mix = block.number % 2 == 0;
@@ -203,7 +203,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     ) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
-        createDNA(newItemId);
+        createGenetics(newItemId);
 
         uint256 promoParent = 0;
         uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents

@@ -74,22 +74,22 @@ function App() {
       console.log('IPFS: ', ipfsURL)
     }
   }
-  async function fetchDNA() {
+  async function fetchGenetics() {
     if (typeof window.ethereum !== 'undefined') {
-      const ipfsDNA = await contract.read.legendDNA(id)
-      console.log(`DNA: ${ipfsDNA}`)
+      const ipfsGenetics = await contract.read.legendGenetics(id)
+      console.log(`Genetics: ${ipfsGenetics}`)
     }
   }
   async function fetchMeta() {
     if (typeof window.ethereum !== 'undefined') {
       // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
       const legendMeta = await contract.read.tokenMeta(id)
-      const legendDNA = await contract.read.legendDNA(id)
+      const legendGenetics = await contract.read.legendGenetics(id)
       console.log(`Meta: ${legendMeta}`)
       console.log(`id: ${legendMeta.id}`)
       console.log(`prefix: ${legendMeta.prefix}`)
       console.log(`postfix: ${legendMeta.postfix}`)
-      console.log(`dna: ${legendDNA}`)
+      console.log(`genetics: ${legendGenetics}`)
       console.log(`parents: ${legendMeta.parents}`)
       console.log(`birthday: ${legendMeta.birthDay}`)
       console.log(`incubation duration: ${legendMeta.incubationDuration}`)
@@ -147,18 +147,18 @@ function App() {
     // Logic for rendering Legend Card Component here from pinata ?
   }
 
-  // Send new NFT DNA to API/Generator
+  // Send new NFT Genetics to API/Generator
   async function generateImage(newItemId) {
     if (typeof window.ethereum !== 'undefined') {
       const legend = await contract.read.tokenMeta(newItemId)
-      const legendDNA = await contract.read.legendDNA(newItemId)
-      console.log(`ffsfsfsf ${legendDNA}`)
+      const legendGenetics = await contract.read.legendGenetics(newItemId)
+      console.log(`ffsfsfsf ${legendGenetics}`)
       // TODO: Make into interface(convert js -> ts)
       const legendInterface = {
         id: `${legend.id}`,
         prefix: legend.prefix,
         postfix: legend.postfix,
-        dna: `${legendDNA}`,
+        genetics: `${legendGenetics}`,
         parents: `${legend.parents}`,
         birthDay: `${legend.birthDay}`,
         incubationDuration: `${legend.incubationDuration}`,
@@ -213,7 +213,7 @@ function App() {
     }
   }
 
-  // Mints Legend with "random" DNA
+  // Mints Legend with "random" Genetics
   async function mintPromo() {
     if (typeof window.ethereum !== 'undefined') {
       const prefix = uniqueNamesGenerator(prefixConfig) // for testing
@@ -242,8 +242,8 @@ function App() {
         <button type="submit" onClick={fetchIPFS}>
           Fetch IPFS URL
         </button>
-        <button type="submit" onClick={fetchDNA}>
-          Fetch IPFS DNA
+        <button type="submit" onClick={fetchGenetics}>
+          Fetch IPFS Genetics
         </button>
         <button type="submit" onClick={fetchMeta}>
           Fetch Legend Metadata
