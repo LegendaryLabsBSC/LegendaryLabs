@@ -2,58 +2,58 @@
 
 pragma solidity ^0.8.0;
 
-import "./LegendsMetadata.sol";
+import "./LegendComposition.sol";
 
-contract LegendBreeding is ILegendMetadata {
+contract LegendBreeding is ILegendComposition {
 
 
-    mapping(uint256 => LegendDNA) public legendDNA;
+    mapping(uint256 => LegendGenetics) public legendGenetics;
 
-    event dnaGenerated(LegendDNA d);
+    event GeneticsGenerated(LegendGenetics g);
 
-    function createDNA(uint256 id) public
+    function createGenetics(uint256 id) public
     {
         uint256 randomValue1 = random(255);
         uint256 randomValue2 = random(100);
-        LegendDNA memory d;
-        d.CdR1 = (randomValue1 - 8);
-        d.CdG1 = (randomValue2 + 81);
-        d.CdB1 = (randomValue1 - 4);
-        d.CdR2 = (randomValue2 + 31);
-        d.CdG2 = (randomValue1 - 13);
-        d.CdB2 = (randomValue2 + 33);
-        d.CdR3 = (randomValue1 - 22);
-        d.CdG3 = (randomValue2 + 5);
-        d.CdB3 = (randomValue1 - 10);
+        LegendGenetics memory g;
+        g.CdR1 = (randomValue1 - 8);
+        g.CdG1 = (randomValue2 + 81);
+        g.CdB1 = (randomValue1 - 4);
+        g.CdR2 = (randomValue2 + 31);
+        g.CdG2 = (randomValue1 - 13);
+        g.CdB2 = (randomValue2 + 33);
+        g.CdR3 = (randomValue1 - 22);
+        g.CdG3 = (randomValue2 + 5);
+        g.CdB3 = (randomValue1 - 10);
 
-        legendDNA[id] = d;
+        legendGenetics[id] = g;
 
-        emit dnaGenerated(d);
+        emit GeneticsGenerated(g);
     }
 
-    function mixDNA(
+    function mixGenetics(
         uint256 _parent1,
         uint256 _parent2,
         uint256 id
     ) public
     {
-        LegendDNA storage parent1 = legendDNA[_parent1];
-        LegendDNA storage parent2 = legendDNA[_parent2];
+        LegendGenetics storage parent1 = legendGenetics[_parent1];
+        LegendGenetics storage parent2 = legendGenetics[_parent2];
 
-        LegendDNA memory d;
-        d.CdR1 = parent1.CdR1;
-        d.CdG1 = parent2.CdG1;
-        d.CdB1 = parent1.CdB1;
-        d.CdR2 = parent2.CdR2;
-        d.CdG2 = parent1.CdG2;
-        d.CdB2 = parent2.CdB2;
-        d.CdR3 = parent1.CdR3;
-        d.CdG3 = parent2.CdG3;
-        d.CdB3 = parent1.CdB3;
+        LegendGenetics memory g;
+        g.CdR1 = parent1.CdR1;
+        g.CdG1 = parent2.CdG1;
+        g.CdB1 = parent1.CdB1;
+        g.CdR2 = parent2.CdR2;
+        g.CdG2 = parent1.CdG2;
+        g.CdB2 = parent2.CdB2;
+        g.CdR3 = parent1.CdR3;
+        g.CdG3 = parent2.CdG3;
+        g.CdB3 = parent1.CdB3;
 
-        legendDNA[id] = d;
+        legendGenetics[id] = g;
 
-        emit dnaGenerated(d);
+        emit GeneticsGenerated(g);
     }
 
     // Random Number oracle call could go here

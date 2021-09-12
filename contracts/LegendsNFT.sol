@@ -25,7 +25,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     event NewLegend(uint256 newItemId);
     event Minted(uint256 tokenId);
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
-    event Immolated(uint256 tokenId);
+    event Burned(uint256 tokenId);
 
     constructor() ERC721("Legend", "LEGEND") {}
 
@@ -113,7 +113,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         legend.isDestroyed = true;
         _burn(tokenId);
 
-        emit Immolated(tokenId);
+        emit Burned(tokenId);
     }
 
     function mintTo(

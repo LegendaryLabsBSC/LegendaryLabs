@@ -35,6 +35,7 @@ function App() {
   const [value, setValue] = useState(0)
   const [season, setSeasonValue] = useState('')
   const [newURI, setURI] = useState('')
+  const [legends, setLegends] = useState('')
 
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
@@ -130,7 +131,8 @@ function App() {
           }
           console.log('test', legendsData)
           console.log('test1', legendsData[1])
-          // setLegends(legendsData)
+          setLegends(legendsData)
+          console.log(legends)
         } else {
           console.log('Account does not own any Legend Tokens')
         }
