@@ -7,15 +7,9 @@ import "./LegendComposition.sol";
 contract LegendStats is ILegendComposition {
     mapping(uint256 => LegendStats) public legendStats;
 
-    uint256 baseHealth;
-
     event StatsAssigned(LegendStats s);
 
-    function setBaseHealth(uint256 _baseHealth) public {
-        baseHealth = _baseHealth;
-    }
-
-    function createStats(uint256 id) public {
+    function createStats(uint256 id, uint256 baseHealth) public {
         // TODO: Link oracle random number
         // TODO: base stat build enum
         uint256 randomValue = clamp(randomS(4), 1, 3);
@@ -34,10 +28,11 @@ contract LegendStats is ILegendComposition {
         emit StatsAssigned(s);
     }
 
-    function mixDNA(
+    function mixStats(
         uint256 _parent1,
         uint256 _parent2,
-        uint256 id
+        uint256 id,
+        uint256 baseHealth
     ) public {
         LegendStats storage parent1 = legendStats[_parent1];
         LegendStats storage parent2 = legendStats[_parent2];

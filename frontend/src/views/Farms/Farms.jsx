@@ -6,7 +6,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0x44992FD0EB1d93d8b91EF53340860A8382F942E0'
+const legendAddress = '0xBe2FC14426E35410E307d0460373c2dD5C1C9B46'
 
 // TODO: generate map = false temp fix
 

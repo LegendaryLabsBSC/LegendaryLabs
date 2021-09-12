@@ -4,9 +4,12 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./LegendsLabratory.sol";
 import "./LegendBreeding.sol";
 import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+
+// ? Consider merging stats with NFT contract ?
 
 contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     using Counters for Counters.Counter;
@@ -16,37 +19,28 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     mapping(uint256 => string) private _tokenURIs;
     mapping(uint256 => LegendMetadata) public legendData;
 
-    uint256 incubationDuration;
-    uint256 breedingCooldown;
-    uint256 offspringLimit;
-    uint256 baseBreedingCost;
-    string season;
+    uint256 public incubationDuration;
+    uint256 public breedingCooldown;
+    uint256 public offspringLimit;
+    uint256 public baseBreedingCost;
+    string public season;
+
+    uint256 baseHealth;
 
     event NewLegend(uint256 newItemId);
     event Minted(uint256 tokenId);
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
 
-    constructor() ERC721("Legend", "LEGEND") {}
+    LegendsLabratory lab;
 
-    function setIncubationDuration(uint256 _incubationDuration) public {
-        incubationDuration = _incubationDuration;
+    modifier onlyLab() {
+        require(msg.sender == address(lab), "not lab owner");
+        _;
     }
 
-    function setBreedingCooldown(uint256 _breedingCooldown) public {
-        breedingCooldown = _breedingCooldown;
-    }
-
-    function setOffspringLimit(uint256 _offspringLimit) public {
-        offspringLimit = _offspringLimit;
-    }
-
-    function setBaseBreedingCost(uint256 _baseBreedingCost) public {
-        baseBreedingCost = _baseBreedingCost;
-    }
-
-    function setSeason(string memory _season) public {
-        season = _season;
+    constructor() ERC721("Legend", "LEGEND") {
+        lab = LegendsLabratory(msg.sender);
     }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
@@ -176,6 +170,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         mixGenetics(parent1.id, parent2.id, newItemId);
+        mixStats(parent1.id, parent2.id, newItemId, baseHealth);
 
         uint256[2] memory parents = [_parent1, _parent2];
         bool mix = block.number % 2 == 0;
@@ -205,7 +200,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         uint256 newItemId = _tokenIds.current();
 
         createGenetics(newItemId);
-        createStats(newItemId);
+        createStats(newItemId, baseHealth);
 
         uint256 promoParent = 0;
         uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents
@@ -219,5 +214,29 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
             isLegendary,
             skipIncubation
         );
+    }
+
+    function setIncubationDuration(uint256 _incubationDuration) public onlyLab {
+        incubationDuration = _incubationDuration;
+    }
+
+    function setBreedingCooldown(uint256 _breedingCooldown) public onlyLab {
+        breedingCooldown = _breedingCooldown;
+    }
+
+    function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
+        offspringLimit = _offspringLimit;
+    }
+
+    function setBreedingCost(uint256 _baseBreedingCost) public onlyLab {
+        baseBreedingCost = _baseBreedingCost;
+    }
+
+    function setSeason(string memory _season) public onlyLab {
+        season = _season;
+    }
+
+    function setBaseHealth(uint256 _baseHealth) public onlyLab {
+        baseHealth = _baseHealth;
     }
 }

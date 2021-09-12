@@ -4,15 +4,22 @@ pragma solidity ^0.8.0;
 
 import "./LegendComposition.sol";
 
+/**
+ * TODO: look into if modifiers such as this are needed
+
+      modifier onlyBreeding() {
+        require(msg.sender == breedingContract, "Not authorized");
+        _;
+    }
+  * ZED == LEGEND : {Token => CFBase} => Breedings == LegendsNFT => LegendsBreeding  
+ */
+
 contract LegendBreeding is ILegendComposition {
-
-
     mapping(uint256 => LegendGenetics) public legendGenetics;
 
     event GeneticsGenerated(LegendGenetics g);
 
-    function createGenetics(uint256 id) public
-    {
+    function createGenetics(uint256 id) public {
         uint256 randomValue1 = random(255);
         uint256 randomValue2 = random(100);
         LegendGenetics memory g;
@@ -35,8 +42,7 @@ contract LegendBreeding is ILegendComposition {
         uint256 _parent1,
         uint256 _parent2,
         uint256 id
-    ) public
-    {
+    ) public {
         LegendGenetics storage parent1 = legendGenetics[_parent1];
         LegendGenetics storage parent2 = legendGenetics[_parent2];
 
