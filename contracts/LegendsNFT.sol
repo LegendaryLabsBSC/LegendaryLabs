@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./LegendsBreeding.sol";
-import "./LegendsMetadata.sol";
+import "./LegendBreeding.sol";
+import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract LegendsNFT is ERC721Enumerable, Ownable, LegendsBreeding {
+contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     using Strings for uint256;
@@ -22,7 +22,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsBreeding {
     uint256 baseBreedingCost;
     string season;
 
-    event createdDNA(uint256 newItemId);
+    event NewLegend(uint256 newItemId);
     event Minted(uint256 tokenId);
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
     event Immolated(uint256 tokenId);
@@ -116,6 +116,84 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsBreeding {
         emit Immolated(tokenId);
     }
 
+    function mintTo(
+        address receiver,
+        uint256 newItemId,
+        string memory prefix,
+        string memory postfix,
+        uint256[2] memory parents,
+        bool isLegendary,
+        bool skipIncubation
+    ) private returns (uint256) {
+        uint256 _incubationDuration;
+
+        _mint(receiver, newItemId);
+
+        if (skipIncubation == true) {
+            _incubationDuration = 0;
+        } else {
+            _incubationDuration = incubationDuration;
+        }
+
+        LegendMetadata memory m;
+        m.id = newItemId;
+        m.prefix = prefix;
+        m.postfix = postfix;
+        m.parents = parents;
+        m.birthDay = block.timestamp;
+        m.incubationDuration = _incubationDuration;
+        m.breedingCooldown = breedingCooldown;
+        m.breedingCost = baseBreedingCost;
+        m.offspringLimit = offspringLimit;
+        m.season = season;
+        m.isLegendary = isLegendary;
+        m.isDestroyed = false;
+
+        legendData[newItemId] = m;
+
+        // TODO: Generate "enumEgg" function
+
+        string
+            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
+
+        _setTokenURI(newItemId, enumEgg);
+
+        emit NewLegend(newItemId);
+    }
+
+    function breed(
+        uint256 _parent1,
+        uint256 _parent2,
+        bool skipIncubation
+    ) public {
+        require(
+            ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
+        );
+
+        LegendMetadata storage parent1 = legendData[_parent1];
+        LegendMetadata storage parent2 = legendData[_parent2];
+
+        _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
+        mixDNA(parent1.id, parent2.id, newItemId);
+
+        uint256[2] memory parents = [_parent1, _parent2];
+        bool mix = block.number % 2 == 0;
+        bool isLegendary = false; // only one of a kind handmade Legends can be "Legendary"
+
+        mintTo(
+            msg.sender,
+            newItemId,
+            mix ? parent1.prefix : parent2.prefix,
+            mix ? parent2.postfix : parent1.postfix,
+            parents,
+            isLegendary,
+            skipIncubation
+        );
+
+        emit Breed(parent1.id, parent2.id, newItemId);
+    }
+
     function mintPromo(
         address recipient,
         string memory prefix,
@@ -125,108 +203,19 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsBreeding {
     ) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
-
-        _mint(recipient, newItemId);
-
-        // string memory dna = 
         createDNA(newItemId);
 
         uint256 promoParent = 0;
-
         uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents
 
-        if (skipIncubation == true) {
-            incubationDuration = 0;
-        }
-
-        LegendMetadata memory l;
-        l.id = newItemId;
-        l.prefix = prefix;
-        l.postfix = postfix;
-        l.parents = parents;
-        l.birthDay = block.timestamp;
-        l.incubationDuration = incubationDuration;
-        l.breedingCooldown = breedingCooldown;
-        l.breedingCost = baseBreedingCost;
-        l.offspringLimit = offspringLimit;
-        l.season = season;
-        l.isLegendary = isLegendary;
-        l.isDestroyed = false;
-
-        legendData[newItemId] = l;
-
-        // TODO: Generate "enumEgg" function
-
-        string
-            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
-
-        _setTokenURI(newItemId, enumEgg);
-
-        // TODO: createdDNA -> ? newLegendCreated
-        emit createdDNA(newItemId);
-        return newItemId;
-    }
-
-    function mintTo(
-        address receiver,
-        uint256 newItemId,
-        string memory prefix,
-        string memory postfix,
-        uint256[2] memory parents,
-        uint256 birthDay
-    ) private returns (uint256) {
-        bool isLegendary = false; // only one of a kind handmade Legends can be "Legendary"
-
-        _mint(receiver, newItemId);
-
-        legendData[newItemId] = LegendMetadata(
+        mintTo(
+            recipient,
             newItemId,
             prefix,
             postfix,
             parents,
-            birthDay,
-            incubationDuration,
-            breedingCooldown,
-            baseBreedingCost,
-            offspringLimit,
-            season,
             isLegendary,
-            false
+            skipIncubation
         );
-
-        emit Minted(newItemId);
-        return newItemId;
-    }
-
-    function breed(uint256 _parent1, uint256 _parent2) public {
-        require(
-            ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
-        );
-        LegendMetadata storage parent1 = legendData[_parent1];
-        LegendMetadata storage parent2 = legendData[_parent2];
-
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        // string memory newDNA = 
-        mixDNA(parent1.id, parent2.id, newItemId);
-
-        bool mix = block.number % 2 == 0;
-
-        uint256[2] memory parents = [_parent1, _parent2];
-
-        // uint256 level = 1;
-
-        mintTo(
-            msg.sender,
-            newItemId,
-            mix ? parent1.prefix : parent2.prefix,
-            mix ? parent2.postfix : parent1.postfix,
-            parents,
-            block.timestamp
-        );
-
-        emit createdDNA(newItemId);
-        emit Breed(parent1.id, parent2.id, newItemId);
     }
 }

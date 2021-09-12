@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+// TODO: ILegendMetadata -> ? ILegendComposition
 interface ILegendMetadata {
     struct LegendMetadata {
         uint256 id; // token number of Legend
@@ -17,7 +18,8 @@ interface ILegendMetadata {
         bool isLegendary; // is Legend one of a kind handmade
         bool isDestroyed; // if true token has been sent to dead address and is not visible
     }
-    struct LegendDNA { // change to LegendGenetics
+    struct LegendDNA {
+        // change to LegendGenetics
         uint256 CdR1;
         uint256 CdG1;
         uint256 CdB1;
@@ -27,5 +29,15 @@ interface ILegendMetadata {
         uint256 CdR3;
         uint256 CdG3;
         uint256 CdB3;
+    }
+    struct LegendStats {
+        uint256 level; // v1 1-5
+        uint256 health;
+        uint256 strength;
+        uint256 defense;
+        uint256 agility;
+        uint256 speed;
+        uint256 accuracy;
+        uint256 destruction;
     }
 }

@@ -6,7 +6,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0x91161C525A9dCA65FcC04ad8fDF09CADD29733eA'
+const legendAddress = '0xC54Cf56845daa62F01dCd0A3d7CaD6a871F7126C'
 
 // TODO: generate map = false temp fix
 
@@ -194,8 +194,9 @@ function App() {
 
   async function breed() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.write.breed(parent1, parent2).then(
-        contract.write.once('createdDNA', (data, event) => {
+      const skipIncubation = false // for testing ; will be linked to accessories from game
+      await contract.write.breed(parent1, parent2, skipIncubation).then(
+        contract.write.once('NewLegend', (data, event) => {
           const newItemId = data.toString()
           console.log('New Token Created:', newItemId) // Debug logging
           generateImage(newItemId)
@@ -217,13 +218,13 @@ function App() {
       const postfix = uniqueNamesGenerator(postfixConfig) // for testing
       // const level = 1 // for testing
       const isLegendary = false // for testing
-      const skipIncubation = true // for testing
+      const skipIncubation = false // for testing
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
         // ! receiving multiple responses ?
         // ? is .then even needed
-        contract.write.once('createdDNA', (data, event) => {
+        contract.write.once('NewLegend', (data, event) => {
           console.log('New Token Created:', data.toString())
           const newItemId = data.toString()
           generateImage(newItemId)
