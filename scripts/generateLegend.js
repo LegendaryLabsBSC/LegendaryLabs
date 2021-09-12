@@ -90,21 +90,36 @@ function watchPNG(dir, file) {
     })
 }
 
-function pinPNG(dir, file, meta) {
-    return new Promise(resolve => {
+function pinPNG(dir, file, legend) {
+    return new Promise(resolve => { // ?
         const pinFileToIPFS = async () => {
             const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
             const data = new FormData();
             const image = path.join(dir, file)
 
             data.append("file", fs.createReadStream(image));
-
+            
             // TODO: look into querying wrapped hashes more
-            // const pinataOptions = JSON.stringify({
-            //     cidVersion: 1,
-            //     wrapWithDirectory: true
-            // });
-            // data.append('pinataOptions', pinataOptions);
+            const pinataOptions = JSON.stringify({
+                cidVersion: 1,
+                // wrapWithDirectory: true
+            });
+            data.append('pinataOptions', pinataOptions);
+
+            const metadata = JSON.stringify({
+                name: `${legend.id + legend.dna + legend.parents + legend.birthDay}`
+                    .replace(/,/g, '')
+                ,
+                keyvalues: {
+                    id: `${legend.id}`,
+                    dna: `${legend.dna}`,
+                    parents: `${legend.parents}`,
+                    birthDay: `${legend.birthDay}`,
+                    season: `${legend.season}`,
+                    isLegendary: `${legend.isLegendary}`
+                }
+            });
+            data.append('pinataMetadata', metadata);
 
             const res = await axios.post(url, data, {
                 maxContentLength: "Infinity",
@@ -114,6 +129,7 @@ function pinPNG(dir, file, meta) {
                     pinata_secret_api_key: pinataSecretApiKey,
                 },
             });
+
             const img_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
             
             const currentPath = image
@@ -130,33 +146,28 @@ function pinPNG(dir, file, meta) {
     })
 }
 
-// TODO: work in querying from Pinata API
-function getIPFS(dir, file, meta) {
-    return new Promise(resolve => {
-        const pinFileToIPFS = async () => {
-            const url = `https://api.pinata.cloud/data/pinList`;
+/**
+ * TODO: work in querying from Pinata API
+ * will be used later with "hatching" 
+ */
+async function getIPFS(legend) {
+    // return new Promise(resolve => {
+    // const pinFileToIPFS = async () => {
+    const url = `https://api.pinata.cloud/data/pinList?metadata[keyvalues][id]={"value":${legend.id},"op":"eq"}`;
 
-            const res = await axios.get(url, data, {
-                maxContentLength: "Infinity",
-                headers: {
-                    "Content-Type": `multipart/form-data; boundary=${data._boundary}`,
-                    pinata_api_key: pinataApiKey,
-                    pinata_secret_api_key: pinataSecretApiKey,
-                },
-            });
-            const img_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
-
-            const destination_path = path.join(__dirname, '../test/minted', file);
-            mv(image, destination_path, function (err) {
-                if (err) {
-                    throw err
-                } else {
-                    resolve(img_hash)
-                }
-            });
-        };
-        pinFileToIPFS(dir, file);
+    // return axios
+    const res = await axios.get(url, {
+        headers: {
+            pinata_api_key: pinataApiKey,
+            pinata_secret_api_key: pinataSecretApiKey
+        }
     })
+        .then(function (response) {
+            console.log(response.data.rows[0].metadata)
+        })
+        .catch(function (error) {
+            console.log(error)
+        });
 }
 
 async function generateNewLegend(legend) {
@@ -165,13 +176,13 @@ async function generateNewLegend(legend) {
     await generatePNG(legend.id)
     await watchPNG(generator_png_dir, generated_png)
     const child_hash = await pinPNG(generator_png_dir, generated_png, legend)
-
+    // await getIPFS(legend)
     return child_hash
 }
 
 app.post(MINT_ENDPOINT, async (req, res) => {
     const legend = req.body.legendInterface
-    console.log('good', legend)
+    console.log(legend)
     const child_hash = await generateNewLegend(legend)
     return res.status(200).send(`ipfs://${child_hash}`)
 })

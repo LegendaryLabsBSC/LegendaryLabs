@@ -1,4 +1,4 @@
-
+// TODO: have settable values set on deploy
 async function main() {
 
   // const Greeter = await hre.ethers.getContractFactory("Greeter");
