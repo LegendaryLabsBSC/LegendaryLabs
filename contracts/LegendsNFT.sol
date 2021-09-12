@@ -203,7 +203,9 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     ) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
+
         createGenetics(newItemId);
+        createStats(newItemId);
 
         uint256 promoParent = 0;
         uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents

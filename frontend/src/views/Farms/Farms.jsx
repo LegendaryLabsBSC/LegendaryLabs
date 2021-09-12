@@ -6,7 +6,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0xC54Cf56845daa62F01dCd0A3d7CaD6a871F7126C'
+const legendAddress = '0x44992FD0EB1d93d8b91EF53340860A8382F942E0'
 
 // TODO: generate map = false temp fix
 
@@ -61,6 +61,12 @@ function App() {
       await contract.write.setBaseBreedingCost(value)
     }
   }
+  async function setBaseHealth() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contract.write.setBaseHealth(value)
+    }
+  }
   async function setSeason() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -68,28 +74,22 @@ function App() {
     }
   }
 
-  async function fetchIPFS() {
+  async function fetchURI() {
     if (typeof window.ethereum !== 'undefined') {
-      const ipfsURL = await contract.read.tokenURI(id)
-      console.log('IPFS: ', ipfsURL)
+      const legendURI = await contract.read.tokenURI(id)
+      console.log('IPFS URI: ', legendURI)
     }
   }
-  async function fetchGenetics() {
-    if (typeof window.ethereum !== 'undefined') {
-      const ipfsGenetics = await contract.read.legendGenetics(id)
-      console.log(`Genetics: ${ipfsGenetics}`)
-    }
-  }
-  async function fetchMeta() {
+  async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
       // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
       const legendMeta = await contract.read.tokenMeta(id)
       const legendGenetics = await contract.read.legendGenetics(id)
-      console.log(`Meta: ${legendMeta}`)
+      const legendStats = await contract.read.legendStats(id)
+      console.log('META:')
       console.log(`id: ${legendMeta.id}`)
       console.log(`prefix: ${legendMeta.prefix}`)
       console.log(`postfix: ${legendMeta.postfix}`)
-      console.log(`genetics: ${legendGenetics}`)
       console.log(`parents: ${legendMeta.parents}`)
       console.log(`birthday: ${legendMeta.birthDay}`)
       console.log(`incubation duration: ${legendMeta.incubationDuration}`)
@@ -99,9 +99,46 @@ function App() {
       console.log(`season: ${legendMeta.season}`)
       console.log(`is legendary: ${legendMeta.isLegendary}`)
       console.log(`is destroyed: ${legendMeta.isDestroyed}`)
+      console.log('GENES:')
+      console.log(`CdR1: ${legendGenetics.CdR1}`)
+      console.log(`CdG1: ${legendGenetics.CdG1}`)
+      console.log(`CdB1: ${legendGenetics.CdB1}`)
+      console.log(`CdR2: ${legendGenetics.CdR2}`)
+      console.log(`CdG2: ${legendGenetics.CdG2}`)
+      console.log(`CdB2: ${legendGenetics.CdB2}`)
+      console.log(`CdR3: ${legendGenetics.CdR3}`)
+      console.log(`CdG3: ${legendGenetics.CdG3}`)
+      console.log(`CdB3: ${legendGenetics.CdB3}`)
+      console.log('STATS:')
+      console.log(`level: ${legendStats.level}`)
+      console.log(`health: ${legendStats.health}`)
+      console.log(`strength: ${legendStats.strength}`)
+      console.log(`defense: ${legendStats.defense}`)
+      console.log(`agility: ${legendStats.agility}`)
+      console.log(`speed: ${legendStats.speed}`)
+      console.log(`accuracy: ${legendStats.accuracy}`)
+      console.log(`destruction: ${legendStats.destruction}`)
     }
   }
-
+  async function fetchMeta() {
+    if (typeof window.ethereum !== 'undefined') {
+      // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
+      const legendMeta = await contract.read.tokenMeta(id)
+      console.log(`Meta: ${legendMeta}`)
+    }
+  }
+  async function fetchGenetics() {
+    if (typeof window.ethereum !== 'undefined') {
+      const legendGenetics = await contract.read.legendGenetics(id)
+      console.log(`Genetics: ${legendGenetics}`)
+    }
+  }
+  async function fetchStats() {
+    if (typeof window.ethereum !== 'undefined') {
+      const legendStats = await contract.read.legendStats(id)
+      console.log(`Stats: ${legendStats}`)
+    }
+  }
   async function getAllLegends() {
     if (typeof window.ethereum !== 'undefined') {
       const totalLegends = await contract.read.totalLegends()
@@ -152,7 +189,6 @@ function App() {
     if (typeof window.ethereum !== 'undefined') {
       const legend = await contract.read.tokenMeta(newItemId)
       const legendGenetics = await contract.read.legendGenetics(newItemId)
-      console.log(`ffsfsfsf ${legendGenetics}`)
       // TODO: Make into interface(convert js -> ts)
       const legendInterface = {
         id: `${legend.id}`,
@@ -239,14 +275,20 @@ function App() {
     <div>
       <header>
         <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-        <button type="submit" onClick={fetchIPFS}>
-          Fetch IPFS URL
+        <button type="submit" onClick={fetchURI}>
+          Fetch URI
+        </button>
+        <button type="submit" onClick={fetchLegendComposition}>
+          Fetch Legend Composition
+        </button>
+        <button type="submit" onClick={fetchMeta}>
+          Fetch Legend Metadata
         </button>
         <button type="submit" onClick={fetchGenetics}>
           Fetch IPFS Genetics
         </button>
-        <button type="submit" onClick={fetchMeta}>
-          Fetch Legend Metadata
+        <button type="submit" onClick={fetchStats}>
+          Fetch Legend Stats
         </button>
         <br /> <br /> <br />
         <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
@@ -261,6 +303,9 @@ function App() {
         </button>
         <button type="submit" onClick={setBaseBreedingCost}>
           Set Base Breeding Cost
+        </button>
+        <button type="submit" onClick={setBaseHealth}>
+          Set Base Health
         </button>
         <br />
         <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
