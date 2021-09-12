@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./LegendsDNA.sol";
+import "./LegendsBreeding.sol";
 import "./LegendsMetadata.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
+contract LegendsNFT is ERC721Enumerable, Ownable, LegendsBreeding {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     using Strings for uint256;
@@ -80,13 +80,25 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
     function tokenDATA(
         uint256 tokenId // TODO: Clean this up, possibly not needed at all
-    ) public view virtual returns (string memory) {
+    ) public view virtual returns (LegendDNA memory) {
         require(
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"
         );
-        LegendMetadata memory _legendData = legendData[tokenId];
-        return _legendData.dna;
+        return legendDNA[tokenId];
+    }
+
+    function tokenMeta(uint256 tokenId)
+        public
+        view
+        virtual
+        returns (LegendMetadata memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        return legendData[tokenId];
     }
 
     function totalLegends() public view virtual returns (uint256) {
@@ -104,20 +116,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         emit Immolated(tokenId);
     }
 
-    function tokenMeta(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (LegendMetadata memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        // LegendMetadata memory _legendData = legendData[tokenId];
-        return legendData[tokenId];
-    }
-
     function mintPromo(
         address recipient,
         string memory prefix,
@@ -130,7 +128,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
         _mint(recipient, newItemId);
 
-        string memory dna = createDNA(newItemId);
+        // string memory dna = 
+        createDNA(newItemId);
 
         uint256 promoParent = 0;
 
@@ -144,7 +143,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         l.id = newItemId;
         l.prefix = prefix;
         l.postfix = postfix;
-        l.dna = dna;
         l.parents = parents;
         l.birthDay = block.timestamp;
         l.incubationDuration = incubationDuration;
@@ -164,6 +162,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
 
         _setTokenURI(newItemId, enumEgg);
 
+        // TODO: createdDNA -> ? newLegendCreated
         emit createdDNA(newItemId);
         return newItemId;
     }
@@ -173,7 +172,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         uint256 newItemId,
         string memory prefix,
         string memory postfix,
-        string memory dna,
         uint256[2] memory parents,
         uint256 birthDay
     ) private returns (uint256) {
@@ -185,7 +183,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             newItemId,
             prefix,
             postfix,
-            dna,
             parents,
             birthDay,
             incubationDuration,
@@ -211,7 +208,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
-        string memory newDNA = mixDNA(parent1.id, parent2.id);
+        // string memory newDNA = 
+        mixDNA(parent1.id, parent2.id, newItemId);
 
         bool mix = block.number % 2 == 0;
 
@@ -224,7 +222,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendsDNA, ILegendMetadata {
             newItemId,
             mix ? parent1.prefix : parent2.prefix,
             mix ? parent2.postfix : parent1.postfix,
-            newDNA,
             parents,
             block.timestamp
         );

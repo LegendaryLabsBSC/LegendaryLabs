@@ -6,7 +6,7 @@ import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0xb2ECaa062701bd9a88BB598725090651f1905453'
+const legendAddress = '0x91161C525A9dCA65FcC04ad8fDF09CADD29733eA'
 
 // TODO: generate map = false temp fix
 
@@ -35,39 +35,6 @@ function App() {
   const [value, setValue] = useState(0)
   const [season, setSeasonValue] = useState('')
   const [newURI, setURI] = useState('')
-
-  async function fetchIPFS() {
-    if (typeof window.ethereum !== 'undefined') {
-      const ipfsURL = await contract.read.tokenURI(id)
-      console.log('IPFS: ', ipfsURL)
-    }
-  }
-  async function fetchDNA() {
-    if (typeof window.ethereum !== 'undefined') {
-      const ipfsDNA = await contract.read.tokenDATA(id)
-      console.log('DNA: ', ipfsDNA.toString())
-    }
-  }
-  async function fetchMeta() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
-      const legendMeta = await contract.read.tokenMeta(id)
-      console.log(`Meta: ${legendMeta}`)
-      console.log(`id: ${legendMeta.id}`)
-      console.log(`prefix: ${legendMeta.prefix}`)
-      console.log(`postfix: ${legendMeta.postfix}`)
-      console.log(`dna: ${legendMeta.dna}`)
-      console.log(`parents: ${legendMeta.parents}`)
-      console.log(`birthday: ${legendMeta.birthDay}`)
-      console.log(`incubation duration: ${legendMeta.incubationDuration}`)
-      console.log(`breeding cooldown: ${legendMeta.breedingCooldown}`)
-      console.log(`breeding cost: ${legendMeta.breedingCost}`)
-      console.log(`offspring limit: ${legendMeta.offspringLimit}`)
-      console.log(`season: ${legendMeta.season}`)
-      console.log(`is legendary: ${legendMeta.isLegendary}`)
-      console.log(`is destroyed: ${legendMeta.isDestroyed}`)
-    }
-  }
 
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
@@ -100,6 +67,40 @@ function App() {
     }
   }
 
+  async function fetchIPFS() {
+    if (typeof window.ethereum !== 'undefined') {
+      const ipfsURL = await contract.read.tokenURI(id)
+      console.log('IPFS: ', ipfsURL)
+    }
+  }
+  async function fetchDNA() {
+    if (typeof window.ethereum !== 'undefined') {
+      const ipfsDNA = await contract.read.legendDNA(id)
+      console.log(`DNA: ${ipfsDNA}`)
+    }
+  }
+  async function fetchMeta() {
+    if (typeof window.ethereum !== 'undefined') {
+      // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
+      const legendMeta = await contract.read.tokenMeta(id)
+      const legendDNA = await contract.read.legendDNA(id)
+      console.log(`Meta: ${legendMeta}`)
+      console.log(`id: ${legendMeta.id}`)
+      console.log(`prefix: ${legendMeta.prefix}`)
+      console.log(`postfix: ${legendMeta.postfix}`)
+      console.log(`dna: ${legendDNA}`)
+      console.log(`parents: ${legendMeta.parents}`)
+      console.log(`birthday: ${legendMeta.birthDay}`)
+      console.log(`incubation duration: ${legendMeta.incubationDuration}`)
+      console.log(`breeding cooldown: ${legendMeta.breedingCooldown}`)
+      console.log(`breeding cost: ${legendMeta.breedingCost}`)
+      console.log(`offspring limit: ${legendMeta.offspringLimit}`)
+      console.log(`season: ${legendMeta.season}`)
+      console.log(`is legendary: ${legendMeta.isLegendary}`)
+      console.log(`is destroyed: ${legendMeta.isDestroyed}`)
+    }
+  }
+
   async function getAllLegends() {
     if (typeof window.ethereum !== 'undefined') {
       const totalLegends = await contract.read.totalLegends()
@@ -120,10 +121,6 @@ function App() {
         if (balance > 0) {
           const legendsData = []
           for (let i = 0; i < balance; i++) {
-            // Testing wallets
-            // contract.read.tokenOfOwnerByIndex("0x55f76D8a3AE95944dA55Ea5dBAAa78Da4D29A52", i)
-            // contract.read.tokenOfOwnerByIndex("0xDfcada61FD3698F0421d7a3E129de522D8450B38", i)
-            // Keep this uncommented if you are using Option 2 to test
             contract.read.tokenOfOwnerByIndex(account, i).then((token) => {
               const ownedToken = token.toString()
               loadLegends(ownedToken).then((res) => {
@@ -152,12 +149,14 @@ function App() {
   async function generateImage(newItemId) {
     if (typeof window.ethereum !== 'undefined') {
       const legend = await contract.read.tokenMeta(newItemId)
+      const legendDNA = await contract.read.legendDNA(newItemId)
+      console.log(`ffsfsfsf ${legendDNA}`)
       // TODO: Make into interface(convert js -> ts)
       const legendInterface = {
         id: `${legend.id}`,
         prefix: legend.prefix,
         postfix: legend.postfix,
-        dna: legend.dna,
+        dna: `${legendDNA}`,
         parents: `${legend.parents}`,
         birthDay: `${legend.birthDay}`,
         incubationDuration: `${legend.incubationDuration}`,
@@ -170,7 +169,7 @@ function App() {
       }
 
       // ! recieveing multiple responses in the console
-      console.log('test', legendInterface)
+      // console.log('test', legendInterface)
       // console.log('test1', legend)
 
       await axios
