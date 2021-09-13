@@ -24,7 +24,7 @@ const contractWrite = new ethers.Contract(legendAddress, LegendsNFT.abi, signer)
 //   length: 1,
 // };
 
-function App() {
+function FarmsApp() {
   const [id, setID] = useState(0)
   const [parent1, setParent1] = useState('')
   const [parent2, setParent2] = useState('')
@@ -196,6 +196,7 @@ function App() {
   return (
     <div>
       <header>
+        <h1>Hello from spencer and gavin</h1>
         <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
         <button type="submit" onClick={fetchIPFS}>
           Fetch IPFS URL
@@ -247,4 +248,4 @@ function App() {
   )
 }
 
-export default App
+export default FarmsApp
