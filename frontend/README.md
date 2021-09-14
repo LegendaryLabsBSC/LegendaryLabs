@@ -2,7 +2,7 @@
 
 ## Local Frontend Dev
 
--auild your react feature and bind id to a dom element using React.RenderDOM() somewhere in ./src
+-build your react feature and bind id to a dom element using React.RenderDOM() somewhere in ./src
   -a good way to target one specific element is with getElementById(). examples in index.tsx
   -add that element to a source file within ./godlike/dist
 -from the frontend directory, run ```yarn build:nosplit```
