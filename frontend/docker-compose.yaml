@@ -7,7 +7,6 @@ services:
             - "8080:80"
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
-            - ./godlike:/app
             - ./godlike/dist:/usr/share/nginx/html
     php:
         image: php:fpm
