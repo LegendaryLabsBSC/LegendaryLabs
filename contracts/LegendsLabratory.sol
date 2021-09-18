@@ -30,17 +30,21 @@ contract LegendsLabratory is Ownable {
         legendsNFT.setBreedingCooldown(newBreedingCooldown);
     }
 
-    function setOffspringLimit(uint256 newOffspringLimit) public onlyOwner {
-        legendsNFT.setOffspringLimit(newOffspringLimit);
-    }
+    // function setOffspringLimit(uint256 newOffspringLimit) public onlyOwner {
+    //     legendsNFT.setOffspringLimit(newOffspringLimit);
+    // }
 
-    function setBreedingCost(uint256 BreedingCost) public onlyOwner {
-        legendsNFT.setBreedingCost(BreedingCost);
-    }
+    // function setBreedingCost(uint256 breedingCost) public onlyOwner {
+    //     legendsNFT.setBreedingCost(breedingCost);
+    // }
 
-    function setSeason(string memory newSeason) public onlyOwner {
-        legendsNFT.setSeason(newSeason);
-    }
+    // function setSeason(string memory newSeason) public onlyOwner {
+    //     legendsNFT.setSeason(newSeason);
+    // }
+
+    // function setBaseHealth(uint256 baseHealth) public onlyOwner {
+    //     legendsNFT.setBaseHealth(baseHealth);
+    // }
 
     // function mintPromotion(address receiver, string memory prefix, string memory postfix, uint dna) public onlyOwner {
     //     strainzNFT.mintPromotion(receiver, prefix, postfix, dna);

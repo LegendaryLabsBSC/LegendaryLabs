@@ -25,7 +25,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     uint256 public baseBreedingCost;
     string public season;
 
-    uint256 baseHealth;
+    uint256 public baseHealth;
 
     event NewLegend(uint256 newItemId);
     event Minted(uint256 tokenId);
@@ -39,6 +39,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         _;
     }
 
+    // modifier isHatchable
+
     constructor() ERC721("Legend", "LEGEND") {
         lab = LegendsLabratory(msg.sender);
     }
@@ -48,13 +50,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         virtual
     {
         _tokenURIs[tokenId] = _tokenURI;
-    }
-
-    // Leaving in for testing ; "Hatch" function will replace and call internally(safer)
-    function assignIPFS(uint256 tokenId, string memory _tokenURI) public {
-        require(ownerOf(tokenId) == msg.sender);
-        // Needs another layer of security to prevent owner calling without reason ?
-        _setTokenURI(tokenId, _tokenURI);
     }
 
     function tokenURI(uint256 tokenId)
@@ -72,15 +67,15 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         return _tokenURI;
     }
 
-    function tokenDATA(
-        uint256 tokenId // TODO: Clean this up, possibly not needed at all
-    ) public view virtual returns (LegendGenetics memory) {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        return legendGenetics[tokenId];
-    }
+    // function tokenDATA(
+    //     uint256 tokenId // TODO: Clean this up, possibly not needed at all
+    // ) public view virtual returns (LegendGenetics memory) {
+    //     require(
+    //         _exists(tokenId),
+    //         "ERC721Metadata: URI query for nonexistent token"
+    //     );
+    //     return legendGenetics[tokenId];
+    // }
 
     function tokenMeta(uint256 tokenId)
         public
@@ -95,11 +90,6 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         return legendData[tokenId];
     }
 
-    function totalLegends() public view virtual returns (uint256) {
-        require(_tokenIds.current() > 0, "No Legends have been minted");
-        return _tokenIds.current();
-    }
-
     function immolate(uint256 tokenId) public {
         require(ownerOf(tokenId) == msg.sender);
 
@@ -110,6 +100,37 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         emit Burned(tokenId);
     }
 
+    function isHatchable(uint256 tokenId, bool testToggle)
+        public
+        view
+        returns (
+            bool,
+            uint256,
+            uint256
+        )
+    {
+        bool hatchable;
+        uint256 hatchableWhen;
+        LegendMetadata memory l = legendData[tokenId];
+        if (!testToggle) {
+            hatchableWhen = l.incubationDuration + l.birthDay;
+        } else {
+            hatchableWhen = block.timestamp;
+        }
+        if (hatchableWhen <= block.timestamp) {
+            hatchable = true;
+        }
+
+        return (hatchable, hatchableWhen, block.timestamp);
+    }
+
+    function hatch(uint256 tokenId, string memory _tokenURI) public {
+        // require(isHatchable(tokenId, false) === true);
+        _setTokenURI(tokenId, _tokenURI);
+        LegendMetadata memory legend = legendData[tokenId];
+        legend.isHatched = true;
+    }
+
     function mintTo(
         address receiver,
         uint256 newItemId,
@@ -118,15 +139,18 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         uint256[2] memory parents,
         bool isLegendary,
         bool skipIncubation
-    ) private returns (uint256) {
+    ) private {
         uint256 _incubationDuration;
+        bool isHatched;
 
         _mint(receiver, newItemId);
 
         if (skipIncubation == true) {
             _incubationDuration = 0;
+            isHatched = true;
         } else {
             _incubationDuration = incubationDuration;
+            isHatched = false;
         }
 
         LegendMetadata memory m;
@@ -141,6 +165,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         m.offspringLimit = offspringLimit;
         m.season = season;
         m.isLegendary = isLegendary;
+        m.isHatched = isHatched;
         m.isDestroyed = false;
 
         legendData[newItemId] = m;
@@ -189,13 +214,14 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         emit Breed(parent1.id, parent2.id, newItemId);
     }
 
+    // TODO: restrict access control to lab
     function mintPromo(
         address recipient,
         string memory prefix,
         string memory postfix,
         bool isLegendary,
         bool skipIncubation
-    ) public returns (uint256) {
+    ) public {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
@@ -217,26 +243,26 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     }
 
     function setIncubationDuration(uint256 _incubationDuration) public onlyLab {
-        incubationDuration = _incubationDuration;
+        incubationDuration = (_incubationDuration);
     }
 
     function setBreedingCooldown(uint256 _breedingCooldown) public onlyLab {
         breedingCooldown = _breedingCooldown;
     }
 
-    function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
-        offspringLimit = _offspringLimit;
-    }
+    // function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
+    //     offspringLimit = _offspringLimit;
+    // }
 
-    function setBreedingCost(uint256 _baseBreedingCost) public onlyLab {
-        baseBreedingCost = _baseBreedingCost;
-    }
+    // function setBreedingCost(uint256 _baseBreedingCost) public onlyLab {
+    //     baseBreedingCost = _baseBreedingCost;
+    // }
 
-    function setSeason(string memory _season) public onlyLab {
-        season = _season;
-    }
+    // function setSeason(string memory _season) public onlyLab {
+    //     season = _season;
+    // }
 
-    function setBaseHealth(uint256 _baseHealth) public onlyLab {
-        baseHealth = _baseHealth;
-    }
+    // function setBaseHealth(uint256 _baseHealth) public onlyLab {
+    //     baseHealth = _baseHealth;
+    // }
 }

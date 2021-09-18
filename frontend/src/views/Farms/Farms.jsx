@@ -1,14 +1,17 @@
 import { React, useState } from 'react'
 import { ethers } from 'ethers'
 import axios from 'axios'
+import styled from 'styled-components'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator'
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
+// import LegendsNFT from '../../artifacts/contracts/LegendsLabratory.sol/LegendsLabratory.json'
+import { NftCard } from './components/nftCard'
+import gif from '../../eater.gif'
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0xBe2FC14426E35410E307d0460373c2dD5C1C9B46'
-
-// TODO: generate map = false temp fix
+const legendAddress = '0x447384cF3d54b04A2e3b88669F371E53c681eB46'
+// const legendAddress = '0x595d855Ba16dE4469Fb5DaA006EB5e7Afc89D4AB' // master
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
@@ -35,12 +38,14 @@ function App() {
   const [value, setValue] = useState(0)
   const [season, setSeasonValue] = useState('')
   const [newURI, setURI] = useState('')
-  const [legends, setLegends] = useState('')
+  const [legends, setLegends] = useState([])
+  const [gettingLegends, setGettingLegends] = useState(false)
 
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.write.setIncubationDuration(value)
+      const unixTime = value * 86400
+      await contract.write.setIncubationDuration(unixTime)
     }
   }
   async function setBreedingCooldown() {
@@ -98,6 +103,7 @@ function App() {
       console.log(`offspring limit: ${legendMeta.offspringLimit}`)
       console.log(`season: ${legendMeta.season}`)
       console.log(`is legendary: ${legendMeta.isLegendary}`)
+      console.log(`is hatched: ${legendMeta.isHatched}`)
       console.log(`is destroyed: ${legendMeta.isDestroyed}`)
       console.log('GENES:')
       console.log(`CdR1: ${legendGenetics.CdR1}`)
@@ -139,12 +145,38 @@ function App() {
       console.log(`Stats: ${legendStats}`)
     }
   }
-  async function getAllLegends() {
+
+  async function isHatchable() {
     if (typeof window.ethereum !== 'undefined') {
-      const totalLegends = await contract.read.totalLegends()
+      legends.forEach((legend) => {
+        contract.read.legendData(legend.tokenID).then((legendMeta) => {
+          if (!legendMeta.isHatched) {
+            const testToggle = true // hatching test toggle
+            contract.read.isHatchable(legendMeta.id, testToggle).then((res) => {
+              console.log(res.toString())
+            })
+            console.log(`Legend ${legendMeta.id} is hatched: ${legendMeta.isHatched}`)
+          }
+        })
+      })
+    }
+  }
+
+  async function hatch() {
+    await axios.post('http://localhost:3001/api/retrieve', { id }).then((res) => {
+      console.log(res.data)
+      const hatchedURI = res.data
+      contract.write.hatch(id, hatchedURI)
+    })
+  }
+
+  async function getAllLegends() {
+    setGettingLegends(true)
+    if (typeof window.ethereum !== 'undefined') {
+      const totalLegends = await contract.read.totalSupply()
       for (let i = 1; i <= totalLegends; i++) {
         contract.read.legendData(i).then((legendMeta) => {
-          if (!legendMeta.isDestroyed === true) {
+          if (!legendMeta.isDestroyed) {
             loadLegends(legendMeta.id.toString())
           }
         })
@@ -157,6 +189,7 @@ function App() {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.read.balanceOf(account).then((balance) => {
         if (balance > 0) {
+          setGettingLegends(true)
           const legendsData = []
           for (let i = 0; i < balance; i++) {
             contract.read.tokenOfOwnerByIndex(account, i).then((token) => {
@@ -166,10 +199,7 @@ function App() {
               })
             })
           }
-          console.log('test', legendsData)
-          console.log('test1', legendsData[1])
           setLegends(legendsData)
-          console.log(legends)
         } else {
           console.log('Account does not own any Legend Tokens')
         }
@@ -216,17 +246,10 @@ function App() {
         .then((res) => {
           const url = res.data
           console.log('New NFT IPFS URL:', url)
-          assignIPFS(legend.id, url)
         })
       // .finally(() => {
       //   document.location.reload()
       // })
-    }
-  }
-
-  async function assignIPFS(newItemId, hash) {
-    if (typeof window.ethereum !== 'undefined') {
-      await contract.write.assignIPFS(newItemId, hash)
     }
   }
 
@@ -271,6 +294,25 @@ function App() {
     }
   }
 
+  const NftContainer = styled.div`
+    & {
+      padding: 25px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: center;
+      div {
+        margin: 25px;
+      }
+    }
+  `
+
+  const pinataGeteway = 'https://gateway.pinata.cloud/ipfs/'
+
+  const cidToUrl = (cid) => {
+    return pinataGeteway + cid.split('//')[1]
+  }
+
   return (
     <div>
       <header>
@@ -289,6 +331,9 @@ function App() {
         </button>
         <button type="submit" onClick={fetchStats}>
           Fetch Legend Stats
+        </button>
+        <button type="submit" onClick={isHatchable}>
+          is Hatchable ?
         </button>
         <br /> <br /> <br />
         <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
@@ -336,11 +381,26 @@ function App() {
         </button>
         <br />
         <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-        <input type="text" placeholder="IPFS URL" onChange={(e) => setURI(e.target.value)} />
-        <button type="submit" onClick={assignIPFS}>
-          Correct Token URI
+        <button type="submit" onClick={hatch}>
+          Hatch Legend
         </button>
       </header>
+      <NftContainer>
+        {gettingLegends &&
+          (legends.length > 0 ? (
+            legends.map((legend) => {
+              console.log(legends)
+              return (
+                <NftCard>
+                  <h3>Legend ID: {legend.tokenID}</h3>
+                  <img alt="legend" src={cidToUrl(legend.imgURL)} />
+                </NftCard>
+              )
+            })
+          ) : (
+            <img alt="eater" src={gif} />
+          ))}
+      </NftContainer>
     </div>
   )
 }

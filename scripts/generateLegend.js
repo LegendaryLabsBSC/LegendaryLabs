@@ -13,7 +13,7 @@ const express = require('express');
 require('dotenv').config();
 const pinataApiKey = process.env.PINATAAPIKEY;
 const pinataSecretApiKey = process.env.PINATASECRETKEY;
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 // Generator Paths
 const generator_datatable = path.join(__dirname, '../phoenixGenerator_1.1/Engine/Content/Files/dataPhoenix.csv') // put in env
@@ -22,6 +22,7 @@ const tmp_uriLink = path.join(__dirname, '../test/tmp_uri-link.csv')
 
 // Endpoints
 const MINT_ENDPOINT = '/api/mint'
+const RETRIEVE_ENDPOINT = '/api/retrieve'
 
 // App variables
 const app = express()
@@ -42,7 +43,7 @@ app.all('*', function (req, res, next) {
 function appendCSV(legend, dt) {
     return new Promise(resolve => {
         const newLine = '\r\n';
-        const generatorData = (legend.id + ',' + legend.dna + '\n')
+        const generatorData = (legend.id + ',' + legend.genetics + '\n')
         fs.stat(dt, function (err, stat) {
             if (err == null) {
                 fs.appendFile(dt, generatorData, function (err) {
@@ -74,7 +75,6 @@ function generatePNG(id) {
     })
 }
 
-// ? merge with above or below function
 function watchPNG(dir, file) {
     return new Promise(resolve => {
         const output_png = path.join(dir, file);
@@ -98,7 +98,7 @@ function pinPNG(dir, file, legend) {
             const image = path.join(dir, file)
 
             data.append("file", fs.createReadStream(image));
-            
+
             // TODO: look into querying wrapped hashes more
             const pinataOptions = JSON.stringify({
                 cidVersion: 1,
@@ -107,12 +107,12 @@ function pinPNG(dir, file, legend) {
             data.append('pinataOptions', pinataOptions);
 
             const metadata = JSON.stringify({
-                name: `${legend.id + legend.dna + legend.parents + legend.birthDay}`
+                name: `${legend.id + legend.genetics + legend.parents + legend.birthDay}`
                     .replace(/,/g, '')
                 ,
                 keyvalues: {
                     id: `${legend.id}`,
-                    dna: `${legend.dna}`,
+                    genetics: `${legend.genetics}`,
                     parents: `${legend.parents}`,
                     birthDay: `${legend.birthDay}`,
                     season: `${legend.season}`,
@@ -130,8 +130,9 @@ function pinPNG(dir, file, legend) {
                 },
             });
 
+            console.log(res.data)
             const img_hash = JSON.parse(JSON.stringify(res.data.IpfsHash));
-            
+
             const currentPath = image
             const destination_path = path.join(__dirname, '../test/minted', file);
             mv(currentPath, destination_path, function (err) {
@@ -153,7 +154,7 @@ function pinPNG(dir, file, legend) {
 async function getIPFS(legend) {
     // return new Promise(resolve => {
     // const pinFileToIPFS = async () => {
-    const url = `https://api.pinata.cloud/data/pinList?metadata[keyvalues][id]={"value":${legend.id},"op":"eq"}`;
+    const url = `https://api.pinata.cloud/data/pinList?metadata[keyvalues][id]={"value":${legend},"op":"eq"}`;
 
     // return axios
     const res = await axios.get(url, {
@@ -162,12 +163,17 @@ async function getIPFS(legend) {
             pinata_secret_api_key: pinataSecretApiKey
         }
     })
-        .then(function (response) {
-            console.log(response.data.rows[0].metadata)
-        })
-        .catch(function (error) {
-            console.log(error)
-        });
+    const hatchedURI = (res.data.rows[0].ipfs_pin_hash)
+    return hatchedURI
+    // .then(function (response) {
+    //     const hatchedURI = (response.data.rows[0].ipfs_pin_hash)
+    //     console.log(hatchedURI)
+    //     // return hatchedURI
+    // })
+    // .catch(function (error) {
+    //     console.log(error)
+    // });
+
 }
 
 async function generateNewLegend(legend) {
@@ -185,6 +191,13 @@ app.post(MINT_ENDPOINT, async (req, res) => {
     console.log(legend)
     const child_hash = await generateNewLegend(legend)
     return res.status(200).send(`ipfs://${child_hash}`)
+})
+
+app.post(RETRIEVE_ENDPOINT, async (req, res) => {
+    const legend = req.body.id
+    const hatchedURI = await getIPFS(legend)
+    console.log(hatchedURI)
+    return res.status(200).send(`ipfs://${hatchedURI}`)
 })
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`))

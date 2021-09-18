@@ -15,6 +15,11 @@ async function main() {
   const legendsnft = await LegendsNFT.deploy();
   await legendsnft.deployed();
   console.log("LegendsNFT deployed to:", legendsnft.address);
+
+  // const LegendsNFT = await hre.ethers.getContractFactory("LegendsLabratory");
+  // const legendsnft = await LegendsNFT.deploy();
+  // await legendsnft.deployed();
+  // console.log("LegendsNFT deployed to:", legendsnft.address);
 }
 
 main()
