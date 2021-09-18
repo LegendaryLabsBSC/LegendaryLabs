@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./LegendsLabratory.sol";
+import "./LegendsLaboratory.sol";
 import "./LegendBreeding.sol";
 import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -32,7 +32,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
 
-    LegendsLabratory lab;
+    LegendsLaboratory lab;
 
     modifier onlyLab() {
         require(msg.sender == address(lab), "not lab owner");
@@ -42,7 +42,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     // modifier isHatchable
 
     constructor() ERC721("Legend", "LEGEND") {
-        lab = LegendsLabratory(msg.sender);
+        lab = LegendsLaboratory(msg.sender);
     }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
@@ -125,7 +125,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     }
 
     function hatch(uint256 tokenId, string memory _tokenURI) public {
-        // require(isHatchable(tokenId, false) === true);
+        // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
         _setTokenURI(tokenId, _tokenURI);
         LegendMetadata memory legend = legendData[tokenId];
         legend.isHatched = true;

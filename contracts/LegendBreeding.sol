@@ -14,6 +14,8 @@ import "./LegendComposition.sol";
   * ZED == LEGEND : {Token => CFBase} => Breedings == LegendsNFT => LegendsBreeding  
  */
 
+// TODO: ? map siblings & parents
+
 contract LegendBreeding is ILegendComposition {
     mapping(uint256 => LegendGenetics) public legendGenetics;
 

@@ -5,18 +5,18 @@ pragma solidity ^0.8.0;
 import "./LegendsNFT.sol";
 // import "./LegendaryToken.sol";
 // import "./LegendsAccessories.sol";
-// import "./LegendsMarketplace.sol";
+import "./LegendsMarketplace.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 //TODO: look into openZeppelin Access Control docs more ; OZ Governor
 
-contract LegendsLabratory is Ownable {
+contract LegendsLaboratory is Ownable {
     // master deals with anything that can be minted (not dna, stat, etc contracts)
     LegendsNFT public legendsNFT = new LegendsNFT();
 
     // LegendaryToken public legendaryToken = new LegendaryToken();
     // LegendsAccessories public legendsAccessories = new LegendsAccessories(msg.sender);
-    // LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
+    LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     constructor() {}
 
     function setIncubationDuration(uint256 newIncubationDuration)

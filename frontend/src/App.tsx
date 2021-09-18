@@ -49,7 +49,7 @@ const App: React.FC = () => {
         <Suspense fallback={<PageLoader />}>
           <Switch>
             <Route path="/" exact>
-              <Home />u{' '}
+              <Home />{' '}
             </Route>
             <Route path="/farms">
               <Farms />

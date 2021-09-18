@@ -4,21 +4,27 @@ import axios from 'axios'
 import styled from 'styled-components'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator'
 import LegendsNFT from '../../artifacts/contracts/LegendsNFT.sol/LegendsNFT.json'
-// import LegendsNFT from '../../artifacts/contracts/LegendsLabratory.sol/LegendsLabratory.json'
+import LegendsMarketplace from '../../artifacts/contracts/LegendsMarketplace.sol/LegendsMarketplace.json'
 import { NftCard } from './components/nftCard'
 import gif from '../../eater.gif'
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendAddress = '0x447384cF3d54b04A2e3b88669F371E53c681eB46'
+const legendsNFTAddress = '0x17C5bE2fE0f5f8461E79FdCd5d62Ee012208500A'
+const legendsMarketplaceAddress = '0x5CaAdcF0c222053F2e6D35c8C988820fC09508E7'
 // const legendAddress = '0x595d855Ba16dE4469Fb5DaA006EB5e7Afc89D4AB' // master
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 const signer = provider.getSigner()
 
 const contract = {
-  read: new ethers.Contract(legendAddress, LegendsNFT.abi, provider),
-  write: new ethers.Contract(legendAddress, LegendsNFT.abi, signer),
+  read: new ethers.Contract(legendsNFTAddress, LegendsNFT.abi, provider),
+  write: new ethers.Contract(legendsNFTAddress, LegendsNFT.abi, signer),
+}
+
+const marketplace = {
+  read: new ethers.Contract(legendsMarketplaceAddress, LegendsMarketplace.abi, provider),
+  write: new ethers.Contract(legendsMarketplaceAddress, LegendsMarketplace.abi, signer),
 }
 
 const prefixConfig = {
@@ -33,6 +39,7 @@ const postfixConfig = {
 
 function App() {
   const [id, setID] = useState(0)
+  const [price, setPrice] = useState(0)
   const [parent1, setParent1] = useState(0)
   const [parent2, setParent2] = useState(0)
   const [value, setValue] = useState(0)
@@ -294,98 +301,164 @@ function App() {
     }
   }
 
-  const NftContainer = styled.div`
-    & {
-      padding: 25px;
-      display: inline-flex;
-      flex-wrap: wrap;
-      width: 100%;
-      justify-content: center;
-      div {
-        margin: 25px;
-      }
+  async function createMarketListing() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await marketplace.write.createMarketListing(legendsNFTAddress, id, price).then(
+        marketplace.write.once('ListingStatusChanged', (data, event) => {
+          console.log(data.toString())
+          console.log(event.toString())
+        }),
+      )
     }
-  `
-
-  const pinataGeteway = 'https://gateway.pinata.cloud/ipfs/'
-
-  const cidToUrl = (cid) => {
-    return pinataGeteway + cid.split('//')[1]
   }
+  async function buyMarketListing() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await marketplace.write.buyMarketListing(legendsNFTAddress, id).then(
+        marketplace.write.once('ListingStatusChanged', (data, event) => {
+          console.log(data.toString())
+          console.log(event.toString())
+        }),
+      )
+    }
+  }
+  async function cancelMarketListing() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await marketplace.write.cancelMarketListing(id).then(
+        marketplace.write.once('ListingStatusChanged', (data, event) => {
+          console.log(data.toString())
+          console.log(event.toString())
+        }),
+      )
+    }
+  }
+
+  async function fetchMarketListings() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const totalListings = await marketplace.read.fetchMarketListings()
+      console.log(totalListings)
+    }
+  }
+
+  // const NftContainer = styled.div`
+  //   & {
+  //     padding: 25px;
+  //     display: inline-flex;
+  //     flex-wrap: wrap;
+  //     width: 100%;
+  //     justify-content: center;
+  //     div {
+  //       margin: 25px;
+  //     }
+  //   }
+  // `
+
+  // const pinataGeteway = 'https://gateway.pinata.cloud/ipfs/'
+
+  // const cidToUrl = (cid) => {
+  //   return pinataGeteway + cid.split('//')[1]
+  // }
 
   return (
     <div>
       <header>
-        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-        <button type="submit" onClick={fetchURI}>
-          Fetch URI
-        </button>
-        <button type="submit" onClick={fetchLegendComposition}>
-          Fetch Legend Composition
-        </button>
-        <button type="submit" onClick={fetchMeta}>
-          Fetch Legend Metadata
-        </button>
-        <button type="submit" onClick={fetchGenetics}>
-          Fetch IPFS Genetics
-        </button>
-        <button type="submit" onClick={fetchStats}>
-          Fetch Legend Stats
-        </button>
-        <button type="submit" onClick={isHatchable}>
-          is Hatchable ?
-        </button>
-        <br /> <br /> <br />
-        <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
-        <button type="submit" onClick={setIncubationDuration}>
-          Set Base Incubation Duration
-        </button>
-        <button type="submit" onClick={setBreedingCooldown}>
-          Set Base Breeding Cooldown
-        </button>
-        <button type="submit" onClick={setOffspringLimit}>
-          Set Offspring Limit
-        </button>
-        <button type="submit" onClick={setBaseBreedingCost}>
-          Set Base Breeding Cost
-        </button>
-        <button type="submit" onClick={setBaseHealth}>
-          Set Base Health
-        </button>
+        <div>
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={fetchURI}>
+            Fetch URI
+          </button>
+          <button type="submit" onClick={fetchLegendComposition}>
+            Fetch Legend Composition
+          </button>
+          <button type="submit" onClick={fetchMeta}>
+            Fetch Legend Metadata
+          </button>
+          <button type="submit" onClick={fetchGenetics}>
+            Fetch IPFS Genetics
+          </button>
+          <button type="submit" onClick={fetchStats}>
+            Fetch Legend Stats
+          </button>
+          <button type="submit" onClick={isHatchable}>
+            is Hatchable ?
+          </button>
+          <br /> <br /> <br />
+          <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
+          <button type="submit" onClick={setIncubationDuration}>
+            Set Base Incubation Duration
+          </button>
+          <button type="submit" onClick={setBreedingCooldown}>
+            Set Base Breeding Cooldown
+          </button>
+          <button type="submit" onClick={setOffspringLimit}>
+            Set Offspring Limit
+          </button>
+          <button type="submit" onClick={setBaseBreedingCost}>
+            Set Base Breeding Cost
+          </button>
+          <button type="submit" onClick={setBaseHealth}>
+            Set Base Health
+          </button>
+          <br />
+          <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
+          <button type="submit" onClick={setSeason}>
+            Set Season
+          </button>
+          <br /> <br /> <br />
+          <button type="submit" onClick={getTokensByOwner}>
+            Print Owned Legend IDs
+          </button>
+          <button type="submit" onClick={getAllLegends}>
+            Print All Legend Ids
+          </button>
+          <br /> <br />
+          <button type="submit" onClick={mintPromo}>
+            Mint Promotional NFT
+          </button>
+          <br /> <br />
+          <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setParent1(e.target.value)} />
+          <input type="number" placeholder="Parent 2 Token ID" onChange={(e) => setParent2(e.target.value)} />
+          <button type="submit" onClick={breed}>
+            Breed
+          </button>
+          <br /> <br />
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={destroy}>
+            Destroy Legend
+          </button>
+          <br />
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={hatch}>
+            Hatch Legend
+          </button>
+        </div>
         <br />
-        <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
-        <button type="submit" onClick={setSeason}>
-          Set Season
-        </button>
-        <br /> <br /> <br />
-        <button type="submit" onClick={getTokensByOwner}>
-          Print Owned Legend IDs
-        </button>
-        <button type="submit" onClick={getAllLegends}>
-          Print All Legend Ids
-        </button>
-        <br /> <br />
-        <button type="submit" onClick={mintPromo}>
-          Mint Promotional NFT
-        </button>
-        <br /> <br />
-        <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setParent1(e.target.value)} />
-        <input type="number" placeholder="Parent 2 Token ID" onChange={(e) => setParent2(e.target.value)} />
-        <button type="submit" onClick={breed}>
-          Breed
-        </button>
-        <br /> <br />
-        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-        <button type="submit" onClick={destroy}>
-          Destroy Legend
-        </button>
         <br />
-        <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-        <button type="submit" onClick={hatch}>
-          Hatch Legend
-        </button>
+        <br />
+        <div>
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <input type="number" placeholder="Sell Price(BSC)" onChange={(e) => setPrice(e.target.value)} />
+          <button type="submit" onClick={createMarketListing}>
+            Sell Legend
+          </button>
+          <br />
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={buyMarketListing}>
+            Buy Legend
+          </button>
+          <button type="submit" onClick={cancelMarketListing}>
+            Cancel Listing
+          </button>
+          <br />
+          <button type="submit" onClick={fetchMarketListings}>
+            Fetch Market Listings
+          </button>
+        </div>
       </header>
-      <NftContainer>
+      {/* <NftContainer>
         {gettingLegends &&
           (legends.length > 0 ? (
             legends.map((legend) => {
@@ -400,7 +473,7 @@ function App() {
           ) : (
             <img alt="eater" src={gif} />
           ))}
-      </NftContainer>
+      </NftContainer> */}
     </div>
   )
 }
