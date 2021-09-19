@@ -10,8 +10,8 @@ import gif from '../../eater.gif'
 
 // 0x18d551e95f318955F149A73aEc91B68940312E4a ; 0x0F1aaA64D4A29d6e9165E18e9c7C9852fc92Ff53
 // During testing this address will change frequently
-const legendsNFTAddress = '0x17C5bE2fE0f5f8461E79FdCd5d62Ee012208500A'
-const legendsMarketplaceAddress = '0x5CaAdcF0c222053F2e6D35c8C988820fC09508E7'
+const legendsNFTAddress = '0x29e8925639DE2cBb42F19A2f38cdD8F4BdB16ef4'
+const legendsMarketplaceAddress = '0x712F292e01b495FBee725130897fe1Bd6145777f'
 // const legendAddress = '0x595d855Ba16dE4469Fb5DaA006EB5e7Afc89D4AB' // master
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -39,7 +39,7 @@ const postfixConfig = {
 
 function App() {
   const [id, setID] = useState(0)
-  const [price, setPrice] = useState(0)
+  const [sellPrice, setPrice] = useState(0)
   const [parent1, setParent1] = useState(0)
   const [parent2, setParent2] = useState(0)
   const [value, setValue] = useState(0)
@@ -50,38 +50,38 @@ function App() {
 
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       const unixTime = value * 86400
       await contract.write.setIncubationDuration(unixTime)
     }
   }
   async function setBreedingCooldown() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.write.setBreedingCooldown(value)
     }
   }
   async function setOffspringLimit() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.write.setOffspringLimit(value)
     }
   }
   async function setBaseBreedingCost() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.write.setBaseBreedingCost(value)
     }
   }
   async function setBaseHealth() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.write.setBaseHealth(value)
     }
   }
   async function setSeason() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.write.setSeason(season)
     }
   }
@@ -301,32 +301,61 @@ function App() {
     }
   }
 
+  async function approveTransaction() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.write.approve(legendsMarketplaceAddress, id)
+    }
+  }
+
   async function createMarketListing() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.write.approve(legendsMarketplaceAddress, id)
-      await marketplace.write.createMarketListing(legendsNFTAddress, id, price).then(
-        marketplace.write.once('ListingStatusChanged', (data, event) => {
-          console.log('d1', data.toString())
-          console.log('e1', event.toString())
-        }),
-      )
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const price = ethers.utils.parseUnits(sellPrice, 'ether')
+      const transaction = await marketplace.write.createMarketListing(legendsNFTAddress, id, price)
+      await transaction.wait
+      // await marketplace.write.createMarketListing(legendsNFTAddress, id, price).then(
+      //   marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //     console.log('d1', data.toString())
+      //     console.log('e1', event.toString())
+      //   }),
+      // )
     }
   }
   async function buyMarketListing() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await marketplace.write.buyMarketListing(legendsNFTAddress, id).then(
-        marketplace.write.once('ListingStatusChanged', (data, event) => {
-          console.log(data.toString())
-          console.log(event.toString())
-        }),
-      )
+      const t = await marketplace.read.legendListing(id)
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const price = ethers.utils.parseUnits(t.price.toString(), 'ether')
+      // const price = t.price.toString()
+      // console.log(price)
+      const transaction = await marketplace.write.buyMarketListing(legendsNFTAddress, id, {
+        value: t.price,
+      })
+      await transaction.wait()
+      // .then(
+      //   marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //     console.log(data.toString())
+      //     console.log(event.toString())
+      //   }),
+      // )
+    }
+  }
+  async function fetchListingData() {
+    if (typeof window.ethereum !== 'undefined') {
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const t = await marketplace.read.legendListing(id)
+      console.log(`Listing ID: ${t.listingId}`)
+      console.log(`Contract: ${t.nftContract}`)
+      console.log(`Token ID: ${t.tokenId}`)
+      console.log(`Seller: ${t.seller}`)
+      console.log(`Buyer: ${t.buyer}`)
+      console.log(`Price: ${t.price}`)
+      console.log(`Status: ${t.status}`)
     }
   }
   async function cancelMarketListing() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await marketplace.write.cancelMarketListing(id).then(
         marketplace.write.once('ListingStatusChanged', (data, event) => {
           console.log(data.toString())
@@ -335,10 +364,9 @@ function App() {
       )
     }
   }
-
   async function fetchMarketListings() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       const totalListings = await marketplace.read.fetchMarketListings()
       console.log(totalListings.toString())
     }
@@ -440,6 +468,10 @@ function App() {
         <br />
         <br />
         <div>
+          <button type="submit" onClick={approveTransaction}>
+            Approve Transaction
+          </button>
+          <br />
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
           <input type="number" placeholder="Sell Price(BSC)" onChange={(e) => setPrice(e.target.value)} />
           <button type="submit" onClick={createMarketListing}>
@@ -452,6 +484,9 @@ function App() {
           </button>
           <button type="submit" onClick={cancelMarketListing}>
             Cancel Listing
+          </button>
+          <button type="submit" onClick={fetchListingData}>
+            Fetch Listing Data
           </button>
           <br />
           <button type="submit" onClick={fetchMarketListings}>

@@ -9,8 +9,6 @@ import "./LegendBreeding.sol";
 import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-// ? Consider merging stats with NFT contract ?
-
 contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -170,7 +168,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
 
         legendData[newItemId] = m;
 
-        // TODO: Generate "enumEgg" function
+        // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
 
         string
             memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";

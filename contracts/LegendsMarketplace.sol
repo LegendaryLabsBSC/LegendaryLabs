@@ -53,7 +53,7 @@ contract LegendsMarketplace is ReentrancyGuard {
         TradeStatus status; // ? change to bool for simplicity
     }
 
-    mapping(uint256 => LegendListing) private legendListing;
+    mapping(uint256 => LegendListing) public legendListing;
 
     event ListingStatusChanged(uint256 listingId, TradeStatus status);
 
@@ -82,7 +82,7 @@ contract LegendsMarketplace is ReentrancyGuard {
 
         legendsNFT.transferFrom(msg.sender, address(this), tokenId);
 
-        emit ListingStatusChanged(listingId, l.status);
+        emit ListingStatusChanged(listingId, TradeStatus.Open);
     }
 
     function buyMarketListing(address nftContract, uint256 listingId)
@@ -91,8 +91,9 @@ contract LegendsMarketplace is ReentrancyGuard {
         nonReentrant
     {
         LegendListing memory l = legendListing[listingId];
+        uint price = l.price;
         require(l.status == TradeStatus.Open);
-        require(msg.value == l.price, "Incorrect price submitted for item");
+        require(msg.value == price, "Incorrect price submitted for item"); // replace with check owner has enough 
 
         uint256 laboratoryFee = (l.price * marketplaceFee) / 100;
 
