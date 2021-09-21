@@ -125,8 +125,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     function hatch(uint256 tokenId, string memory _tokenURI) public {
         // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
         _setTokenURI(tokenId, _tokenURI);
-        LegendMetadata memory legend = legendData[tokenId];
-        legend.isHatched = true;
+        // LegendMetadata memory legend = legendData[tokenId];
+        legendData[tokenId].isHatched = true;
     }
 
     function mintTo(
