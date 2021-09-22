@@ -1,6 +1,7 @@
 import React, { lazy } from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
+import MainNav from './main-nav'
 import Providers from './Providers'
 // import App from './views/Farms'
 
@@ -15,4 +16,11 @@ ReactDOM.render(
     </Providers>
   </React.StrictMode>,
   document.getElementById('root-react-app'),
+)
+
+ReactDOM.render(
+  <React.StrictMode>
+    <MainNav />
+  </React.StrictMode>,
+  document.getElementById('root-react-nav'),
 )
