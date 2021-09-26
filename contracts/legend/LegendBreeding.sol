@@ -16,6 +16,7 @@ import "./LegendComposition.sol";
 
 // TODO: ? map siblings & parents
 // TODO: breeding token burn
+//TODO: do not allow breeding or matching with same token
 
 contract LegendBreeding is ILegendComposition {
     mapping(uint256 => LegendGenetics) public legendGenetics;
