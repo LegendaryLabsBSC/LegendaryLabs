@@ -33,5 +33,4 @@ oldcontracts
 #
 *-rc*.*
 Notes
-axie.sol
-contracts/LegendsAccessControl.sol
+axie.solcontracts/LegendaryTests.sol
