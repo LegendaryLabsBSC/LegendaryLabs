@@ -1,30 +1,20 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
-
-import "@openzeppelin/contracts/utils/Counters.sol"; // could be inherited from listing
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; // could be inherited from listing
-import "../legend/LegendsNFT.sol";
+import "./LegendSales.sol";
 
 //TODO: make function without implementation
 //TODO: add in a closing fee that is either burned or added to liquidity
 // ? make LegendListing the most derived
 
-abstract contract LegendMatchings {
-    using Counters for Counters.Counter; // could be inherited from listing
-    Counters.Counter private _matchIds;
-    Counters.Counter private _matchesClosed;
-    Counters.Counter private _matchesCancelled;
+abstract contract LegendMatchings is LegendSales {
+    using Counters for Counters.Counter;
+    Counters.Counter internal _matchIds;
+    Counters.Counter internal _matchesClosed;
+    Counters.Counter internal _matchesCancelled;
 
-    // uint256 public matchingPlatformFee; //TODO: make setter function
-    uint256 public matchingPlatformFee = 10;
+    uint256 public matchingPlatformFee = 10; //TODO: make setter function
 
-    enum MatchingStatus {
-        // could be inherited from listing
-        Open,
-        Closed,
-        Cancelled
-    }
     struct LegendMatching {
         uint256 matchId;
         address nftContract;
@@ -34,7 +24,7 @@ abstract contract LegendMatchings {
         uint256 breederToken;
         uint256 childId;
         uint256 price;
-        MatchingStatus status;
+        ListingStatus status;
     }
 
     mapping(uint256 => LegendMatching) public legendMatching;
@@ -54,7 +44,7 @@ abstract contract LegendMatchings {
         m.surrogate = (msg.sender);
         m.breeder = (address(0));
         m.price = _price;
-        m.status = MatchingStatus.Open;
+        m.status = ListingStatus.Open;
 
         // emit ListingStatusChanged(listingId, ListingStatus.Open);
     }
@@ -68,44 +58,18 @@ abstract contract LegendMatchings {
     ) internal {
         legendMatching[matchId].breeder = _breeder;
         legendMatching[matchId].breederToken = _tokenId;
-        legendMatching[matchId].childId = _childId; 
-        legendMatching[matchId].status = MatchingStatus.Closed;
+        legendMatching[matchId].childId = _childId;
+        legendMatching[matchId].status = ListingStatus.Closed;
 
         _matchesClosed.increment();
     }
 
     function _cancelLegendMatching(uint256 matchId) internal {
-        legendMatching[matchId].status = MatchingStatus.Cancelled;
+        legendMatching[matchId].status = ListingStatus.Cancelled;
 
         _matchesCancelled.increment();
 
         // emit ListingStatusChanged(listingId, ListingStatus.Cancelled);
     }
 
-    function fetchLegendMatchings()
-        public
-        view
-        virtual
-        returns (LegendMatching[] memory)
-    {
-        uint256 matchingCount = _matchIds.current();
-        uint256 unclaimedMatchesCount = _matchIds.current() -
-            (_matchesClosed.current() + _matchesCancelled.current());
-        uint256 currentIndex = 0;
-
-        LegendMatching[] memory matchings = new LegendMatching[](
-            unclaimedMatchesCount
-        );
-        for (uint256 i = 0; i < matchingCount; i++) {
-            if (legendMatching[i + 1].breeder == address(0)) {
-                uint256 currentId = legendMatching[i + 1].matchId;
-                LegendMatching storage currentListing = legendMatching[
-                    currentId
-                ];
-                matchings[currentIndex] = currentListing;
-                currentIndex++;
-            }
-        }
-        return matchings;
-    }
 }

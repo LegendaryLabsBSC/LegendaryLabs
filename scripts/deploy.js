@@ -2,16 +2,6 @@ const fs = require('fs')
 const path = require('path')
 
 
-async function loadNewAddresses(res) {
-  const contract_config = path.join(__dirname, '../frontend/src/artifacts/config/contract-config.js')
-
-  console.log(`res: ${res}`)
-
-  fs.readFile(contract_config, 'utf-8', (data, err) => {
-    console.log('data', data)
-  })
-}
-
 // TODO: have settable values set on deploy
 async function main() {
   const LegendsLaboratory = await hre.ethers.getContractFactory("LegendsLaboratory");
@@ -37,7 +27,7 @@ async function main() {
     fs.writeFile(contract_config, re, 'utf-8', (err) => {
       if (err) console.log(err)
 
-      console.log('New Addresses loaded')
+      console.log('New Addresses Loaded')
     })
 
   })

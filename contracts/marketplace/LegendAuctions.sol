@@ -2,17 +2,20 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./LegendSales.sol";
+
+
+/// Refund Escrow
+
 
 //TODO: make function without implementation
 // TODO: extend auction by 10 min if a bid is made within the last 10 min
-abstract contract LegendAuctions {
+abstract contract LegendAuctions is LegendSales{
     using Counters for Counters.Counter;
     Counters.Counter private _auctionIds;
     Counters.Counter private _auctionsClosed;
     Counters.Counter private _auctionsCancelled;
-
+    
     enum AuctionStatus {
         Open,
         Closed,
@@ -26,7 +29,7 @@ abstract contract LegendAuctions {
         uint256 duration;
         uint256 createdAt;
         uint256 startingPrice;
-        uint256 instantBuy;
+        // uint256 instantBuy;
         address payable seller;
         uint256 maxBid;
         address payable maxBidder;
@@ -44,8 +47,8 @@ abstract contract LegendAuctions {
         address nftContract,
         uint256 tokenId,
         uint256 duration,
-        uint256 startingPrice,
-        uint256 instantBuy
+        uint256 startingPrice
+        // uint256 instantBuy
     ) internal {
         _auctionIds.increment();
         uint256 auctionId = _auctionIds.current();

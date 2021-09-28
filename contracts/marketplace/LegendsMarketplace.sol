@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
-
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/PullPayment.sol";
 import "../control/LegendsLaboratory.sol";
-import "./LegendListings.sol";
+import "../legend/LegendsNFT.sol";
 import "./LegendAuctions.sol";
 import "./LegendMatchings.sol";
 
@@ -22,18 +21,19 @@ import "./LegendMatchings.sol";
  */
 
 contract LegendsMarketplace is
-    LegendListings,
     LegendAuctions,
     LegendMatchings,
-    ReentrancyGuard
+    ReentrancyGuard,
+    PullPayment
 {
     using SafeMath for uint256;
-
+    using Counters for Counters.Counter;
     uint256 public marketplaceFee;
 
     address payable owner;
 
     LegendsLaboratory lab;
+    // RefundEscrow escrow;
 
     modifier onlyLab() {
         require(msg.sender == address(lab));
@@ -51,58 +51,89 @@ contract LegendsMarketplace is
 
     // event ListingStatusChanged(uint256 listingId, ListingStatus status);
 
-    function createLegendListing(
+    function claimPayment(uint256 saleId) external payable {
+        LegendSale memory s = legendSale[saleId];
+        require(msg.sender == s.seller);
+        require(s.status == ListingStatus.Closed);
+
+        // subtract fees
+        uint256 amount = credits[saleId][s.seller];
+        require(amount != 0);
+        require(address(this).balance >= amount);
+
+        credits[saleId][s.seller] = 0;
+
+        payable(msg.sender).transfer(amount);
+
+        // _claimPayment();
+    }
+
+    function claimLegends() external payable {}
+
+    function claimTokens() external payable {}
+
+    function createLegendSale(
         address nftContract,
         uint256 tokenId,
         uint256 price
     ) public payable nonReentrant {
-        IERC721 legendsNFT = IERC721(nftContract);
+        LegendsNFT legendsNFT = LegendsNFT(nftContract);
         require(legendsNFT.ownerOf(tokenId) == msg.sender);
         require(price > 0, "Price can not be 0");
 
+        // escrow = new RefundEscrow(payable(msg.sender));
+
         legendsNFT.transferFrom(msg.sender, address(this), tokenId);
-        _createLegendListing(nftContract, tokenId, price);
+        _createLegendSale(nftContract, tokenId, price);
 
         // emit ListingStatusChanged(listingId, ListingStatus.Open);
     }
 
-    function buyLegendListing(address nftContract, uint256 listingId)
+    function buyLegend(address nftContract, uint256 saleId)
         public
         payable
         nonReentrant
     {
-        LegendListing memory l = legendListing[listingId];
-        require(l.status == ListingStatus.Open);
-        require(msg.value == l.price, "Incorrect price submitted for item");
+        LegendSale memory s = legendSale[saleId];
+        require(s.status == ListingStatus.Open);
+        require(msg.value == s.price, "Incorrect price submitted for item");
 
         // uint256 laboratoryFee = (l.price * marketplaceFee) / 100;
 
-        l.seller.transfer(msg.value);
+        _asyncTransfer(s.seller, msg.value);
+
+        // s.seller.transfer(msg.value);
         // TODO:  include royality payment logic
         // TODO: include Lab fee vv
 
-        IERC721(nftContract).safeTransferFrom(
+        LegendsNFT(nftContract).safeTransferFrom(
             address(this),
             msg.sender,
-            l.tokenId
+            s.tokenId
         );
 
-        _buyLegendListing(listingId);
+        // escrow.close();
+
+        _buyLegend(saleId);
 
         // emit ListingStatusChanged(listingId, TradeStatus.Closed);
     }
 
-    function cancelLegendListing(address nftContract, uint256 listingId)
+    function cancelLegendSale(address nftContract, uint256 saleId)
         public
         payable
         nonReentrant
     {
-        LegendListing memory l = legendListing[listingId];
-        require(msg.sender == l.seller);
-        require(l.status == ListingStatus.Open);
+        LegendSale memory s = legendSale[saleId];
+        require(msg.sender == s.seller);
+        require(s.status == ListingStatus.Open);
 
-        IERC721(nftContract).transferFrom(address(this), l.seller, l.tokenId);
-        _cancelLegendListing(listingId);
+        LegendsNFT(nftContract).transferFrom(
+            address(this),
+            s.seller,
+            s.tokenId
+        );
+        _cancelLegendSale(saleId);
 
         // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
     }
@@ -129,7 +160,7 @@ contract LegendsMarketplace is
         uint256 tokenId
     ) public nonReentrant {
         LegendMatching memory m = legendMatching[matchId];
-        require(m.status == MatchingStatus.Open);
+        require(m.status == ListingStatus.Open);
 
         uint256 laboratoryFee = (m.price * matchingPlatformFee) / 100;
         lab.legendToken().matchingBurn(msg.sender, laboratoryFee); // may because liqlock
@@ -171,7 +202,7 @@ contract LegendsMarketplace is
     {
         LegendMatching memory m = legendMatching[matchId];
         require(msg.sender == m.surrogate);
-        require(m.status == MatchingStatus.Open);
+        require(m.status == ListingStatus.Open);
 
         LegendsNFT(nftContract).transferFrom(
             address(this),
@@ -183,14 +214,74 @@ contract LegendsMarketplace is
         // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
     }
 
+    // Debug function, not for production
+    function fetchData() public view returns (Counters.Counter[6] memory) {
+        Counters.Counter[6] memory counts = [
+            _saleIds,
+            _salesClosed,
+            _salesCancelled,
+            _matchIds,
+            _matchesClosed,
+            _matchesCancelled
+        ];
+        return (counts);
+    }
+
+    function fetchLegendListings(uint256 listingType)
+        public
+        view
+        virtual
+        returns (uint256[] memory)
+    {
+        uint256 listingCount;
+        uint256 unsoldListingCount;
+        uint256 currentId;
+
+        if (listingType == 0) {
+            listingCount = _saleIds.current();
+            unsoldListingCount =
+                _saleIds.current() -
+                (_salesClosed.current() + _salesCancelled.current());
+        } else if (listingType == 1) {
+            listingCount = _matchIds.current();
+            unsoldListingCount =
+                _matchIds.current() -
+                (_matchesClosed.current() + _matchesCancelled.current());
+        } // add auction compatibility
+
+        uint256 currentIndex = 0;
+        uint256[] memory listings = new uint256[](unsoldListingCount);
+
+        for (uint256 i = 0; i < listingCount; i++) {
+            if (listingType == 0) {
+                if (legendSale[i + 1].buyer == address(0)) {
+                    currentId = legendSale[i + 1].saleId;
+                    listings[currentIndex] = currentId;
+                    currentIndex++;
+                }
+            } else if (listingType == 1) {
+                if (legendMatching[i + 1].breeder == address(0)) {
+                    currentId = legendMatching[i + 1].matchId;
+                    listings[currentIndex] = currentId;
+                    currentIndex++;
+                }
+            } //TODO: add auction compatibility
+        }
+        return listings;
+    }
+
     function createLegendAuction(
         address nftContract,
         uint256 tokenId,
         uint256 duration,
-        uint256 startingPrice,
-        uint256 instantBuy
-    ) public payable nonReentrant {
-        IERC721 legendsNFT = IERC721(nftContract);
+        uint256 startingPrice
+    )
+        public
+        payable
+        // uint256 instantBuy
+        nonReentrant
+    {
+        LegendsNFT legendsNFT = LegendsNFT(nftContract);
         require(legendsNFT.ownerOf(tokenId) == msg.sender);
         require(startingPrice > 0, "Price can not be 0");
 
@@ -199,8 +290,8 @@ contract LegendsMarketplace is
             nftContract,
             tokenId,
             duration,
-            startingPrice,
-            instantBuy
+            startingPrice
+            // instantBuy
         );
 
         // emit ListingStatusChanged(listingId, ListingStatus.Open);
@@ -213,7 +304,7 @@ contract LegendsMarketplace is
     //     if (a.bidders.length == 0) {
     //         require(msg.value >= a.startingPrice, "Minimum price not met");
     //     }
-    //     uint256 newBid = a.bids[msg.sender].add(msg.value);
+    // uint256 newBid = a.bids[msg.sender].add(msg.value);
     //     require(newBid > a.maxBid, "Bid must be higher than current bid");
 
     //     _bid(auctionId, newBid);
