@@ -10,10 +10,13 @@ import "./LegendSales.sol";
 abstract contract LegendMatchings is LegendSales {
     using Counters for Counters.Counter;
     Counters.Counter internal _matchIds;
-    Counters.Counter internal _matchesClosed;
-    Counters.Counter internal _matchesCancelled;
+    Counters.Counter internal _matchingsClosed;
+    Counters.Counter internal _matchingsCancelled;
 
     uint256 public matchingPlatformFee = 10; //TODO: make setter function
+
+    mapping(uint256 => mapping(address => uint256)) internal _tokensOwed; 
+    mapping(uint256 => mapping(address => uint256)) internal _eggOwed;
 
     struct LegendMatching {
         uint256 matchId;
@@ -26,7 +29,6 @@ abstract contract LegendMatchings is LegendSales {
         uint256 price;
         ListingStatus status;
     }
-
     mapping(uint256 => LegendMatching) public legendMatching;
 
     function _createLegendMatching(
@@ -41,8 +43,8 @@ abstract contract LegendMatchings is LegendSales {
         m.matchId = matchId;
         m.nftContract = _nftContract;
         m.surrogateToken = _tokenId;
-        m.surrogate = (msg.sender);
-        m.breeder = (address(0));
+        m.surrogate = msg.sender;
+        m.breeder = address(0);
         m.price = _price;
         m.status = ListingStatus.Open;
 
@@ -54,22 +56,29 @@ abstract contract LegendMatchings is LegendSales {
         uint256 matchId,
         address _breeder,
         uint256 _childId,
-        uint256 _tokenId
+        uint256 _tokenId,
+        uint256 tokensOwed
     ) internal {
         legendMatching[matchId].breeder = _breeder;
         legendMatching[matchId].breederToken = _tokenId;
         legendMatching[matchId].childId = _childId;
         legendMatching[matchId].status = ListingStatus.Closed;
 
-        _matchesClosed.increment();
+        _legendOwed[matchId][legendMatching[matchId].surrogate] = legendMatching[
+            matchId
+        ].surrogateToken;
+        _tokensOwed[matchId][legendMatching[matchId].surrogate] += tokensOwed;
+
+        _eggOwed[matchId][_breeder] = _childId;
+
+        _matchingsClosed.increment();
     }
 
     function _cancelLegendMatching(uint256 matchId) internal {
         legendMatching[matchId].status = ListingStatus.Cancelled;
 
-        _matchesCancelled.increment();
+        _matchingsCancelled.increment();
 
         // emit ListingStatusChanged(listingId, ListingStatus.Cancelled);
     }
-
 }

@@ -319,9 +319,11 @@ function App() {
   async function approveTransaction() {
     if (typeof window.ethereum !== 'undefined') {
       await contract.write.approve(legendsMarketplaceAddress, id)
+      // await contract.write.approve('0x94726120565094F1a443eE8abd0fd8c3bd76c555', id)
     }
   }
 
+  // TODO: change to payment owed
   async function checkPaymentAmount() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -330,10 +332,50 @@ function App() {
     }
   }
 
+  async function checkLegendsOwed() {
+    if (typeof window.ethereum !== 'undefined') {
+      const payment = await marketplace.read.checkLegendsOwed(0)
+      console.log(payment.toString())
+    }
+  }
+
   async function claimPayment() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await marketplace.write.claimPayment(id)
+    }
+  }
+
+  async function claimLegend() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimLegend(id)
+    }
+  }
+  async function checkOwedTokens() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const tokensOwed = await marketplace.read.checkTokensOwed(id)
+      console.log(tokensOwed.toString())
+    }
+  }
+  async function claimTokens() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimTokens(id)
+    }
+  }
+  async function claimEgg() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimEgg(id)
+    }
+  }
+
+  async function withdrawFromMatching() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.withdrawFromMatching(id)
+    }
+  }
+  async function relistInMatching() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.relistInMatching(id)
     }
   }
 
@@ -353,7 +395,7 @@ function App() {
   async function buyLegend() {
     if (typeof window.ethereum !== 'undefined') {
       const listing = await marketplace.read.legendSale(id)
-      const transaction = await marketplace.write.buyLegend(legendsNFTAddress, id, {
+      const transaction = await marketplace.write.buyLegend(id, {
         value: listing.price,
       })
       await transaction.wait()
@@ -747,10 +789,46 @@ function App() {
         <br />
         <div>
           <button type="submit" onClick={checkPaymentAmount}>
-            Check Payment Amount
+            Check Owed Eggs
           </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={claimEgg}>
+            Claim Egg
+          </button>
+          <br />
+          <button type="submit" onClick={checkOwedTokens}>
+            Check Owed Tokens
+          </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={claimTokens}>
+            Claim Tokens
+          </button>
+          <br />
+          <button type="submit" onClick={checkLegendsOwed}>
+            Check Owed Legends
+          </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={claimLegend}>
+            Claim Legend
+          </button>
+          <br />
+          <button type="submit" onClick={checkPaymentAmount}>
+            Check Owed Payment
+          </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={claimPayment}>
             Claim Payment
+          </button>
+          <br />
+          <button type="submit" onClick={checkPaymentAmount}>
+            Check Reclaimable Legends
+          </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={withdrawFromMatching}>
+            Withdraw From Matching
+          </button>
+          <button type="submit" onClick={relistInMatching}>
+            Relist In Matching
           </button>
         </div>
       </header>
