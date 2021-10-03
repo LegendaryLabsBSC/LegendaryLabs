@@ -11,6 +11,9 @@ import "@openzeppelin/contracts/utils/escrow/Escrow.sol";
  */
 abstract contract LegendsConditionalEscrow is Escrow {
 
+    //TODO: if not used to hold more functions can just use escrow probably
+
+
     // withdraw highest bidder
     function withdraw(address payable payee) public virtual override {
         super.withdraw(payee);

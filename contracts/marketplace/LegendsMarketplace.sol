@@ -3,12 +3,13 @@
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./LegendsAuctioneer.sol";
+import "./workers/LegendsAuctioneer.sol";
+// import "./workers/LegendsMarketAttendant.sol";
 import "../control/LegendsLaboratory.sol";
 import "../token/LegendToken.sol";
 import "../legend/LegendsNFT.sol";
-import "./LegendAuctions.sol";
-import "./LegendMatchings.sol";
+import "./listings/LegendAuctions.sol";
+import "./listings/LegendMatchings.sol";
 
 /** TODO:
  * incorporate royalties
@@ -28,6 +29,7 @@ contract LegendsMarketplace is
     LegendAuctions,
     LegendMatchings,
     LegendsAuctioneer,
+    // LegendsMarketAttendant,
     ReentrancyGuard
 {
     using SafeMath for uint256;
@@ -259,57 +261,57 @@ contract LegendsMarketplace is
         return (counts);
     }
 
-    function fetchLegendListings(uint256 listingType)
-        public
-        view
-        returns (uint256[] memory)
-    {
-        uint256 listingCount;
-        uint256 unsoldListingCount;
-        uint256 currentId;
+    // function fetchLegendListings(uint256 listingType)
+    //     public
+    //     view
+    //     returns (uint256[] memory)
+    // {
+    //     uint256 listingCount;
+    //     uint256 unsoldListingCount;
+    //     uint256 currentId;
 
-        if (listingType == 0) {
-            listingCount = _saleIds.current();
-            unsoldListingCount =
-                _saleIds.current() -
-                (_salesClosed.current() + _salesCancelled.current());
-        } else if (listingType == 1) {
-            listingCount = _matchIds.current();
-            unsoldListingCount =
-                _matchIds.current() -
-                (_matchingsClosed.current() + _matchingsCancelled.current());
-        } else if (listingType == 2) {
-            listingCount = _auctionIds.current();
-            unsoldListingCount =
-                _auctionIds.current() -
-                (_auctionsClosed.current() + _auctionsCancelled.current());
-        }
-        uint256 currentIndex = 0;
-        uint256[] memory listings = new uint256[](unsoldListingCount);
+    //     if (listingType == 0) {
+    //         listingCount = _saleIds.current();
+    //         unsoldListingCount =
+    //             _saleIds.current() -
+    //             (_salesClosed.current() + _salesCancelled.current());
+    //     } else if (listingType == 1) {
+    //         listingCount = _matchIds.current();
+    //         unsoldListingCount =
+    //             _matchIds.current() -
+    //             (_matchingsClosed.current() + _matchingsCancelled.current());
+    //     } else if (listingType == 2) {
+    //         listingCount = _auctionIds.current();
+    //         unsoldListingCount =
+    //             _auctionIds.current() -
+    //             (_auctionsClosed.current() + _auctionsCancelled.current());
+    //     }
+    //     uint256 currentIndex = 0;
+    //     uint256[] memory listings = new uint256[](unsoldListingCount);
 
-        for (uint256 i = 0; i < listingCount; i++) {
-            if (listingType == 0) {
-                if (legendSale[i + 1].buyer == address(0)) {
-                    currentId = legendSale[i + 1].saleId;
-                    listings[currentIndex] = currentId;
-                    currentIndex++;
-                }
-            } else if (listingType == 1) {
-                if (legendMatching[i + 1].breeder == address(0)) {
-                    currentId = legendMatching[i + 1].matchId;
-                    listings[currentIndex] = currentId;
-                    currentIndex++;
-                }
-            } else if (listingType == 2) {
-                if (legendAuction[i + 1].status == ListingStatus.Open) {
-                    currentId = legendAuction[i + 1].auctionId;
-                    listings[currentIndex] = currentId;
-                    currentIndex++;
-                }
-            }
-        }
-        return listings;
-    }
+    //     for (uint256 i = 0; i < listingCount; i++) {
+    //         if (listingType == 0) {
+    //             if (legendSale[i + 1].buyer == address(0)) {
+    //                 currentId = legendSale[i + 1].saleId;
+    //                 listings[currentIndex] = currentId;
+    //                 currentIndex++;
+    //             }
+    //         } else if (listingType == 1) {
+    //             if (legendMatching[i + 1].breeder == address(0)) {
+    //                 currentId = legendMatching[i + 1].matchId;
+    //                 listings[currentIndex] = currentId;
+    //                 currentIndex++;
+    //             }
+    //         } else if (listingType == 2) {
+    //             if (legendAuction[i + 1].status == ListingStatus.Open) {
+    //                 currentId = legendAuction[i + 1].auctionId;
+    //                 listings[currentIndex] = currentId;
+    //                 currentIndex++;
+    //             }
+    //         }
+    //     }
+    //     return listings;
+    // }
 
     //
     //
@@ -320,13 +322,9 @@ contract LegendsMarketplace is
         address nftContract,
         uint256 tokenId,
         uint256 duration,
-        uint256 startingPrice
-    )
-        public
-        payable
-        // uint256 instantBuy
-        nonReentrant
-    {
+        uint256 startingPrice,
+        uint256 instantPrice
+    ) public payable nonReentrant {
         LegendsNFT legendsNFT = LegendsNFT(nftContract);
         require(legendsNFT.ownerOf(tokenId) == msg.sender);
         require(startingPrice > 0, "Price can not be 0");
@@ -336,8 +334,8 @@ contract LegendsMarketplace is
             nftContract,
             tokenId,
             duration,
-            startingPrice
-            // instantBuy
+            startingPrice,
+            instantPrice
         );
 
         // emit ListingStatusChanged(listingId, ListingStatus.Open);
@@ -346,15 +344,16 @@ contract LegendsMarketplace is
     function bid(uint256 auctionId) public payable {
         LegendAuction storage a = legendAuction[auctionId];
         require(a.status == ListingStatus.Open);
-        // require(msg.sender != a.seller, "Seller can not bid"); disabled for testing
+        require(!queryExpiration(auctionId), 'Auction has expired'); // test if  ..= is needed
+        // require(msg.sender != a.seller, "Seller can not bid"); // disabled for testing
         if (a.bidders.length == 0) {
             require(msg.value >= a.startingPrice, "Minimum price not met");
         }
 
-        // if bid is instant buy price ...
-
         uint256 newBid = bids[auctionId][msg.sender].add(msg.value); // try without SM
         require(newBid > a.highestBid, "Bid must be higher than current bid"); // ! allowing same price bid
+
+        // if bid is instant buy price ...
 
         // // We're going to do this 'require' only if the auction has no
         // // bids yet.(zed)

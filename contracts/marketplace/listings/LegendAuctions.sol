@@ -22,7 +22,7 @@ abstract contract LegendAuctions is LegendSales {
         uint256 duration;
         uint256 createdAt;
         uint256 startingPrice;
-        // uint256 instantBuy;
+        bool instantBuy;
         address payable seller;
         uint256 highestBid;
         address payable highestBidder;
@@ -31,6 +31,7 @@ abstract contract LegendAuctions is LegendSales {
     }
     mapping(uint256 => LegendAuction) public legendAuction;
 
+    mapping(uint256 => uint256) public instantBuyPrice;
     mapping(uint256 => mapping(address => uint256)) internal bids; // assign visability
     mapping(uint256 => mapping(address => bool)) exists;
 
@@ -42,10 +43,18 @@ abstract contract LegendAuctions is LegendSales {
         address nftContract,
         uint256 tokenId,
         uint256 duration,
-        uint256 startingPrice // uint256 instantBuy
+        uint256 startingPrice,
+        uint256 instantPrice
     ) internal {
         _auctionIds.increment();
         uint256 auctionId = _auctionIds.current();
+
+        bool _instantBuy;
+
+        if (instantPrice != 0) {
+            _instantBuy = true;
+            instantBuyPrice[auctionId] = instantPrice;
+        }
 
         LegendAuction storage a = legendAuction[auctionId];
         a.auctionId = auctionId;
@@ -54,11 +63,28 @@ abstract contract LegendAuctions is LegendSales {
         a.duration = duration;
         a.createdAt = block.timestamp;
         a.startingPrice = startingPrice;
+        a.instantBuy = _instantBuy;
         a.seller = payable(msg.sender);
-        // a.buyer = payable(address(0));
         a.status = ListingStatus.Open;
 
         // emit ListingStatusChanged(auctionId, ListingStatus.Open);
+    }
+
+    function queryExpiration(uint256 auctionId) public view returns (bool) {
+        LegendAuction memory a = legendAuction[auctionId];
+        bool isExpired;
+
+        uint256 expirationTime = a.createdAt + a.duration;
+        if (block.timestamp >= expirationTime) {
+            isExpired = true;
+        }
+
+        return isExpired;
+    }
+
+    function closeAuction(uint256 auctionId) public {
+        require(queryExpiration(auctionId), "Auction has not expired");
+        
     }
 
     function _bid(uint256 auctionId, uint256 newBid) internal {
@@ -86,24 +112,30 @@ abstract contract LegendAuctions is LegendSales {
         // _withdrawAllowed[auctionId][msg.sender] = false;
         // Allow previous highest bidder to reclaim or increase their bid  !! did we test this??
         // _withdrawAllowed[auctionId][a.highestBidder] = true;
+
+        if (a.instantBuy) {
+            if (newBid >= instantBuyPrice[auctionId]) {
+                a.status = ListingStatus.Closed;
+            }
+        }
     }
 
-    // // Auctions can only be canceled if a bid has yet to be palced
-    // // function cancelLegendAuction(address nftContract, uint256 auctionId)
-    // //     internal
-    // // {
-    // //     LegendListing memory l = legendListing[auctionId];
-    // //     require(msg.sender == l.seller);
-    // //     require(l.status == ListingStatus.Open);
+    // // // Auctions can only be canceled if a bid has yet to be palced
+    // function cancelLegendAuction(address nftContract, uint256 auctionId)
+    //     internal
+    // {
+    //     LegendAuction memory l = legendAuction[auctionId];
+    //     require(msg.sender == l.seller);
+    //     require(l.status == ListingStatus.Open);
 
-    // //     IERC721(nftContract).transferFrom(address(this), l.seller, l.tokenId);
-    // //     legendListing[auctionId].buyer = payable(msg.sender);
-    // //     legendListing[auctionId].status = ListingStatus.Cancelled;
+    //     IERC721(nftContract).transferFrom(address(this), l.seller, l.tokenId);
+    //     legendListing[auctionId].buyer = payable(msg.sender);
+    //     legendListing[auctionId].status = ListingStatus.Cancelled;
 
-    // //     _listingsCancelled.increment();
+    //     _listingsCancelled.increment();
 
-    // //     emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
-    // // }
+    //     emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
+    // }
 
     // function _fetchLegendAuctions(uint256 auctionId)
     //     internal
