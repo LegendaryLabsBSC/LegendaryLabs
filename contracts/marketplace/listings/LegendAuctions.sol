@@ -84,7 +84,13 @@ abstract contract LegendAuctions is LegendSales {
 
     function closeAuction(uint256 auctionId) public {
         require(queryExpiration(auctionId), "Auction has not expired");
-        
+        LegendAuction storage a = legendAuction[auctionId];
+
+        a.status = ListingStatus.Closed;
+
+        _legendOwed[auctionId][a.highestBidder] = a.tokenId;
+
+        _auctionsClosed.increment();
     }
 
     function _bid(uint256 auctionId, uint256 newBid) internal {
@@ -121,21 +127,23 @@ abstract contract LegendAuctions is LegendSales {
     }
 
     // // // Auctions can only be canceled if a bid has yet to be palced
-    // function cancelLegendAuction(address nftContract, uint256 auctionId)
-    //     internal
-    // {
-    //     LegendAuction memory l = legendAuction[auctionId];
-    //     require(msg.sender == l.seller);
-    //     require(l.status == ListingStatus.Open);
+    function cancelLegendAuction(uint256 auctionId) internal {
+        legendAuction[auctionId].seller = payable(msg.sender);
+        legendAuction[auctionId].status = ListingStatus.Cancelled;
 
-    //     IERC721(nftContract).transferFrom(address(this), l.seller, l.tokenId);
-    //     legendListing[auctionId].buyer = payable(msg.sender);
-    //     legendListing[auctionId].status = ListingStatus.Cancelled;
+        _auctionsCancelled.increment();
+        // LegendAuction memory l = legendAuction[auctionId];
+        // require(msg.sender == l.seller);
+        // require(l.status == ListingStatus.Open);
 
-    //     _listingsCancelled.increment();
+        // IERC721(nftContract).transferFrom(address(this), l.seller, l.tokenId);
+        // legendListing[auctionId].buyer = payable(msg.sender);
+        // legendListing[auctionId].status = ListingStatus.Cancelled;
 
-    //     emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
-    // }
+        // _listingsCancelled.increment();
+
+        // emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
+    }
 
     // function _fetchLegendAuctions(uint256 auctionId)
     //     internal

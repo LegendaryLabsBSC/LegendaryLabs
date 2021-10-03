@@ -9,7 +9,8 @@ import "../control/LegendsLaboratory.sol";
 import "../token/LegendToken.sol";
 import "../legend/LegendsNFT.sol";
 import "./listings/LegendAuctions.sol";
-import "./listings/LegendMatchings.sol";
+
+// import "./listings/LegendMatchings.sol";
 
 /** TODO:
  * incorporate royalties
@@ -27,7 +28,7 @@ import "./listings/LegendMatchings.sol";
 
 contract LegendsMarketplace is
     LegendAuctions,
-    LegendMatchings,
+    // LegendMatchings,
     LegendsAuctioneer,
     // LegendsMarketAttendant,
     ReentrancyGuard
@@ -129,131 +130,131 @@ contract LegendsMarketplace is
         // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
     }
 
-    function createLegendMatching(
-        address nftContract,
-        uint256 tokenId,
-        uint256 price
-    ) public nonReentrant {
-        LegendsNFT legendsNFT = LegendsNFT(nftContract);
-        require(legendsNFT.ownerOf(tokenId) == msg.sender);
-        require(price > 0, "Price can not be 0");
-        //TODO: require legend is breedable - wait on NFT rework
+    // function createLegendMatching(
+    //     address nftContract,
+    //     uint256 tokenId,
+    //     uint256 price
+    // ) public nonReentrant {
+    //     LegendsNFT legendsNFT = LegendsNFT(nftContract);
+    //     require(legendsNFT.ownerOf(tokenId) == msg.sender);
+    //     require(price > 0, "Price can not be 0");
+    //     //TODO: require legend is breedable - wait on NFT rework
 
-        legendsNFT.transferFrom(msg.sender, address(this), tokenId); // ? should use lab
-        _createLegendMatching(nftContract, tokenId, price);
+    //     legendsNFT.transferFrom(msg.sender, address(this), tokenId); // ? should use lab
+    //     _createLegendMatching(nftContract, tokenId, price);
 
-        // emit ListingStatusChanged(listingId, ListingStatus.Open);
-    }
+    //     // emit ListingStatusChanged(listingId, ListingStatus.Open);
+    // }
 
-    function matchWithLegend(
-        address nftContract,
-        uint256 matchId,
-        uint256 tokenId
-    ) public nonReentrant {
-        LegendMatching memory m = legendMatching[matchId];
-        require(m.status == ListingStatus.Open);
+    // function matchWithLegend(
+    //     address nftContract,
+    //     uint256 matchId,
+    //     uint256 tokenId
+    // ) public nonReentrant {
+    //     LegendMatching memory m = legendMatching[matchId];
+    //     require(m.status == ListingStatus.Open);
 
-        uint256 laboratoryFee = (m.price * matchingPlatformFee) / 100;
-        lab.legendToken().matchingBurn(msg.sender, laboratoryFee); // may become liqlock
+    //     uint256 laboratoryFee = (m.price * matchingPlatformFee) / 100;
+    //     lab.legendToken().matchingBurn(msg.sender, laboratoryFee); // may become liqlock
 
-        uint256 tokensOwed = m.price - laboratoryFee;
-        // transfer LGND token payment to escrow
-        lab.legendToken().transferFrom(msg.sender, address(this), tokensOwed);
+    //     uint256 tokensOwed = m.price - laboratoryFee;
+    //     // transfer LGND token payment to escrow
+    //     lab.legendToken().transferFrom(msg.sender, address(this), tokensOwed);
 
-        // transfer breeder's token to contract
-        LegendsNFT legendsNFT = LegendsNFT(nftContract);
-        legendsNFT.transferFrom(msg.sender, address(this), tokenId);
+    //     // transfer breeder's token to contract
+    //     LegendsNFT legendsNFT = LegendsNFT(nftContract);
+    //     legendsNFT.transferFrom(msg.sender, address(this), tokenId);
 
-        // breed and send offspring to purchaser ;; change for withdraw pattern
-        uint256 newItemId = legendsNFT.breed(
-            // msg.sender,
-            address(this),
-            m.surrogateToken,
-            tokenId,
-            false
-        );
-        _matchWithLegend(matchId, msg.sender, newItemId, tokenId, tokensOwed);
+    //     // breed and send offspring to purchaser ;; change for withdraw pattern
+    //     uint256 newItemId = legendsNFT.breed(
+    //         // msg.sender,
+    //         address(this),
+    //         m.surrogateToken,
+    //         tokenId,
+    //         false
+    //     );
+    //     _matchWithLegend(matchId, msg.sender, newItemId, tokenId, tokensOwed);
 
-        // return the surrogate & breeder tokens to the owners
-        // legendsNFT.safeTransferFrom(
-        //     address(this),
-        //     m.surrogate,
-        //     m.surrogateToken
-        // );
-        legendsNFT.safeTransferFrom(address(this), msg.sender, tokenId);
+    //     // return the surrogate & breeder tokens to the owners
+    //     // legendsNFT.safeTransferFrom(
+    //     //     address(this),
+    //     //     m.surrogate,
+    //     //     m.surrogateToken
+    //     // );
+    //     legendsNFT.safeTransferFrom(address(this), msg.sender, tokenId);
 
-        // emit ListingStatusChanged(listingId, TradeStatus.Closed);
-    }
+    //     // emit ListingStatusChanged(listingId, TradeStatus.Closed);
+    // }
 
-    function cancelLegendMatching(address nftContract, uint256 matchId)
-        public
-        nonReentrant
-    {
-        LegendMatching memory m = legendMatching[matchId];
-        require(msg.sender == m.surrogate);
-        require(m.status == ListingStatus.Open);
+    // function cancelLegendMatching(address nftContract, uint256 matchId)
+    //     public
+    //     nonReentrant
+    // {
+    //     LegendMatching memory m = legendMatching[matchId];
+    //     require(msg.sender == m.surrogate);
+    //     require(m.status == ListingStatus.Open);
 
-        LegendsNFT(nftContract).transferFrom(
-            address(this),
-            m.surrogate,
-            m.surrogateToken
-        );
-        _cancelLegendMatching(matchId);
+    //     LegendsNFT(nftContract).transferFrom(
+    //         address(this),
+    //         m.surrogate,
+    //         m.surrogateToken
+    //     );
+    //     _cancelLegendMatching(matchId);
 
-        // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
-    }
+    //     // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
+    // }
 
-    function withdrawFromMatching(uint256 matchingId) external payable {
-        LegendMatching memory m = legendMatching[matchingId];
-        require(msg.sender == m.surrogate);
-        require(m.status == ListingStatus.Closed);
+    // function withdrawFromMatching(uint256 matchingId) external payable {
+    //     LegendMatching memory m = legendMatching[matchingId];
+    //     require(msg.sender == m.surrogate);
+    //     require(m.status == ListingStatus.Closed);
 
-        uint256 canWithdraw = _legendOwed[matchingId][m.surrogate];
-        require(canWithdraw != 0);
+    //     uint256 canWithdraw = _legendOwed[matchingId][m.surrogate];
+    //     require(canWithdraw != 0);
 
-        _legendOwed[matchingId][m.surrogate] = 0;
+    //     _legendOwed[matchingId][m.surrogate] = 0;
 
-        //TODO: add security and/or modifier
-        lab.legendsNFT().safeTransferFrom(
-            address(this),
-            m.surrogate,
-            canWithdraw
-        );
-    }
+    //     //TODO: add security and/or modifier
+    //     lab.legendsNFT().safeTransferFrom(
+    //         address(this),
+    //         m.surrogate,
+    //         canWithdraw
+    //     );
+    // }
 
-    function relistInMatching(uint256 matchingId) external payable {
-        LegendMatching memory m = legendMatching[matchingId];
-        require(msg.sender == m.surrogate, "bad1");
-        require(m.status == ListingStatus.Closed, "bad2");
+    // function relistInMatching(uint256 matchingId) external payable {
+    //     LegendMatching memory m = legendMatching[matchingId];
+    //     require(msg.sender == m.surrogate, "bad1");
+    //     require(m.status == ListingStatus.Closed, "bad2");
 
-        _createLegendMatching(m.nftContract, m.surrogateToken, m.price);
+    //     _createLegendMatching(m.nftContract, m.surrogateToken, m.price);
 
-        // uint256 canWithdraw = _legendOwed[matchingId][m.surrogate];
-        // require(canWithdraw != 0);
+    //     // uint256 canWithdraw = _legendOwed[matchingId][m.surrogate];
+    //     // require(canWithdraw != 0);
 
-        // _legendOwed[matchingId][m.surrogate] = 0;
+    //     // _legendOwed[matchingId][m.surrogate] = 0;
 
-        //TODO: add security and/or modifier
-        // lab.legendsNFT().safeTransferFrom(
-        //     address(this),
-        //     m.surrogate,
-        //     canWithdraw
-        // );
-    }
+    //     //TODO: add security and/or modifier
+    //     // lab.legendsNFT().safeTransferFrom(
+    //     //     address(this),
+    //     //     m.surrogate,
+    //     //     canWithdraw
+    //     // );
+    // }
 
     //TODO: claim royalties -- weekend
 
     // TODO: take into account cancels
 
     // Debug function, not for production
-    function fetchData() public view returns (Counters.Counter[9] memory) {
-        Counters.Counter[9] memory counts = [
+    function fetchData() public view returns (Counters.Counter[6] memory) {
+        Counters.Counter[6] memory counts = [
             _saleIds,
             _salesClosed,
             _salesCancelled,
-            _matchIds,
-            _matchingsClosed,
-            _matchingsCancelled,
+            // _matchIds,
+            // _matchingsClosed,
+            // _matchingsCancelled,
             _auctionIds,
             _auctionsClosed,
             _auctionsCancelled
@@ -344,7 +345,7 @@ contract LegendsMarketplace is
     function bid(uint256 auctionId) public payable {
         LegendAuction storage a = legendAuction[auctionId];
         require(a.status == ListingStatus.Open);
-        require(!queryExpiration(auctionId), 'Auction has expired'); // test if  ..= is needed
+        require(!queryExpiration(auctionId), "Auction has expired"); // test if  ..= is needed
         // require(msg.sender != a.seller, "Seller can not bid"); // disabled for testing
         if (a.bidders.length == 0) {
             require(msg.value >= a.startingPrice, "Minimum price not met");
@@ -466,37 +467,37 @@ contract LegendsMarketplace is
         lab.legendsNFT().safeTransferFrom(address(this), l.buyer, legendOwed);
     }
 
-    function checkTokensOwed(uint256 matchId) public view returns (uint256) {
-        uint256 tokensOwed = _tokensOwed[matchId][msg.sender];
-        return tokensOwed;
-    }
+    // function checkTokensOwed(uint256 matchId) public view returns (uint256) {
+    //     uint256 tokensOwed = _tokensOwed[matchId][msg.sender];
+    //     return tokensOwed;
+    // }
 
-    function claimTokens(uint256 matchingId) external payable {
-        LegendMatching memory m = legendMatching[matchingId];
-        require(msg.sender == m.surrogate);
-        require(m.status == ListingStatus.Closed);
+    // function claimTokens(uint256 matchingId) external payable {
+    //     LegendMatching memory m = legendMatching[matchingId];
+    //     require(msg.sender == m.surrogate);
+    //     require(m.status == ListingStatus.Closed);
 
-        uint256 tokensOwed = _tokensOwed[matchingId][m.surrogate];
-        require(tokensOwed != 0);
+    //     uint256 tokensOwed = _tokensOwed[matchingId][m.surrogate];
+    //     require(tokensOwed != 0);
 
-        _tokensOwed[matchingId][m.surrogate] = 0;
+    //     _tokensOwed[matchingId][m.surrogate] = 0;
 
-        //TODO: add security and/or modifier
-        // LegendToken(tokenContract).transfer(m.surrogate, tokensOwed);
-        lab.legendToken().transfer(m.surrogate, tokensOwed);
-    }
+    //     //TODO: add security and/or modifier
+    //     // LegendToken(tokenContract).transfer(m.surrogate, tokensOwed);
+    //     lab.legendToken().transfer(m.surrogate, tokensOwed);
+    // }
 
-    function claimEgg(uint256 matchingId) external payable {
-        LegendMatching memory m = legendMatching[matchingId];
-        require(msg.sender == m.breeder);
-        require(m.status == ListingStatus.Closed);
+    // function claimEgg(uint256 matchingId) external payable {
+    //     LegendMatching memory m = legendMatching[matchingId];
+    //     require(msg.sender == m.breeder);
+    //     require(m.status == ListingStatus.Closed);
 
-        uint256 eggOwed = _eggOwed[matchingId][m.breeder];
-        require(eggOwed != 0);
+    //     uint256 eggOwed = _eggOwed[matchingId][m.breeder];
+    //     require(eggOwed != 0);
 
-        _eggOwed[matchingId][m.breeder] = 0;
+    //     _eggOwed[matchingId][m.breeder] = 0;
 
-        //TODO: add security and/or modifier
-        lab.legendsNFT().safeTransferFrom(address(this), m.breeder, eggOwed);
-    }
+    //     //TODO: add security and/or modifier
+    //     lab.legendsNFT().safeTransferFrom(address(this), m.breeder, eggOwed);
+    // }
 }

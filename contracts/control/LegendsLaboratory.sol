@@ -6,17 +6,19 @@ import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 // import "./LegendsAccessories.sol";
 import "../marketplace/LegendsMarketplace.sol";
+import "../mating/LegendsMatingboard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 //TODO: look into openZeppelin Access Control docs more ; OZ Governor
 //TODO: fix lab owner for setter functions
-//TODO: ?? put all state variables in a struct and pull from/ set 
+//TODO: ?? put all state variables in a struct and pull from/ set
 
 contract LegendsLaboratory is Ownable {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
     // LegendsAccessories public legendsAccessories = new LegendsAccessories(msg.sender);
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
+    LegendsMatingboard public legendsMatingboard = new LegendsMatingboard();
 
     constructor() {}
 
@@ -24,7 +26,11 @@ contract LegendsLaboratory is Ownable {
         public
         view
         virtual
-        returns (LegendsNFT, LegendToken, LegendsMarketplace)
+        returns (
+            LegendsNFT,
+            LegendToken,
+            LegendsMarketplace
+        )
     {
         return (legendsNFT, legendToken, legendsMarketplace);
     }

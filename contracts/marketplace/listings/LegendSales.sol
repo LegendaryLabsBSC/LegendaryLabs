@@ -52,6 +52,7 @@ abstract contract LegendSales {
         return saleId;
     }
 
+    // USE this method if it works entirely ; uses less contract size
     function _buyLegend(uint256 saleId) internal {
         LegendSale storage s = legendSale[saleId];
         s.buyer = payable(msg.sender);
@@ -71,8 +72,9 @@ abstract contract LegendSales {
     //     _salesClosed.increment();
     // }
 
+    // Have no reworked cancellations yet to account for withdraw pattern
     function _cancelLegendSale(uint256 saleId) internal {
-        legendSale[saleId].buyer = payable(msg.sender);
+        legendSale[saleId].buyer = payable(msg.sender); // ? does this even make sense? keep 0 address ?
         legendSale[saleId].status = ListingStatus.Cancelled;
 
         _salesCancelled.increment();
