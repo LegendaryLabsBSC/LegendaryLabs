@@ -4,23 +4,16 @@ pragma solidity ^0.8.4;
 
 import "./LegendSales.sol";
 
-
 /// Refund Escrow
-
 
 //TODO: make function without implementation
 // TODO: extend auction by 10 min if a bid is made within the last 10 min
-abstract contract LegendAuctions is LegendSales{
+abstract contract LegendAuctions is LegendSales {
     using Counters for Counters.Counter;
-    Counters.Counter private _auctionIds;
-    Counters.Counter private _auctionsClosed;
-    Counters.Counter private _auctionsCancelled;
-    
-    enum AuctionStatus {
-        Open,
-        Closed,
-        Cancelled
-    }
+    Counters.Counter internal _auctionIds;
+    Counters.Counter internal _auctionsClosed;
+    Counters.Counter internal _auctionsCancelled;
+
     // TODO: bids should stay private
     struct LegendAuction {
         uint256 auctionId;
@@ -31,24 +24,25 @@ abstract contract LegendAuctions is LegendSales{
         uint256 startingPrice;
         // uint256 instantBuy;
         address payable seller;
-        uint256 maxBid;
-        address payable maxBidder;
+        uint256 highestBid;
+        address payable highestBidder;
         address[] bidders;
-        AuctionStatus status;
-        // mapping(address => uint256) bids;
-        // mapping(address => bool) exists;
+        ListingStatus status;
     }
-    mapping(address => mapping(uint256 => LegendAuction)) bids;
     mapping(uint256 => LegendAuction) public legendAuction;
 
-    // event ListingStatusChanged(uint256 auctionId, AuctionStatus status);
+    mapping(uint256 => mapping(address => uint256)) internal bids; // assign visability
+    mapping(uint256 => mapping(address => bool)) exists;
+
+    // mapping(uint256 => mapping(address => bool)) public isReclaimable; // public for testing ; no assignment picked yet
+
+    // event ListingStatusChanged(uint256 auctionId, ListingStatus status);
 
     function _createLegendAuction(
         address nftContract,
         uint256 tokenId,
         uint256 duration,
-        uint256 startingPrice
-        // uint256 instantBuy
+        uint256 startingPrice // uint256 instantBuy
     ) internal {
         _auctionIds.increment();
         uint256 auctionId = _auctionIds.current();
@@ -62,28 +56,37 @@ abstract contract LegendAuctions is LegendSales{
         a.startingPrice = startingPrice;
         a.seller = payable(msg.sender);
         // a.buyer = payable(address(0));
-        a.status = AuctionStatus.Open;
+        a.status = ListingStatus.Open;
 
         // emit ListingStatusChanged(auctionId, ListingStatus.Open);
     }
 
-    // function _bid(uint256 auctionId, uint256 newBid) internal {
-    //     LegendAuction storage a = legendAuction[auctionId];
-    //     a.bids[msg.sender] = newBid;
+    function _bid(uint256 auctionId, uint256 newBid) internal {
+        LegendAuction storage a = legendAuction[auctionId];
 
-    //     if (!a.exists[msg.sender]) {
-    //         a.bidders.push(msg.sender);
-    //         a.exists[msg.sender] = true;
+        bids[auctionId][msg.sender] = newBid;
 
-    //         // // Adds to the auctions where the user is participating
-    //         // auctionsParticipating[msg.sender].push(_auctionId);
-    //     }
+        if (!exists[auctionId][msg.sender]) {
+            a.bidders.push(msg.sender);
+            exists[auctionId][msg.sender] = true;
 
-    //     a.maxBid = newBid;
-    //     a.maxBidder = payable(msg.sender);
+            // // Adds to the auctions where the user is participating
+            // auctionsParticipating[msg.sender].push(_auctionId);
+        }
 
-    //     // emit LogBid(msg.sender, newBid);
-    // }
+        // a.highestBid = newBid;
+        // isReclaimable[auctionId][a.highestBidder] = true;
+
+        // a.highestBidder = payable(msg.sender);
+        // isReclaimable[auctionId][msg.sender] = false;
+
+        a.highestBid = newBid;
+        a.highestBidder = payable(msg.sender);
+
+        // _withdrawAllowed[auctionId][msg.sender] = false;
+        // Allow previous highest bidder to reclaim or increase their bid  !! did we test this??
+        // _withdrawAllowed[auctionId][a.highestBidder] = true;
+    }
 
     // // Auctions can only be canceled if a bid has yet to be palced
     // // function cancelLegendAuction(address nftContract, uint256 auctionId)
@@ -91,15 +94,15 @@ abstract contract LegendAuctions is LegendSales{
     // // {
     // //     LegendListing memory l = legendListing[auctionId];
     // //     require(msg.sender == l.seller);
-    // //     require(l.status == AuctionStatus.Open);
+    // //     require(l.status == ListingStatus.Open);
 
     // //     IERC721(nftContract).transferFrom(address(this), l.seller, l.tokenId);
     // //     legendListing[auctionId].buyer = payable(msg.sender);
-    // //     legendListing[auctionId].status = AuctionStatus.Cancelled;
+    // //     legendListing[auctionId].status = ListingStatus.Cancelled;
 
     // //     _listingsCancelled.increment();
 
-    // //     emit ListingStatusChanged(auctionId, AuctionStatus.Cancelled);
+    // //     emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
     // // }
 
     // function _fetchLegendAuctions(uint256 auctionId)

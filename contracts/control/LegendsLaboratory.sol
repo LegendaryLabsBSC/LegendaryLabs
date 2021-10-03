@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 //TODO: look into openZeppelin Access Control docs more ; OZ Governor
 //TODO: fix lab owner for setter functions
+//TODO: ?? put all state variables in a struct and pull from/ set 
 
 contract LegendsLaboratory is Ownable {
     LegendsNFT public legendsNFT = new LegendsNFT();

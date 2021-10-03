@@ -53,13 +53,23 @@ abstract contract LegendSales {
     }
 
     function _buyLegend(uint256 saleId) internal {
-        legendSale[saleId].buyer = payable(msg.sender);
-        legendSale[saleId].status = ListingStatus.Closed;
+        LegendSale storage s = legendSale[saleId];
+        s.buyer = payable(msg.sender);
+        s.status = ListingStatus.Closed;
 
-        _legendOwed[saleId][payable(msg.sender)] = legendSale[saleId].tokenId;
+        _legendOwed[saleId][payable(msg.sender)] = s.tokenId;
 
         _salesClosed.increment();
     }
+
+    // function _buyLegend(uint256 saleId) internal {
+    //     legendSale[saleId].buyer = payable(msg.sender);
+    //     legendSale[saleId].status = ListingStatus.Closed;
+
+    //     _legendOwed[saleId][payable(msg.sender)] = legendSale[saleId].tokenId;
+
+    //     _salesClosed.increment();
+    // }
 
     function _cancelLegendSale(uint256 saleId) internal {
         legendSale[saleId].buyer = payable(msg.sender);
