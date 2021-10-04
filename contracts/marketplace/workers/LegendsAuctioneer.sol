@@ -32,6 +32,10 @@ import "./LegendsAuctionClerk.sol";
 abstract contract LegendsAuctioneer {
     LegendsAuctionClerk private immutable _escrow; // change to _clerk when done
 
+    // comment well to explain this
+    // mapping(uint256 => mapping(uint256 => mapping(address => bool)))
+    //     public _withdrawAllowed; // public for testing ; no assignment picked yet
+
     mapping(uint256 => mapping(address => bool)) public _withdrawAllowed; // public for testing ; no assignment picked yet
 
     //try to add claim functions here
@@ -65,8 +69,16 @@ abstract contract LegendsAuctioneer {
         _escrow.withdraw(payee);
     }
 
-    function withdrawHighestBid(address payable payee) public virtual {
-        _escrow.withdraw(payee);
+    function withdrawHighestBid(
+        uint256 listingId,
+        address payable buyer,
+        address payable seller
+    ) internal virtual {
+        require(
+            _withdrawAllowed[listingId][seller], // take into account the various listing types
+            "ConditionalEscrow: payee is not allowed to withdraw"
+        );
+        _escrow.auctionWithdraw(buyer, seller);
     }
 
     /**
@@ -76,6 +88,14 @@ abstract contract LegendsAuctioneer {
     function payments(address dest) public view returns (uint256) {
         return _escrow.depositsOf(dest);
     }
+
+    // function highestBid(uint256 listingId, address dest)
+    //     public
+    //     view
+    //     returns (uint256)
+    // {
+    //     return _escrow.bidOwedTo(listingId, dest);
+    // }
 
     /**
      * @dev Called by the payer to store the sent amount as credit to be pulled.
@@ -89,7 +109,12 @@ abstract contract LegendsAuctioneer {
         _escrow.deposit{value: amount}(dest);
     }
 
-    function _asyncBid(address dest, uint256 amount) internal virtual {
-        _escrow.bid{value: amount}(dest);
-    }
+    // function _asyncBid(
+    //     uint256 listingId,
+    //     address seller,
+    //     address bidder,
+    //     uint256 amount
+    // ) internal virtual {
+    //     _escrow.bid{value: amount}(listingId, seller, bidder);
+    // }
 }

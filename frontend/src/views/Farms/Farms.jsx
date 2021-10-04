@@ -333,6 +333,14 @@ function App() {
     }
   }
 
+  async function checkOwedBid() {
+    if (typeof window.ethereum !== 'undefined') {
+      const auction = await marketplace.read.legendListing(id)
+      const payment = await marketplace.read.payments(auction.buyer)
+      console.log(payment.toString())
+    }
+  }
+
   async function checkLegendsOwed() {
     if (typeof window.ethereum !== 'undefined') {
       const payment = await marketplace.read.checkLegendsOwed(0)
@@ -395,7 +403,7 @@ function App() {
   }
   async function buyLegend() {
     if (typeof window.ethereum !== 'undefined') {
-      const listing = await marketplace.read.legendSale(id)
+      const listing = await marketplace.read.legendListing(id)
       const transaction = await marketplace.write.buyLegend(id, {
         value: listing.price,
       })
@@ -418,31 +426,46 @@ function App() {
       // )
     }
   }
-  async function fetchLegendSales() {
+  async function fetchLegendListings() {
     if (typeof window.ethereum !== 'undefined') {
-      const totalSales = await marketplace.read.fetchLegendListings(0)
-      totalSales.forEach((sale) => {
-        marketplace.read.legendSale(sale).then((s) => {
-          console.log(`Listing ID: ${s.saleId}`)
-          console.log(`Contract: ${s.nftContract}`)
-          console.log(`Token ID: ${s.tokenId}`)
-          console.log(`Seller: ${s.seller}`)
-          console.log(`Buyer: ${s.buyer}`)
-          console.log(`Price: ${s.price}`)
-          console.log(`Status: ${s.status}`)
-          console.log('')
-        })
+      const totalListings = await marketplace.read.fetchLegendListings()
+      const auctionDetails = await marketplace.read.fetchAuctionDetails()
+      totalListings.forEach((l) => {
+        // marketplace.read.legendLisi(sale).then((l) => {
+        console.log(`Listing ID: ${l.listingId}`)
+        console.log(`Contract: ${l.nftContract}`)
+        console.log(`Token ID: ${l.tokenId}`)
+        console.log(`Seller: ${l.seller}`)
+        console.log(`Buyer: ${l.buyer}`)
+        console.log(`Price: ${l.price}`)
+        console.log(`is Auction: ${l.isAuction}`)
+        console.log(`Status: ${l.status}`)
+        console.log('')
+        if (l.isAuction) {
+          auctionDetails.forEach((a) => {
+            // const a = await marketplace.read.auctionDetails(id)
+            // const a = marketplace.read.fetchAuctionDetails()
+            console.log(`Created At: ${a.createdAt}`)
+            console.log(`Duration: ${a.duration}`)
+            console.log(`Starting Price: ${a.startingPrice}`)
+            console.log(`Highest Bid: ${a.highestBid}`)
+            console.log(`Highest Bidder: ${a.highestBidder}`)
+            console.log(`Bidders: ${a.bidders}`)
+            console.log(`Instant Buy: ${a.instantBuy}`)
+            console.log('')
+          })
+        }
       })
     }
   }
   // debug function to see status of closed listings
   async function fetchListingData() {
     if (typeof window.ethereum !== 'undefined') {
-      // const itemData = await marketplace.read.fetchItemData()
+      const auctionDetails = await marketplace.read.fetchAuctionDetails()
       // const itemCount = itemData[0]
       // const unsoldItemCount = itemData[0] - itemData[1]
       const currentIndex = 0
-      const l = await marketplace.read.legendSale(id)
+      const l = await marketplace.read.legendListing(id)
       //
       // for (let i = 0; i < itemCount; i++) {
       console.log(`Listing ID: ${l.listingId}`)
@@ -451,8 +474,20 @@ function App() {
       console.log(`Seller: ${l.seller}`)
       console.log(`Buyer: ${l.buyer}`)
       console.log(`Price: ${l.price}`)
+      console.log(`is Auction: ${l.isAuction}`)
       console.log(`Status: ${l.status}`)
       console.log('')
+      if (l.isAuction) {
+        const a = await marketplace.read.auctionDetails(id)
+        console.log(`Created At: ${a.createdAt}`)
+        console.log(`Duration: ${a.duration}`)
+        console.log(`Starting Price: ${a.startingPrice}`)
+        console.log(`Highest Bid: ${a.highestBid}`)
+        console.log(`Highest Bidder: ${a.highestBidder}`)
+        console.log(`Bidders: ${a.bidders}`)
+        console.log(`Instant Buy: ${a.instantBuy}`)
+        console.log('')
+      }
       // console.log(legendListing.buyer)
       // if (legendListing(i+1).buyer == )
       // }
@@ -461,9 +496,19 @@ function App() {
 
   async function createLegendAuction() {
     if (typeof window.ethereum !== 'undefined') {
-      const duration = _duration * 86400
+      // const duration = _duration * 86400
+      const testDuration = 80 // seconds
+      const duration = testDuration
       const startingPrice = ethers.utils.parseUnits(_startingPrice, 'ether')
-      const transaction = await marketplace.write.createLegendAuction(legendsNFTAddress, id, duration, startingPrice)
+      const _instantPrice = ethers.utils.parseUnits(instantPrice, 'ether')
+      // const instantBuyPrice = ethers.utils.parseUnits(0.005, 'ether') // for testing
+      const transaction = await marketplace.write.createLegendAuction(
+        legendsNFTAddress,
+        id,
+        duration,
+        startingPrice,
+        _instantPrice,
+      )
       await transaction.wait()
       // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
       // marketplace.write.once('ListingStatusChanged', (data, event) => {
@@ -475,7 +520,7 @@ function App() {
   async function bidOnLegend() {
     if (typeof window.ethereum !== 'undefined') {
       const auctionBid = ethers.utils.parseUnits(bid, 'ether')
-      await marketplace.write.bid(id, {
+      await marketplace.write.placeBid(id, {
         value: auctionBid,
       })
     }
@@ -498,6 +543,11 @@ function App() {
   async function withdrawFromAuction() {
     if (typeof window.ethereum !== 'undefined') {
       await marketplace.write.withdrawFromAuction(id)
+    }
+  }
+  async function closeAuction() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.closeAuction(id)
     }
   }
   // increase bid ; can use same logic as bid , just change FE logic
@@ -685,7 +735,7 @@ function App() {
           <button type="submit" onClick={isHatchable}>
             is Hatchable ?
           </button>
-          <br /> <br /> <br />
+          <br /> <br />
           <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
           <button type="submit" onClick={setIncubationDuration}>
             Set Base Incubation Duration
@@ -707,7 +757,7 @@ function App() {
           <button type="submit" onClick={setSeason}>
             Set Season
           </button>
-          <br /> <br /> <br />
+          <br /> <br />
           <button type="submit" onClick={getTokensByOwner}>
             Print Owned Legend IDs
           </button>
@@ -737,7 +787,6 @@ function App() {
         </div>
         <br />
         <br />
-        <br />
         <div>
           <button type="submit" onClick={approveTransaction}>
             Approve Transaction
@@ -757,7 +806,7 @@ function App() {
             Cancel Listing
           </button>
           <br />
-          <button type="submit" onClick={fetchLegendSales}>
+          <button type="submit" onClick={fetchLegendListings}>
             Fetch Legend Listings
           </button>
           <button type="submit" onClick={fetchListingData}>
@@ -800,6 +849,9 @@ function App() {
           <button type="submit" onClick={withdrawFromAuction}>
             Withdraw From Auction
           </button>
+          <button type="submit" onClick={closeAuction}>
+            Close Auction
+          </button>
           <button type="submit" onClick={cancelLegendSale}>
             Cancel Auction
           </button>
@@ -813,6 +865,28 @@ function App() {
           <button type="submit" onClick={depositsOf}>
             Deposited Amount
           </button>
+          <br />
+          <br />
+          <button type="submit" onClick={checkPaymentAmount}>
+            Check Owed Payment
+          </button>
+          <button type="submit" onClick={checkOwedBid}>
+            Check Owed Bid
+          </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={claimPayment}>
+            Claim Payment
+          </button>
+          <br />
+          <button type="submit" onClick={checkLegendsOwed}>
+            Check Owed Legends
+          </button>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={claimLegend}>
+            Claim Legend
+          </button>
+          <br />
+          <br />
         </div>
         <br />
         <div>
@@ -850,7 +924,6 @@ function App() {
           </button>
         </div>
         <br />
-        <br />
         <div>
           <button type="submit" onClick={checkPaymentAmount}>
             Check Owed Eggs
@@ -866,22 +939,6 @@ function App() {
           <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={claimTokens}>
             Claim Tokens
-          </button>
-          <br />
-          <button type="submit" onClick={checkLegendsOwed}>
-            Check Owed Legends
-          </button>
-          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={claimLegend}>
-            Claim Legend
-          </button>
-          <br />
-          <button type="submit" onClick={checkPaymentAmount}>
-            Check Owed Payment
-          </button>
-          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={claimPayment}>
-            Claim Payment
           </button>
           <br />
           <button type="submit" onClick={checkPaymentAmount}>

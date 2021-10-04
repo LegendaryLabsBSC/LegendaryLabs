@@ -3,6 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "./LegendsConditionalEscrow.sol";
+
 // import "@openzeppelin/contracts/utils/escrow/Escrow.sol";
 
 /**
@@ -26,6 +27,8 @@ contract LegendsAuctionClerk is LegendsConditionalEscrow {
 
     // event RefundsClosed();
     // event RefundsEnabled();
+
+    // mapping(uint256 => mapping(address => uint256)) private _bidOwed;
 
     State private _state;
 
@@ -58,6 +61,10 @@ contract LegendsAuctionClerk is LegendsConditionalEscrow {
     //     return _beneficiary;
     // }
 
+    // function bidOwedTo(address payee) public view returns(uint256){
+    //     return _deposits[payee];
+    // }
+
     /*
      * @dev Stores funds that may later be refunded.
      * @param refundee The address funds will be sent to if a refund occurs.
@@ -70,26 +77,50 @@ contract LegendsAuctionClerk is LegendsConditionalEscrow {
         super.deposit(payee);
     }
 
-    function bid(address bidder) public payable virtual {
-        require(
-            state() == State.Active,
-            "RefundEscrow: can only deposit while active" // change to check if withdrable
-        );
-        deposit(bidder);
-    }
+    // function bid(
+    //     uint256 listingId,
+    //     address seller,
+    //     address bidder
+    // ) public payable virtual {
+    //     require(
+    //         state() == State.Active,
+    //         "RefundEscrow: can only deposit while active" // change to check if withdrable
+    //     );
+    //     // uint256 amount = msg.value;
+    //     // _deposits[seller] = amount;
+    //     deposit(bidder);
+    // }
 
     /**
      * @dev Allows for the beneficiary to withdraw their funds, rejecting
      * further deposits.
      */
-    function close() public virtual onlyOwner {
-        require(
-            state() == State.Active,
-            "RefundEscrow: can only close while active"
-        );
-        _state = State.Closed;
-        // emit RefundsClosed();
-    }
+    // function close(uint256 _highestBid, address seller, address highestBidder) public payable virtual onlyOwner {
+    //     require(
+    //         state() == State.Active,
+    //         "RefundEscrow: can only close while active"
+    //     );
+    //     uint256 highestBid = _highestBid;
+    //     _deposits[highestBidder] -= highestBid;
+
+    // }
+
+    // function beneficiaryWithdraw(
+    //     uint256 listingId,
+    //     address payable seller
+    // ) public virtual {
+    //     require(
+    //         state() == State.Closed,
+    //         "RefundEscrow: beneficiary can only withdraw while closed"
+    //     );
+    //     uint256 payment = _bidOwed[listingId][seller];
+
+    //     _bidOwed[listingId][seller] = 0;
+
+    //     seller.sendValue(payment);
+
+    //     // emit Withdrawn(payee, payment);
+    // }
 
     /**
      * @dev Allows for refunds to take place, rejecting further deposits.

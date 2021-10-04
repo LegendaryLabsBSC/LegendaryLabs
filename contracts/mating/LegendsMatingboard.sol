@@ -3,7 +3,7 @@
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "../marketplace/listings/LegendMatchings.sol";
+import "./LegendMatchings.sol";
 // import "./workers/LegendsMarketAttendant.sol";
 import "../control/LegendsLaboratory.sol";
 import "../token/LegendToken.sol";

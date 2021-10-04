@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
-import "./LegendSales.sol";
+import "../marketplace/listings/LegendSale.sol";
 
 //TODO: make function without implementation
 //TODO: add in a closing fee that is either burned or added to liquidity
 // ? make LegendListing the most derived
 
-abstract contract LegendMatchings is LegendSales {
+abstract contract LegendMatchings is LegendSale {
     using Counters for Counters.Counter;
     Counters.Counter internal _matchIds;
     Counters.Counter internal _matchingsClosed;

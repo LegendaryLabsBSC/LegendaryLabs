@@ -2,38 +2,30 @@
 
 pragma solidity ^0.8.4;
 
-import "./LegendSales.sol";
+import "./LegendSale.sol";
 
 /// Refund Escrow
 
 //TODO: make function without implementation
 // TODO: extend auction by 10 min if a bid is made within the last 10 min
-abstract contract LegendAuctions is LegendSales {
+abstract contract LegendAuction is LegendSale {
     using Counters for Counters.Counter;
-    Counters.Counter internal _auctionIds;
-    Counters.Counter internal _auctionsClosed;
-    Counters.Counter internal _auctionsCancelled;
 
-    // TODO: bids should stay private
-    struct LegendAuction {
-        uint256 auctionId;
-        address nftContract;
-        uint256 tokenId;
-        uint256 duration;
+    // TODO: ? bids addresses should stay private
+    struct AuctionDetails {
         uint256 createdAt;
+        uint256 duration;
         uint256 startingPrice;
-        bool instantBuy;
-        address payable seller;
         uint256 highestBid;
-        address payable highestBidder;
+        address payable highestBidder; // assign to buyer when they claim
         address[] bidders;
-        ListingStatus status;
+        bool instantBuy;
     }
-    mapping(uint256 => LegendAuction) public legendAuction;
-
     mapping(uint256 => uint256) public instantBuyPrice;
     mapping(uint256 => mapping(address => uint256)) internal bids; // assign visability
     mapping(uint256 => mapping(address => bool)) exists;
+
+    mapping(uint256 => AuctionDetails) public auctionDetails;
 
     // mapping(uint256 => mapping(address => bool)) public isReclaimable; // public for testing ; no assignment picked yet
 
@@ -45,33 +37,39 @@ abstract contract LegendAuctions is LegendSales {
         uint256 duration,
         uint256 startingPrice,
         uint256 instantPrice
-    ) internal {
-        _auctionIds.increment();
-        uint256 auctionId = _auctionIds.current();
+    ) internal returns (uint256) {
+        _listingIds.increment();
+        uint256 _listingId = _listingIds.current();
 
         bool _instantBuy;
-
         if (instantPrice != 0) {
             _instantBuy = true;
-            instantBuyPrice[auctionId] = instantPrice;
+            instantBuyPrice[_listingId] = instantPrice;
         }
 
-        LegendAuction storage a = legendAuction[auctionId];
-        a.auctionId = auctionId;
-        a.nftContract = nftContract;
-        a.tokenId = tokenId;
-        a.duration = duration;
+        LegendListing storage l = legendListing[_listingId];
+        l.listingId = _listingId;
+        l.nftContract = nftContract;
+        l.tokenId = tokenId;
+        l.seller = payable(msg.sender);
+        // l.buyer = payable(address(0)); // assign once auction has ended
+        // l.price = price; // assign once auction has ended
+        l.isAuction = true;
+        l.status = ListingStatus.Open;
+
+        AuctionDetails storage a = auctionDetails[_listingId];
         a.createdAt = block.timestamp;
+        a.duration = duration;
         a.startingPrice = startingPrice;
         a.instantBuy = _instantBuy;
-        a.seller = payable(msg.sender);
-        a.status = ListingStatus.Open;
 
         // emit ListingStatusChanged(auctionId, ListingStatus.Open);
+
+        return _listingId;
     }
 
-    function queryExpiration(uint256 auctionId) public view returns (bool) {
-        LegendAuction memory a = legendAuction[auctionId];
+    function queryExpiration(uint256 listingId) public view returns (bool) {
+        AuctionDetails memory a = auctionDetails[listingId];
         bool isExpired;
 
         uint256 expirationTime = a.createdAt + a.duration;
@@ -82,25 +80,46 @@ abstract contract LegendAuctions is LegendSales {
         return isExpired;
     }
 
-    function closeAuction(uint256 auctionId) public {
-        require(queryExpiration(auctionId), "Auction has not expired");
-        LegendAuction storage a = legendAuction[auctionId];
+    function queryExtension(uint256 listingId) internal view returns (bool) {
+        AuctionDetails memory a = auctionDetails[listingId];
+        bool shouldExtend;
 
-        a.status = ListingStatus.Closed;
+        uint256 expirationTime = a.createdAt + a.duration;
+        uint256 extensionTimeframe = 600; // 10 minute window
+        if (
+            expirationTime > block.timestamp &&
+            block.timestamp >= (expirationTime - extensionTimeframe)
+        ) {
+            shouldExtend = false;
+        }
 
-        _legendOwed[auctionId][a.highestBidder] = a.tokenId;
-
-        _auctionsClosed.increment();
+        return shouldExtend;
     }
 
-    function _bid(uint256 auctionId, uint256 newBid) internal {
-        LegendAuction storage a = legendAuction[auctionId];
+    //TODO: make admin close auction func in Lab or Market ; require auction be expired for X many days before allowed to
+    //TODO: make incentive for first to claim and close
+    function _closeAuction(uint256 listingId) internal {
+        // require(queryExpiration(listingId), "Auction has not expired");
+        LegendListing storage l = legendListing[listingId];
+        AuctionDetails storage a = auctionDetails[listingId];
 
-        bids[auctionId][msg.sender] = newBid;
+        l.buyer = a.highestBidder;
+        l.price = a.highestBid;
+        l.status = ListingStatus.Closed;
 
-        if (!exists[auctionId][msg.sender]) {
+        _legendOwed[listingId][a.highestBidder] = l.tokenId;
+
+        _listingsClosed.increment();
+    }
+
+    function _placeBid(uint256 listingId, uint256 newBid) internal {
+        AuctionDetails storage a = auctionDetails[listingId];
+
+        bids[listingId][msg.sender] = newBid;
+
+        if (!exists[listingId][msg.sender]) {
             a.bidders.push(msg.sender);
-            exists[auctionId][msg.sender] = true;
+            exists[listingId][msg.sender] = true;
 
             // // Adds to the auctions where the user is participating
             // auctionsParticipating[msg.sender].push(_auctionId);
@@ -119,19 +138,24 @@ abstract contract LegendAuctions is LegendSales {
         // Allow previous highest bidder to reclaim or increase their bid  !! did we test this??
         // _withdrawAllowed[auctionId][a.highestBidder] = true;
 
+        if (queryExtension(listingId)) {
+            a.duration = (a.duration + 600); // could make duration a state variable
+        }
+
         if (a.instantBuy) {
-            if (newBid >= instantBuyPrice[auctionId]) {
-                a.status = ListingStatus.Closed;
+            if (newBid >= instantBuyPrice[listingId]) {
+                // legendListing[listingId].status = ListingStatus.Closed;
+                _closeAuction(listingId);
             }
         }
     }
 
     // // // Auctions can only be canceled if a bid has yet to be palced
-    function cancelLegendAuction(uint256 auctionId) internal {
-        legendAuction[auctionId].seller = payable(msg.sender);
-        legendAuction[auctionId].status = ListingStatus.Cancelled;
+    function cancelLegendAuction(uint256 listingId) internal {
+        legendListing[listingId].seller = payable(msg.sender);
+        legendListing[listingId].status = ListingStatus.Cancelled;
 
-        _auctionsCancelled.increment();
+        _listingsCancelled.increment();
         // LegendAuction memory l = legendAuction[auctionId];
         // require(msg.sender == l.seller);
         // require(l.status == ListingStatus.Open);
