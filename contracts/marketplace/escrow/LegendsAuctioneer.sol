@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * Original contract by OpenZeppelin(Pull Payments)
+ * Original contract by OpenZeppelin (Pull Payments)
  * Only slightly modified to fit Legendary Labs needs
+ * These changes were made primarily to facilitate auctions
  * Additions are as follow:
+ *
+ * LAClerk ...
+ * _withdrawlAllowed .. state variable,
+ * listingId parameter in withdrawPayments function
+ * withdrawHighestBid internal function
  *
  */
 
 pragma solidity ^0.8.0;
 
-import "./LegendsAuctionClerk.sol";
+// import "./LegendsAuctionClerk.sol";
+import "./LegendsEscrow.sol";
 
 /**
  * @dev Simple implementation of a
@@ -30,18 +37,15 @@ import "./LegendsAuctionClerk.sol";
  * payments with {payments}, and retrieve them with {withdrawPayments}.
  */
 abstract contract LegendsAuctioneer {
-    LegendsAuctionClerk private immutable _escrow; // change to _clerk when done
+    LegendsEscrow private immutable _escrow; // change to _clerk when done
 
     // comment well to explain this
-    // mapping(uint256 => mapping(uint256 => mapping(address => bool)))
-    //     public _withdrawAllowed; // public for testing ; no assignment picked yet
-
     mapping(uint256 => mapping(address => bool)) public _withdrawAllowed; // public for testing ; no assignment picked yet
 
     //try to add claim functions here
 
     constructor() {
-        _escrow = new LegendsAuctionClerk();
+        _escrow = new LegendsEscrow();
     }
 
     /**
@@ -69,6 +73,14 @@ abstract contract LegendsAuctioneer {
         _escrow.withdraw(payee);
     }
 
+    /*/*
+     * @dev Called by the payer to store the sent amount as credit to be pulled.
+     * Funds sent in this way are stored in an intermediate {Escrow} contract, so
+     * there is no danger of them being spent before withdrawal.
+     *
+     * @param dest The destination address of the funds.
+     * @param amount The amount to transfer.
+     */
     function withdrawHighestBid(
         uint256 listingId,
         address payable buyer,
@@ -89,14 +101,6 @@ abstract contract LegendsAuctioneer {
         return _escrow.depositsOf(dest);
     }
 
-    // function highestBid(uint256 listingId, address dest)
-    //     public
-    //     view
-    //     returns (uint256)
-    // {
-    //     return _escrow.bidOwedTo(listingId, dest);
-    // }
-
     /**
      * @dev Called by the payer to store the sent amount as credit to be pulled.
      * Funds sent in this way are stored in an intermediate {Escrow} contract, so
@@ -108,13 +112,4 @@ abstract contract LegendsAuctioneer {
     function _asyncTransfer(address dest, uint256 amount) internal virtual {
         _escrow.deposit{value: amount}(dest);
     }
-
-    // function _asyncBid(
-    //     uint256 listingId,
-    //     address seller,
-    //     address bidder,
-    //     uint256 amount
-    // ) internal virtual {
-    //     _escrow.bid{value: amount}(listingId, seller, bidder);
-    // }
 }

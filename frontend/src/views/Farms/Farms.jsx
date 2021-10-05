@@ -461,7 +461,7 @@ function App() {
   // debug function to see status of closed listings
   async function fetchListingData() {
     if (typeof window.ethereum !== 'undefined') {
-      const auctionDetails = await marketplace.read.fetchAuctionDetails()
+      // const auctionDetails = await marketplace.read.fetchAuctionDetails()
       // const itemCount = itemData[0]
       // const unsoldItemCount = itemData[0] - itemData[1]
       const currentIndex = 0

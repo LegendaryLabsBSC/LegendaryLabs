@@ -6,9 +6,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
 /**
- * Original contract by OpenZeppelin(Escrow)
+ * Original contract by OpenZeppelin (Escrow)
  * Only slightly modified to fit Legendary Labs needs
+ * These changes were made primarily to facilitate auctions
  * Additions are as follow:
+ *
+ * auctionWithdraw external function
+ * change withdraw function visibility to external
+ * remove virtual from withdraw function
  *
  */
 
@@ -25,7 +30,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract Escrow is Ownable {
+contract LegendsEscrow is Ownable {
     using Address for address payable;
 
     event Deposited(address indexed payee, uint256 weiAmount);
@@ -57,7 +62,7 @@ contract Escrow is Ownable {
      *
      * @param payee The address whose funds will be withdrawn and transferred to.
      */
-    function withdraw(address payable payee) public virtual onlyOwner {
+    function withdraw(address payable payee) external onlyOwner {
         uint256 payment = _deposits[payee];
 
         _deposits[payee] = 0;
@@ -68,8 +73,7 @@ contract Escrow is Ownable {
     }
 
     function auctionWithdraw(address buyer, address payable seller)
-        public
-        virtual
+        external
         onlyOwner
     {
         uint256 payment = _deposits[buyer];
