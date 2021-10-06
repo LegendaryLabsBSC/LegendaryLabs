@@ -107,13 +107,6 @@ abstract contract LegendAuction is LegendSale {
             a.duration = (a.duration + 600); // could make duration a state variable
         } // does not work currentlly
 
-        if (a.instantBuy) {
-            if (newBid >= instantBuyPrice[listingId]) {
-                // do not allow user input over IB-price on FE
-                _closeAuction(listingId);
-            }
-        }
-
         // emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
     }
 
@@ -134,14 +127,13 @@ abstract contract LegendAuction is LegendSale {
         // emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
     }
 
-    // // // Auctions can only be canceled if a bid has yet to be placed
-    function cancelLegendAuction(uint256 listingId) internal {
-        legendListing[listingId].seller = payable(msg.sender);
-        legendListing[listingId].status = ListingStatus.Cancelled;
+    // // // // Auctions can only be canceled if a bid has yet to be placed
+    // function _cancelLegendAuction(uint256 listingId) internal {
+    //     legendListing[listingId].status = ListingStatus.Cancelled;
 
-        _listingsCancelled.increment();
+    //     _listingsCancelled.increment();
 
-        // emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
-    }
+    //     // emit ListingStatusChanged(auctionId, ListingStatus.Cancelled);
+    // }
 
 }

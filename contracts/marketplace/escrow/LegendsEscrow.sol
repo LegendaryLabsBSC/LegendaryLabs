@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
  * Original contract by OpenZeppelin (Escrow)
@@ -30,13 +31,17 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract LegendsEscrow is Ownable {
+contract LegendsEscrow is
+    Ownable
+    // , IERC721Receiver
+{
     using Address for address payable;
 
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
 
     mapping(address => uint256) private _deposits;
+    mapping(address => uint256) private _legendDeposits;
 
     function depositsOf(address payee) public view returns (uint256) {
         return _deposits[payee];
@@ -51,6 +56,17 @@ contract LegendsEscrow is Ownable {
         _deposits[payee] += amount;
         emit Deposited(payee, amount);
     }
+
+    // function depositLegend(address payee, uint256 tokenId)
+    //     public
+    //     payable
+    //     virtual
+    //     onlyOwner
+    // {
+    //     uint256 token = tokenId;
+    //     _legendDeposits[payee] = token;
+    //     emit Deposited(payee, token);
+    // }
 
     /**
      * @dev Withdraw accumulated balance for a payee, forwarding all gas to the
@@ -84,4 +100,13 @@ contract LegendsEscrow is Ownable {
 
         // emit Withdrawn(payee, payment);
     }
+
+    //     function onERC721Received(
+    //         address,
+    //         address,
+    //         uint256,
+    //         bytes calldata
+    //     ) public pure override returns (bytes4) {
+    //         return ERC721_RECEIVED;
+    //     }
 }

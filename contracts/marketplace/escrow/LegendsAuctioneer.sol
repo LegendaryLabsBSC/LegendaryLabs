@@ -112,4 +112,8 @@ abstract contract LegendsAuctioneer {
     function _asyncTransfer(address dest, uint256 amount) internal virtual {
         _escrow.deposit{value: amount}(dest);
     }
+
+    // function _asyncTransferLegend(address dest, uint256 tokenId) internal virtual {
+    //     _escrow.depositLegend(dest, tokenId);
+    // }
 }

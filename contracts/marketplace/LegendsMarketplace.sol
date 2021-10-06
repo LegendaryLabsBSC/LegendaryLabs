@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./escrow/LegendsAuctioneer.sol";
 import "../control/LegendsLaboratory.sol";
-import "../legend/LegendsNFT.sol";
+import "../legend/LegendsNFT.sol"; // remove, use an interface/abstract where needed
 import "./listings/LegendAuction.sol";
 
 /** TODO:
@@ -61,15 +61,32 @@ contract LegendsMarketplace is
         return counts;
     }
 
+    //TODO: check out returing array of structs
+    // function fetchLegendListings()
+    //     public
+    //     view
+    //     returns (LegendListing memory)
+    // {
+    //     LegendListing memory counts = [
+    //         _listingIds,
+    //         _listingsClosed,
+    //         _listingsCancelled
+    //     ];
+
+    //     return counts;
+    // }
+
+
     function createLegendSale(
         address nftContract,
         uint256 tokenId,
         uint256 price
     ) public payable nonReentrant {
         LegendsNFT legendsNFT = LegendsNFT(nftContract);
-        require(legendsNFT.ownerOf(tokenId) == msg.sender);
+        require(legendsNFT.ownerOf(tokenId) == msg.sender); // ? reworkable
         require(price > 0, "Price can not be 0");
 
+        // _asyncTransferLegend(address(0), tokenId);
         legendsNFT.transferFrom(msg.sender, address(this), tokenId);
         _createLegendSale(nftContract, tokenId, price);
 
@@ -94,32 +111,27 @@ contract LegendsMarketplace is
         // emit ListingStatusChanged(listingId, TradeStatus.Closed);
     }
 
-    function cancelLegendSale(address nftContract, uint256 listingId)
-        public
-        payable
-        nonReentrant
-    {
-        LegendListing memory l = legendListing[listingId];
-        require(msg.sender == l.seller);
-        require(l.status == ListingStatus.Open);
+    // function cancelLegendSale(uint256 listingId)
+    //     public
+    //     // payable
+    //     nonReentrant
+    // {
+    //     LegendListing memory l = legendListing[listingId];
+    //     require(msg.sender == l.seller);
+    //     require(l.status == ListingStatus.Open);
 
-        LegendsNFT(nftContract).transferFrom(
-            address(this),
-            l.seller,
-            l.tokenId
-        );
-        _cancelLegendSale(listingId);
+    //     // this must be reworked if we get ierc721 escrow
+    //     LegendsNFT(l.nftContract).transferFrom(
+    //         address(this),
+    //         l.seller,
+    //         l.tokenId
+    //     );
+    //     _cancelLegendSale(listingId);
 
-        // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
-    }
+    //     // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
+    // }
 
     // TODO: take into account cancels
-
-    //
-    //
-    //
-    //
-
     function createLegendAuction(
         address nftContract,
         uint256 tokenId,
@@ -155,52 +167,31 @@ contract LegendsMarketplace is
             require(msg.value >= a.startingPrice, "Minimum price not met");
         }
 
-        uint256 newBid = bids[listingId][msg.sender] + (msg.value); // try without SM
+        uint256 newBid = bids[listingId][msg.sender] + (msg.value); // ! thoroughly test without SM
         require(newBid > a.highestBid, "Bid must be higher than current bid"); // ! allowing same price bid
-
-        // // We're going to do this 'require' only if the auction has no
-        // // bids yet.(zed)
-        // if(auction.bidders.length == 0) {
-        //     require(msg.value >= auction.minimum, "lowerBidThanMinimum");
-        // } --TODO: Determine here after wednesday meeting ; ^ startingPrice
 
         bids[listingId][msg.sender] = newBid;
         _asyncTransfer(payable(msg.sender), newBid);
 
-        // this might go up there ^189-193^
-        // Allow previous highest bidder to reclaim or increase their bid  !! did we test this??
+        // Allow previous highest bidder to reclaim or increase their bid  !! did we test this with PoP??
         _withdrawAllowed[listingId][a.highestBidder] = true; // make sure applied to previous highestbidder not new
 
         _placeBid(listingId, newBid);
         _withdrawAllowed[listingId][msg.sender] = false;
 
+        if (a.instantBuy) {
+            if (newBid >= instantBuyPrice[listingId]) {
+                // do not allow user input over IB-price on FE
+                _closeAuction(listingId);
+                _withdrawAllowed[listingId][l.seller] = true;
+            }
+        }
+
         // emit LogBid(msg.sender, newBid);
     }
 
-    function closeAuction(uint256 listingId) external payable {
-        require(queryExpiration(listingId), "Auction has not expired");
-        LegendListing storage l = legendListing[listingId];
-
-        require(
-            msg.sender == l.seller ||
-                msg.sender == auctionDetails[listingId].highestBidder,
-            "Not authorized to close"
-        ); // see what happens when you remove v
-
-        // ! add some type of closing bonus
-        if (l.status == ListingStatus.Open) {
-            _closeAuction(listingId);
-            _withdrawAllowed[listingId][l.seller] = true; // instant buy will error this
-        }
-
-        if (msg.sender == l.seller) {
-            claimPayment(listingId);
-        } else if (msg.sender == l.buyer) {
-            claimLegend(listingId);
-        }
-    }
-
-    function withdrawFromAuction(uint256 listingId) external payable {
+    // ! have not verified this
+    function withdrawBid(uint256 listingId) external payable {
         LegendListing storage l = legendListing[listingId];
         require(l.status == ListingStatus.Open);
         // require not seller ??
@@ -213,9 +204,86 @@ contract LegendsMarketplace is
         _withdrawAllowed[listingId][msg.sender] = false;
     }
 
-    function claimLegend(uint256 listingId) internal {
+    function closeListing(uint256 listingId) external payable {
+        LegendListing storage l = legendListing[listingId];
+
+        require(
+            msg.sender == l.seller ||
+                msg.sender == l.buyer ||
+                msg.sender == auctionDetails[listingId].highestBidder,
+            "Not authorized to close"
+        );
+
+        // ?! add some type of closing bonus
+        if (l.isAuction) {
+            if (l.status == ListingStatus.Open) {
+                require(queryExpiration(listingId), "Auction has not expired");
+
+                _closeAuction(listingId);
+                _withdrawAllowed[listingId][l.seller] = true; // instant buy will error this
+            }
+        }
+        if (msg.sender == l.seller) {
+            _claimPayment(listingId);
+        } else if (msg.sender == l.buyer) {
+            _claimLegend(listingId);
+        }
+    }
+
+    function cancelLegendListing(uint256 listingId)
+        public
+        // payable
+        nonReentrant
+    {
         LegendListing memory l = legendListing[listingId];
-        // require(msg.sender == l.buyer);
+        require(msg.sender == l.seller);
+        require(l.status == ListingStatus.Open);
+
+        // Auctions can only be canceled if a bid has yet to be placed
+        if (l.isAuction) {
+            require(
+                auctionDetails[listingId].bidders.length == 0,
+                "Bids already placed"
+            );
+        }// auctions can not cancel
+
+        // this must be reworked if we get ierc721 escrow
+        LegendsNFT(l.nftContract).transferFrom(
+            address(this),
+            l.seller,
+            l.tokenId
+        );
+        _cancelLegendListing(listingId);
+
+        // emit ListingStatusChanged(listingId, TradeStatus.Cancelled);
+    }
+
+    // function closeAuction(uint256 listingId) external payable {
+    //     require(queryExpiration(listingId), "Auction has not expired");
+    //     LegendListing storage l = legendListing[listingId];
+
+    //     // require(
+    //     //     msg.sender == l.seller ||
+    //     //         msg.sender == auctionDetails[listingId].highestBidder,
+    //     //     "Not authorized to close"
+    //     // ); // see what happens when you remove v
+
+    //     // ! add some type of closing bonus
+    //     if (l.status == ListingStatus.Open) {
+    //         _closeAuction(listingId);
+    //         _withdrawAllowed[listingId][l.seller] = true; // instant buy will error this
+    //     }
+
+    //     if (msg.sender == l.seller) {
+    //         _claimPayment(listingId);
+    //     } else if (msg.sender == l.buyer) {
+    //         _claimLegend(listingId);
+    //     }
+    // }
+
+    function _claimLegend(uint256 listingId) internal {
+        LegendListing memory l = legendListing[listingId];
+        require(msg.sender == l.buyer);
         require(l.status == ListingStatus.Closed);
 
         uint256 legendOwed = _legendOwed[listingId][l.buyer];
@@ -230,9 +298,9 @@ contract LegendsMarketplace is
         );
     }
 
-    function claimPayment(uint256 listingId) internal {
+    function _claimPayment(uint256 listingId) internal {
         LegendListing memory l = legendListing[listingId];
-        // require(msg.sender == l.seller);
+        require(msg.sender == l.seller);
         require(l.status == ListingStatus.Closed);
 
         //TODO: subtract fees
@@ -254,56 +322,4 @@ contract LegendsMarketplace is
             _withdrawAllowed[listingId][l.seller] = true;
         }
     }
-
-    // function fetchLegendListings()
-    //     public
-    //     view
-    //     returns (LegendListing[] memory)
-    // {
-    //     uint256 listingCount = _listingIds.current();
-    //     uint256 openListingCount = _listingIds.current() -
-    //         (_listingsClosed.current() + _listingsCancelled.current());
-    //     uint256 currentIndex = 0;
-
-    //     LegendListing[] memory listings = new LegendListing[](openListingCount);
-    //     for (uint256 i = 0; i < listingCount; i++) {
-    //         if (legendListing[i + 1].buyer == address(0)) {
-    //             uint256 currentId = i + 1;
-    //             // legendListing[i + 1].listingId;
-    //             LegendListing storage currentListing = legendListing[currentId];
-    //             listings[currentIndex] = currentListing;
-    //             currentIndex++;
-    //         }
-    //     }
-    //     return listings;
-    // }
-
-    // function fetchAuctionDetails()
-    //     public
-    //     view
-    //     returns (AuctionDetails[] memory)
-    // {
-    //     uint256 listingCount = _listingIds.current();
-    //     uint256 openListingCount = _listingIds.current() -
-    //         (_listingsClosed.current() + _listingsCancelled.current());
-    //     uint256 currentIndex = 0;
-
-    //     AuctionDetails[] memory auctions = new AuctionDetails[](
-    //         openListingCount
-    //     );
-    //     for (uint256 i = 0; i < listingCount; i++) {
-    //         if (legendListing[i + 1].buyer == address(0)) {
-    //             if (legendListing[i + 1].isAuction) {
-    //                 uint256 currentId = i +1;
-    //                 // legendListing[i + 1].listingId;
-    //                 AuctionDetails storage currentAuction = auctionDetails[
-    //                     currentId
-    //                 ];
-    //                 auctions[currentIndex] = currentAuction;
-    //                 currentIndex++;
-    //             }
-    //         }
-    //     }
-    //     return auctions;
-    // }
 }

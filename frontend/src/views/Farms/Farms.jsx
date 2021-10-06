@@ -2,6 +2,7 @@ import { React, useState } from 'react'
 import { ethers } from 'ethers'
 import axios from 'axios'
 import styled from 'styled-components'
+import { AddressZero } from 'ethers/constants'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator'
 import { legendsLaboratory, legendsNFT, legendsToken, legendsMarketplace } from 'artifacts/config/contract-config'
 import LegendsNFT from '../../artifacts/contracts/legend/LegendsNFT.sol/LegendsNFT.json'
@@ -417,7 +418,7 @@ function App() {
   }
   async function cancelLegendSale() {
     if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.cancelLegendSale(legendsNFTAddress, id)
+      await marketplace.write.cancelLegendListing(id)
       // .then(
       // marketplace.write.once('ListingStatusChanged', (data, event) => {
       //   console.log(`data: ${data[0]} ${data[1]}`)
@@ -426,48 +427,15 @@ function App() {
       // )
     }
   }
+
   async function fetchLegendListings() {
     if (typeof window.ethereum !== 'undefined') {
-      const totalListings = await marketplace.read.fetchLegendListings()
-      const auctionDetails = await marketplace.read.fetchAuctionDetails()
-      totalListings.forEach((l) => {
-        // marketplace.read.legendLisi(sale).then((l) => {
-        console.log(`Listing ID: ${l.listingId}`)
-        console.log(`Contract: ${l.nftContract}`)
-        console.log(`Token ID: ${l.tokenId}`)
-        console.log(`Seller: ${l.seller}`)
-        console.log(`Buyer: ${l.buyer}`)
-        console.log(`Price: ${l.price}`)
-        console.log(`is Auction: ${l.isAuction}`)
-        console.log(`Status: ${l.status}`)
-        console.log('')
-        if (l.isAuction) {
-          auctionDetails.forEach((a) => {
-            // const a = await marketplace.read.auctionDetails(id)
-            // const a = marketplace.read.fetchAuctionDetails()
-            console.log(`Created At: ${a.createdAt}`)
-            console.log(`Duration: ${a.duration}`)
-            console.log(`Starting Price: ${a.startingPrice}`)
-            console.log(`Highest Bid: ${a.highestBid}`)
-            console.log(`Highest Bidder: ${a.highestBidder}`)
-            console.log(`Bidders: ${a.bidders}`)
-            console.log(`Instant Buy: ${a.instantBuy}`)
-            console.log('')
-          })
-        }
-      })
-    }
-  }
-  // debug function to see status of closed listings
-  async function fetchListingData() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const auctionDetails = await marketplace.read.fetchAuctionDetails()
-      // const itemCount = itemData[0]
-      // const unsoldItemCount = itemData[0] - itemData[1]
-      const currentIndex = 0
+      // const listingCounts = await marketplace.read.fetchListingCounts()
+      // const count = listingCounts[0]
+
       const l = await marketplace.read.legendListing(id)
-      //
-      // for (let i = 0; i < itemCount; i++) {
+      const a = await marketplace.read.auctionDetails(id)
+
       console.log(`Listing ID: ${l.listingId}`)
       console.log(`Contract: ${l.nftContract}`)
       console.log(`Token ID: ${l.tokenId}`)
@@ -475,29 +443,171 @@ function App() {
       console.log(`Buyer: ${l.buyer}`)
       console.log(`Price: ${l.price}`)
       console.log(`is Auction: ${l.isAuction}`)
-      console.log(`Status: ${l.status}`)
+      if (l.status === 0) {
+        console.log('Status: Open')
+      } else if (l.status === 1) {
+        console.log('Status: Closed')
+      } else if (l.status === 2) {
+        console.log('Status: Cancelled')
+      }
       console.log('')
       if (l.isAuction) {
-        const a = await marketplace.read.auctionDetails(id)
         console.log(`Created At: ${a.createdAt}`)
         console.log(`Duration: ${a.duration}`)
         console.log(`Starting Price: ${a.startingPrice}`)
         console.log(`Highest Bid: ${a.highestBid}`)
         console.log(`Highest Bidder: ${a.highestBidder}`)
-        console.log(`Bidders: ${a.bidders}`)
+        console.log('Bidders:', a.bidders)
         console.log(`Instant Buy: ${a.instantBuy}`)
         console.log('')
       }
-      // console.log(legendListing.buyer)
-      // if (legendListing(i+1).buyer == )
-      // }
     }
   }
+
+  // async function fetchLegendListing2s() {
+  //   if (typeof window.ethereum !== 'undefined') {
+  //     const totalListings = await marketplace.read.fetchLegendListings()
+  //     const auctionDetails = await marketplace.read.fetchAuctionDetails()
+  //     totalListings.forEach((l) => {
+  //       // marketplace.read.legendLisi(sale).then((l) => {
+  //       console.log(`Listing ID: ${l.listingId}`)
+  //       console.log(`Contract: ${l.nftContract}`)
+  //       console.log(`Token ID: ${l.tokenId}`)
+  //       console.log(`Seller: ${l.seller}`)
+  //       console.log(`Buyer: ${l.buyer}`)
+  //       console.log(`Price: ${l.price}`)
+  //       console.log(`is Auction: ${l.isAuction}`)
+  //       console.log(`Status: ${l.status}`)
+  //       console.log('')
+  //       if (l.isAuction) {
+  //         auctionDetails.forEach((a) => {
+  //           // const a = await marketplace.read.auctionDetails(id)
+  //           // const a = marketplace.read.fetchAuctionDetails()
+  //           console.log(`Created At: ${a.createdAt}`)
+  //           console.log(`Duration: ${a.duration}`)
+  //           console.log(`Starting Price: ${a.startingPrice}`)
+  //           console.log(`Highest Bid: ${a.highestBid}`)
+  //           console.log(`Highest Bidder: ${a.highestBidder}`)
+  //           console.log(`Bidders: ${a.bidders}`)
+  //           console.log(`Instant Buy: ${a.instantBuy}`)
+  //           console.log('')
+  //         })
+  //       }
+  //     })
+  //   }
+  // }
+
+  async function fetchListingData() {
+    if (typeof window.ethereum !== 'undefined') {
+      const listingCounts = await marketplace.read.fetchListingCounts()
+      const counts = listingCounts.toString()
+
+      const _listingDetails = await marketplace.read.legendListing(id)
+      const _auctionDetails = await marketplace.read.auctionDetails(id)
+
+      const listingIds = counts[0]
+      const openListingCount = counts[0] - (counts[1] + counts[2])
+      // let currentIndex = 0
+
+      // listingIds.forEach((listing) => {
+      for (let i = 0; i < listingIds; i++) {
+        const listing = _listingDetails
+        // if (listing.buyer === AddressZero(0)) {
+        console.log(`Listing ID: ${listing.listingId}`)
+        console.log(`Contract: ${listing.nftContract}`)
+        console.log(`Token ID: ${listing.tokenId}`)
+        console.log(`Seller: ${listing.seller}`)
+        console.log(`Buyer: ${listing.buyer}`)
+        console.log(`Price: ${listing.price}`)
+        console.log(`is Auction: ${listing.isAuction}`)
+        console.log(`Status: ${listing.status}`)
+        console.log('')
+        if (listing.isAuction) {
+          const auction = _auctionDetails
+          console.log(`Created At: ${auction.createdAt}`)
+          console.log(`Duration: ${auction.duration}`)
+          console.log(`Starting Price: ${auction.startingPrice}`)
+          console.log(`Highest Bid: ${auction.highestBid}`)
+          console.log(`Highest Bidder: ${auction.highestBidder}`)
+          console.log(`Bidders: ${auction.bidders}`)
+          console.log(`Instant Buy: ${auction.instantBuy}`)
+          console.log('')
+        }
+      }
+    }
+  }
+
+  // const itemCount = itemData[0]
+  // const unsoldItemCount = itemData[0] - itemData[1]
+  // const currentIndex = 0
+  // const l = await marketplace.read.legendListing(id)
+  // //
+  // // for (let i = 0; i < itemCount; i++) {
+  // console.log(`Listing ID: ${l.listingId}`)
+  // console.log(`Contract: ${l.nftContract}`)
+  // console.log(`Token ID: ${l.tokenId}`)
+  // console.log(`Seller: ${l.seller}`)
+  // console.log(`Buyer: ${l.buyer}`)
+  // console.log(`Price: ${l.price}`)
+  // console.log(`is Auction: ${l.isAuction}`)
+  // console.log(`Status: ${l.status}`)
+  // console.log('')
+  // if (l.isAuction) {
+  //   const a = await marketplace.read.auctionDetails(id)
+  //   console.log(`Created At: ${a.createdAt}`)
+  //   console.log(`Duration: ${a.duration}`)
+  //   console.log(`Starting Price: ${a.startingPrice}`)
+  //   console.log(`Highest Bid: ${a.highestBid}`)
+  //   console.log(`Highest Bidder: ${a.highestBidder}`)
+  //   console.log(`Bidders: ${a.bidders}`)
+  //   console.log(`Instant Buy: ${a.instantBuy}`)
+  //   console.log('')
+  // }
+  // console.log(legendListing.buyer)
+  // if (legendListing(i+1).buyer == )
+  // }
+  // }
+
+  // debug function to see status of closed listings
+  // async function fetchListingData() {
+  //   if (typeof window.ethereum !== 'undefined') {
+  //     // const auctionDetails = await marketplace.read.fetchAuctionDetails()
+  //     // const itemCount = itemData[0]
+  //     // const unsoldItemCount = itemData[0] - itemData[1]
+  //     const currentIndex = 0
+  //     const l = await marketplace.read.legendListing(id)
+  //     //
+  //     // for (let i = 0; i < itemCount; i++) {
+  //     console.log(`Listing ID: ${l.listingId}`)
+  //     console.log(`Contract: ${l.nftContract}`)
+  //     console.log(`Token ID: ${l.tokenId}`)
+  //     console.log(`Seller: ${l.seller}`)
+  //     console.log(`Buyer: ${l.buyer}`)
+  //     console.log(`Price: ${l.price}`)
+  //     console.log(`is Auction: ${l.isAuction}`)
+  //     console.log(`Status: ${l.status}`)
+  //     console.log('')
+  //     if (l.isAuction) {
+  //       const a = await marketplace.read.auctionDetails(id)
+  //       console.log(`Created At: ${a.createdAt}`)
+  //       console.log(`Duration: ${a.duration}`)
+  //       console.log(`Starting Price: ${a.startingPrice}`)
+  //       console.log(`Highest Bid: ${a.highestBid}`)
+  //       console.log(`Highest Bidder: ${a.highestBidder}`)
+  //       console.log(`Bidders: ${a.bidders}`)
+  //       console.log(`Instant Buy: ${a.instantBuy}`)
+  //       console.log('')
+  //     }
+  //     // console.log(legendListing.buyer)
+  //     // if (legendListing(i+1).buyer == )
+  //     // }
+  //   }
+  // }
 
   async function createLegendAuction() {
     if (typeof window.ethereum !== 'undefined') {
       // const duration = _duration * 86400
-      const testDuration = 80 // seconds
+      const testDuration = 800 // seconds
       const duration = testDuration
       const startingPrice = ethers.utils.parseUnits(_startingPrice, 'ether')
       const _instantPrice = ethers.utils.parseUnits(instantPrice, 'ether')
@@ -547,7 +657,7 @@ function App() {
   }
   async function closeAuction() {
     if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.closeAuction(id)
+      await marketplace.write.closeListing(id)
     }
   }
   // increase bid ; can use same logic as bid , just change FE logic

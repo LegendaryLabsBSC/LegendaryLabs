@@ -49,10 +49,12 @@ abstract contract LegendSale is ILegendListing {
         // emit ListingStatusChanged(saleId, ListingStatus.Open);
     }
 
-    // Have not reworked cancellations yet to account for withdraw pattern
-    function _cancelLegendSale(uint256 saleId) internal {
-        legendListing[saleId].buyer = payable(msg.sender); // ? does this even make sense? keep 0 address ?
-        legendListing[saleId].status = ListingStatus.Cancelled;
+    function _cancelLegendListing(uint256 listingId) internal {
+        LegendListing storage l = legendListing[listingId];
+
+        l.status = ListingStatus.Cancelled;
+
+        // _legendOwed[listingId][l.seller] = l.tokenId; // see parent comment
 
         _listingsCancelled.increment();
 
