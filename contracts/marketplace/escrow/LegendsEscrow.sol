@@ -8,14 +8,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
  * Original contract by OpenZeppelin (Escrow)
- * Only slightly modified to fit Legendary Labs needs
+ * Slightly modified to fit Legendary Labs needs
  * These changes were made primarily to facilitate auctions
- * Additions are as follow:
- *
- * auctionWithdraw external function
- * change withdraw function visibility to external
- * remove virtual from withdraw function
- *
  */
 
 /**
@@ -40,12 +34,25 @@ contract LegendsEscrow is
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
 
-    mapping(address => uint256) private _deposits;
-    mapping(address => uint256) private _legendDeposits;
+    // mapping(uint256 => mapping(address => uint256)) private _deposits;
+    // mapping(address => uint256) private _nftDeposit;
 
+    mapping(address => uint256) private _paymentOwed;
+    mapping(uint256 => mapping(address => uint256)) private _pendingBid;
+
+    //TODO: change name; paymentsOwed ?
     function depositsOf(address payee) public view returns (uint256) {
-        return _deposits[payee];
+        return _paymentOwed[payee];
     }
+
+    //TODO:
+    // function bidsOf(uint256 listingId, address payee)
+    //     public
+    //     view
+    //     returns (uint256)
+    // {
+    //     return _paymentOwed[payee];
+    // }
 
     /**
      * @dev Stores the sent amount as credit to be withdrawn.
@@ -53,8 +60,66 @@ contract LegendsEscrow is
      */
     function deposit(address payee) public payable virtual onlyOwner {
         uint256 amount = msg.value;
-        _deposits[payee] += amount;
+
+        _paymentOwed[payee] += amount;
+
         emit Deposited(payee, amount);
+    }
+
+    function depositBid(uint256 listingId, address bidder)
+        public
+        payable
+        virtual
+        onlyOwner
+    {
+        uint256 amount = msg.value;
+
+        _pendingBid[listingId][bidder] += amount;
+
+        emit Deposited(bidder, amount);
+    }
+
+        function depositBid1(uint256 listingId, address bidder)
+        public
+        payable
+        virtual
+        onlyOwner
+    {
+        // uint256 amount = msg.value;
+
+        // _pendingBid[listingId][bidder] += amount;
+
+        // emit Deposited(bidder, amount);
+        // bool good;
+    }
+
+    function obligateBid(
+        uint256 listingId,
+        address buyer,
+        address payable seller
+    ) public payable virtual onlyOwner {
+        uint256 amount = _pendingBid[listingId][buyer];
+
+        _pendingBid[listingId][buyer] = 0;
+
+        _paymentOwed[seller] += amount;
+
+        // emit Deposited(bidder, amount);
+    }
+
+    function refundBid(uint256 listingId, address payable bidder)
+        public
+        payable
+        virtual
+        onlyOwner
+    {
+        uint256 amount = _pendingBid[listingId][bidder];
+
+        _pendingBid[listingId][bidder] = 0;
+
+        bidder.sendValue(amount);
+
+        // emit Deposited(bidder, amount);
     }
 
     // function depositLegend(address payee, uint256 tokenId)
@@ -79,27 +144,28 @@ contract LegendsEscrow is
      * @param payee The address whose funds will be withdrawn and transferred to.
      */
     function withdraw(address payable payee) external onlyOwner {
-        uint256 payment = _deposits[payee];
+        uint256 payment = _paymentOwed[payee];
 
-        _deposits[payee] = 0;
+        _paymentOwed[payee] = 0;
 
         payee.sendValue(payment);
 
         emit Withdrawn(payee, payment);
     }
 
-    function auctionWithdraw(address buyer, address payable seller)
-        external
-        onlyOwner
-    {
-        uint256 payment = _deposits[buyer];
+    // function auctionWithdraw(
+    //     uint256 listingId,
+    //     address buyer,
+    //     address payable seller
+    // ) external onlyOwner {
+    //     uint256 payment = [listingId][buyer];
 
-        _deposits[buyer] = 0;
+    //     _deposits[listingId][buyer] = 0;
 
-        seller.sendValue(payment);
+    //     seller.sendValue(payment);
 
-        // emit Withdrawn(payee, payment);
-    }
+    //     // emit Withdrawn(payee, payment);
+    // }
 
     //     function onERC721Received(
     //         address,

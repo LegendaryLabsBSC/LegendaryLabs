@@ -54,6 +54,7 @@ function App() {
   const [season, setSeasonValue] = useState('')
   const [newURI, setURI] = useState('')
   const [legends, setLegends] = useState([])
+  const [bidders, setBidders] = useState([])
   const [gettingLegends, setGettingLegends] = useState(false)
   const [_duration, setDuration] = useState(0)
   const [_startingPrice, setStartingPrice] = useState(0)
@@ -216,8 +217,8 @@ function App() {
           const legendsData = []
           for (let i = 0; i < balance; i++) {
             contract.read.tokenOfOwnerByIndex(account, i).then((token) => {
-              const ownedToken = token.toString()
-              loadLegends(ownedToken).then((res) => {
+              const tokenId = token.toString()
+              loadLegends(tokenId).then((res) => {
                 legendsData.push(res)
               })
             })
@@ -428,11 +429,26 @@ function App() {
     }
   }
 
+  async function loadBidders(bidder) {
+    // const imgURL = await contract.read.tokenURI(tokenID)
+    console.log(`Bidder: ${bidder}`)
+    return { bidder }
+    // Logic for rendering Legend Card Component here from pinata ?
+  }
+
+  async function biddys() {
+    if (typeof window.ethereum !== 'undefined') {
+      const b = await marketplace.read.gaH(id)
+      console.log(b)
+      console.log(b.length)
+    }
+  }
+
   async function fetchLegendListings() {
     if (typeof window.ethereum !== 'undefined') {
       // const listingCounts = await marketplace.read.fetchListingCounts()
       // const count = listingCounts[0]
-
+      const b = await marketplace.read.legendListing(1)
       const l = await marketplace.read.legendListing(id)
       const a = await marketplace.read.auctionDetails(id)
 
@@ -444,10 +460,12 @@ function App() {
       console.log(`Price: ${l.price}`)
       console.log(`is Auction: ${l.isAuction}`)
       if (l.status === 0) {
+        console.log('Status: Null')
+      }else if (l.status === 1) {
         console.log('Status: Open')
-      } else if (l.status === 1) {
-        console.log('Status: Closed')
       } else if (l.status === 2) {
+        console.log('Status: Closed')
+      } else if (l.status === 3) {
         console.log('Status: Cancelled')
       }
       console.log('')
@@ -458,6 +476,32 @@ function App() {
         console.log(`Highest Bid: ${a.highestBid}`)
         console.log(`Highest Bidder: ${a.highestBidder}`)
         console.log('Bidders:', a.bidders)
+
+        // const newArr = []
+        // marketplace.read.auctionDetails(id).then((auction) => {
+        //   const bidder = auction.bidders
+        //   loadBidders(bidder).then((res) => {
+        //     newArr.push(res)
+        //   })
+        // })
+        // setBidders(newArr)
+        // console.log(bidders)
+
+        // // const newArr = []
+        // // await marketplace.read.auctionDetails(id).then((res) => {
+        // //   newArr.push(res.bidders)
+        // // })
+
+        // // console.log(newArr)
+
+        // // const newArr = []
+        // // a.map((i) => newArr.push(i))
+        // // console.log(newArr)
+
+        // // const biddys = await a.bidders
+        // // a.bidders.map((i) => newArr.push(i))
+        // // console.log(a)
+
         console.log(`Instant Buy: ${a.instantBuy}`)
         console.log('')
       }
@@ -607,7 +651,7 @@ function App() {
   async function createLegendAuction() {
     if (typeof window.ethereum !== 'undefined') {
       // const duration = _duration * 86400
-      const testDuration = 800 // seconds
+      const testDuration = 650 // seconds
       const duration = testDuration
       const startingPrice = ethers.utils.parseUnits(_startingPrice, 'ether')
       const _instantPrice = ethers.utils.parseUnits(instantPrice, 'ether')
@@ -638,7 +682,7 @@ function App() {
   async function increaseBid() {
     if (typeof window.ethereum !== 'undefined') {
       const auctionBid = ethers.utils.parseUnits(bid, 'ether')
-      await marketplace.write.bid(id, {
+      await marketplace.write.placeBid1(id, {
         value: auctionBid,
       })
     }
@@ -652,7 +696,7 @@ function App() {
   }
   async function withdrawFromAuction() {
     if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.withdrawFromAuction(id)
+      await marketplace.write.withdrawBid(id)
     }
   }
   async function closeAuction() {
@@ -922,6 +966,9 @@ function App() {
           <button type="submit" onClick={fetchListingData}>
             Fetch Listing Data
           </button>
+          <button type="submit" onClick={biddys}>
+            Fetch Listing Bids
+          </button>
         </div>
         <br />
         <div>
@@ -954,7 +1001,7 @@ function App() {
             Bid On Legend
           </button>
           <button type="submit" onClick={increaseBid}>
-            Increase Bid
+            Debug Bid
           </button>
           <button type="submit" onClick={withdrawFromAuction}>
             Withdraw From Auction

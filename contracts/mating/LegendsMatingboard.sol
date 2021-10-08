@@ -342,7 +342,7 @@ contract LegendsMatingboard is LegendMatchings, ReentrancyGuard {
     // function bid(uint256 auctionId) public payable {
     //     LegendAuction storage a = legendAuction[auctionId];
     //     require(a.status == ListingStatus.Open);
-    //     require(!queryExpiration(auctionId), "Auction has expired"); // test if  ..= is needed
+    //     require(!isExpired(auctionId), "Auction has expired"); // test if  ..= is needed
     //     // require(msg.sender != a.seller, "Seller can not bid"); // disabled for testing
     //     if (a.bidders.length == 0) {
     //         require(msg.value >= a.startingPrice, "Minimum price not met");

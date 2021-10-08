@@ -37,12 +37,9 @@ import "./LegendsEscrow.sol";
  * payments with {payments}, and retrieve them with {withdrawPayments}.
  */
 abstract contract LegendsAuctioneer {
-    LegendsEscrow private immutable _escrow; // change to _clerk when done
+    LegendsEscrow private immutable _escrow;
 
-    // comment well to explain this
-    mapping(uint256 => mapping(address => bool)) public _withdrawAllowed; // public for testing ; no assignment picked yet
-
-    //try to add claim functions here
+    mapping(uint256 => mapping(address => bool)) internal _withdrawAllowed; // public for testing ; no assignment picked yet
 
     constructor() {
         _escrow = new LegendsEscrow();
@@ -62,15 +59,21 @@ abstract contract LegendsAuctioneer {
      *
      * @param payee Whose payments will be withdrawn.
      */
-    function withdrawPayments(uint256 listingId, address payable payee)
+
+    function _withdrawPayments(uint256 listingId, address payable payee)
         internal
         virtual
     {
-        require(
-            _withdrawAllowed[listingId][payee], // take into account the various listing types
-            "ConditionalEscrow: payee is not allowed to withdraw"
-        );
+        require(_withdrawAllowed[listingId][payee], "Not authorized");
         _escrow.withdraw(payee);
+    }
+
+    function _withdrawBid(uint256 listingId, address payable payee)
+        internal
+        virtual
+    {
+        require(_withdrawAllowed[listingId][payee], "Not authorized");
+        _escrow.refundBid(listingId, payee);
     }
 
     /*/*
@@ -81,17 +84,17 @@ abstract contract LegendsAuctioneer {
      * @param dest The destination address of the funds.
      * @param amount The amount to transfer.
      */
-    function withdrawHighestBid(
-        uint256 listingId,
-        address payable buyer,
-        address payable seller
-    ) internal virtual {
-        require(
-            _withdrawAllowed[listingId][seller], // take into account the various listing types
-            "ConditionalEscrow: payee is not allowed to withdraw"
-        );
-        _escrow.auctionWithdraw(buyer, seller);
-    }
+    // function withdrawHighestBid(
+    //     uint256 listingId,
+    //     address payable buyer,
+    //     address payable seller
+    // ) internal virtual {
+    //     require(
+    //         _withdrawAllowed[listingId][seller], // take into account the various listing types
+    //         "ConditionalEscrow: payee is not allowed to withdraw"
+    //     );
+    //     _escrow.auctionWithdraw(listingId, buyer, seller);
+    // }
 
     /**
      * @dev Returns the payments owed to an address.
@@ -111,6 +114,30 @@ abstract contract LegendsAuctioneer {
      */
     function _asyncTransfer(address dest, uint256 amount) internal virtual {
         _escrow.deposit{value: amount}(dest);
+    }
+
+    function _asyncTransferBid(
+        uint256 listingId,
+        address bidder,
+        uint256 amount
+    ) internal virtual {
+        _escrow.depositBid{value: amount}(listingId, bidder);
+    }
+
+        function _asyncTransferBid1(
+        uint256 listingId,
+        address bidder,
+        uint256 amount
+    ) internal virtual {
+        _escrow.depositBid1{value: amount}(listingId, bidder);
+    }
+
+    function _obligateBid(
+        uint256 listingId,
+        address buyer,
+        address seller
+    ) internal virtual {
+        _escrow.obligateBid(listingId, buyer, payable(seller));
     }
 
     // function _asyncTransferLegend(address dest, uint256 tokenId) internal virtual {

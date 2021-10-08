@@ -17,8 +17,7 @@ abstract contract LegendSale is ILegendListing {
         address nftContract,
         uint256 tokenId,
         uint256 price
-    ) internal // returns (uint256)
-    {
+    ) internal {
         _listingIds.increment();
         uint256 _listingId = _listingIds.current();
 
@@ -32,9 +31,7 @@ abstract contract LegendSale is ILegendListing {
         l.isAuction = false;
         l.status = ListingStatus.Open;
 
-        // emit ListingStatusChanged(saleId, ListingStatus.Open);
-
-        // return _listingId; // ? is needed
+        emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
     function _buyLegend(uint256 listingId) internal {
@@ -46,7 +43,7 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsClosed.increment();
 
-        // emit ListingStatusChanged(saleId, ListingStatus.Open);
+        emit ListingStatusChanged(listingId, ListingStatus.Closed); // try with l.status, on all
     }
 
     function _cancelLegendListing(uint256 listingId) internal {
@@ -58,6 +55,6 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsCancelled.increment();
 
-        // emit ListingStatusChanged(saleId, SaleStatus.Cancelled);
+        emit ListingStatusChanged(listingId, ListingStatus.Cancelled);
     }
 }
