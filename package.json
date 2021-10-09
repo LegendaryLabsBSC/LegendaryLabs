@@ -7,10 +7,11 @@
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.5",
-    "hardhat": "^2.6.1"
+    "hardhat": "^2.6.1",
+    "hardhat-contract-sizer": "^2.1.1"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.0",
+    "@openzeppelin/contracts": "^4.3.2",
     "@pinata/ipfs-gateway-tools": "^1.1.6",
     "axios": "^0.21.4",
     "dotenv": "^10.0.0",
@@ -24,6 +25,7 @@
   "scripts": {
     "load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
     "com": "npx hardhat compile",
-    "start:api": "sudo kill $(sudo lsof -t -i:3001) ; nodemon scripts/generateLegend.js"
+    "size": "npx hardhat compile && hardhat size-contracts",
+    "start:api": "nodemon scripts/generateLegend.js"
   }
 }

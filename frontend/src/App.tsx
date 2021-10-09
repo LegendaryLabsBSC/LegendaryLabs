@@ -16,7 +16,7 @@ import XBLZD from './views/XBLZD'
 // Only pool is included in the main bundle because of it's the most visited page'
 const Home = lazy(() => import('./views/Home'))
 const Farms = lazy(() => import('./views/Farms'))
-// const Lottery = lazy(() => import('./views/Lottery'))
+const Lottery = lazy(() => import('./views/Lottery'))
 // const Pools = lazy(() => import('./views/Pools'))
 // const Ifos = lazy(() => import('./views/Ifos'))
 const NotFound = lazy(() => import('./views/NotFound'))
@@ -49,12 +49,14 @@ const App: React.FC = () => {
         <Suspense fallback={<PageLoader />}>
           <Switch>
             <Route path="/" exact>
-              <Home />u{' '}
+              <Home />{' '}
             </Route>
             <Route path="/farms">
               <Farms />
             </Route>
-            <Route path="/caves">{/* <Farms tokenMode /> */}</Route>
+            <Route path="/caves">
+              <Lottery />
+            </Route>
             <Route path="/pools">
               <Pools />
             </Route>

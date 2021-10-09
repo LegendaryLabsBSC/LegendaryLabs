@@ -4,12 +4,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./LegendsLabratory.sol";
+import "../control/LegendsLaboratory.sol";
 import "./LegendBreeding.sol";
 import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
-// ? Consider merging stats with NFT contract ?
 
 contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     using Counters for Counters.Counter;
@@ -25,14 +23,12 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     uint256 public baseBreedingCost;
     string public season;
 
-    uint256 public baseHealth;
-
     event NewLegend(uint256 newItemId);
     event Minted(uint256 tokenId);
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
 
-    LegendsLabratory lab;
+    LegendsLaboratory lab;
 
     modifier onlyLab() {
         require(msg.sender == address(lab), "not lab owner");
@@ -42,7 +38,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     // modifier isHatchable
 
     constructor() ERC721("Legend", "LEGEND") {
-        lab = LegendsLabratory(msg.sender);
+        lab = LegendsLaboratory(msg.sender);
     }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
@@ -67,15 +63,15 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         return _tokenURI;
     }
 
-    // function tokenDATA(
-    //     uint256 tokenId // TODO: Clean this up, possibly not needed at all
-    // ) public view virtual returns (LegendGenetics memory) {
-    //     require(
-    //         _exists(tokenId),
-    //         "ERC721Metadata: URI query for nonexistent token"
-    //     );
-    //     return legendGenetics[tokenId];
-    // }
+    function tokenDATA(
+        uint256 tokenId // TODO: Clean this up, possibly not needed at all
+    ) public view virtual returns (LegendGenetics memory) {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        return legendGenetics[tokenId];
+    }
 
     function tokenMeta(uint256 tokenId)
         public
@@ -125,14 +121,14 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     }
 
     function hatch(uint256 tokenId, string memory _tokenURI) public {
-        // require(isHatchable(tokenId, false) === true);
+        // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
         _setTokenURI(tokenId, _tokenURI);
-        LegendMetadata memory legend = legendData[tokenId];
-        legend.isHatched = true;
+        // LegendMetadata memory legend = legendData[tokenId];
+        legendData[tokenId].isHatched = true;
     }
 
     function mintTo(
-        address receiver,
+        address recipient,
         uint256 newItemId,
         string memory prefix,
         string memory postfix,
@@ -143,7 +139,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         uint256 _incubationDuration;
         bool isHatched;
 
-        _mint(receiver, newItemId);
+        _mint(recipient, newItemId);
 
         if (skipIncubation == true) {
             _incubationDuration = 0;
@@ -153,7 +149,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
             isHatched = false;
         }
 
-        LegendMetadata memory m;
+        // LegendMetadata memory m;
+        LegendMetadata storage m = legendData[newItemId];
         m.id = newItemId;
         m.prefix = prefix;
         m.postfix = postfix;
@@ -168,9 +165,9 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         m.isHatched = isHatched;
         m.isDestroyed = false;
 
-        legendData[newItemId] = m;
+        // legendData[newItemId] = m;
 
-        // TODO: Generate "enumEgg" function
+        // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
 
         string
             memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
@@ -181,10 +178,11 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
     }
 
     function breed(
+        address recipient,
         uint256 _parent1,
         uint256 _parent2,
         bool skipIncubation
-    ) public {
+    ) public returns (uint256) {
         require(
             ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
         );
@@ -195,14 +193,15 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         mixGenetics(parent1.id, parent2.id, newItemId);
-        mixStats(parent1.id, parent2.id, newItemId, baseHealth);
+        mixStats(parent1.id, parent2.id, newItemId);
+        // , baseHealth);
 
         uint256[2] memory parents = [_parent1, _parent2];
         bool mix = block.number % 2 == 0;
         bool isLegendary = false; // only one of a kind handmade Legends can be "Legendary"
 
         mintTo(
-            msg.sender,
+            recipient,
             newItemId,
             mix ? parent1.prefix : parent2.prefix,
             mix ? parent2.postfix : parent1.postfix,
@@ -212,6 +211,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         );
 
         emit Breed(parent1.id, parent2.id, newItemId);
+        return (newItemId);
     }
 
     // TODO: restrict access control to lab
@@ -226,7 +226,8 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         uint256 newItemId = _tokenIds.current();
 
         createGenetics(newItemId);
-        createStats(newItemId, baseHealth);
+        createStats(newItemId);
+        // , baseHealth);
 
         uint256 promoParent = 0;
         uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents
@@ -250,19 +251,16 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         breedingCooldown = _breedingCooldown;
     }
 
-    // function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
-    //     offspringLimit = _offspringLimit;
-    // }
+    function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
+        offspringLimit = _offspringLimit;
+    }
 
-    // function setBreedingCost(uint256 _baseBreedingCost) public onlyLab {
-    //     baseBreedingCost = _baseBreedingCost;
-    // }
+    function setBreedingCost(uint256 _baseBreedingCost) public onlyLab {
+        baseBreedingCost = _baseBreedingCost;
+    }
 
-    // function setSeason(string memory _season) public onlyLab {
-    //     season = _season;
-    // }
+    function setSeason(string memory _season) public onlyLab {
+        season = _season;
+    }
 
-    // function setBaseHealth(uint256 _baseHealth) public onlyLab {
-    //     baseHealth = _baseHealth;
-    // }
 }

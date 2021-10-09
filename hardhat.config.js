@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require('dotenv').config()
+require('hardhat-contract-sizer');
 
 const PRIVATEKEY = process.env.PRIVATEKEY
 

@@ -3,13 +3,22 @@
 pragma solidity ^0.8.0;
 
 import "./LegendComposition.sol";
+import "../control/LegendsLaboratory.sol";
 
 contract LegendStats is ILegendComposition {
     mapping(uint256 => LegendStats) public legendStats;
 
-    event StatsAssigned(LegendStats s);
+    uint256 public baseHealth;
 
-    function createStats(uint256 id, uint256 baseHealth) public {
+    event StatsAssigned(LegendStats s);
+    
+    LegendsLaboratory lab1;
+
+    modifier onlyLab1() {
+        require(msg.sender == address(lab1), "not lab owner");
+        _;
+    }
+    function createStats(uint256 id) public {
         // TODO: Link oracle random number
         // TODO: base stat build enum
         uint256 randomValue = clamp(randomS(4), 1, 3);
@@ -31,9 +40,9 @@ contract LegendStats is ILegendComposition {
     function mixStats(
         uint256 _parent1,
         uint256 _parent2,
-        uint256 id,
-        uint256 baseHealth
-    ) public {
+        uint256 id
+    ) public // uint256 baseHealth
+    {
         LegendStats storage parent1 = legendStats[_parent1];
         LegendStats storage parent2 = legendStats[_parent2];
 
@@ -58,6 +67,10 @@ contract LegendStats is ILegendComposition {
         legendStats[id] = s;
 
         emit StatsAssigned(s);
+    }
+
+    function setBaseHealth(uint256 _baseHealth) public onlyLab1 {
+        baseHealth = _baseHealth;
     }
 
     // Random Number oracle call could go here

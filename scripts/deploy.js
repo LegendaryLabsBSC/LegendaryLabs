@@ -1,30 +1,44 @@
+const fs = require('fs')
+const path = require('path')
+
+
 // TODO: have settable values set on deploy
 async function main() {
+  const LegendsLaboratory = await hre.ethers.getContractFactory("LegendsLaboratory");
+  const legendsLaboratory = await LegendsLaboratory.deploy();
+  await legendsLaboratory.deployed();
+  console.log("LegendsLaboratory deployed to:", legendsLaboratory.address);
+  const contract = legendsLaboratory.attach(legendsLaboratory.address)
+  const children = await contract.getChildContracts()
+  console.log(children)
 
-  // const Greeter = await hre.ethers.getContractFactory("Greeter");
-  // const greeter = await Greeter.deploy("Hello, Hardhat!");
-  // await greeter.deployed();
-  // console.log("Greeter deployed to:", greeter.address);
+  const contract_config = path.join(__dirname, '../frontend/src/contract_config/contract-config.js')
+  fs.readFile(contract_config, 'utf-8', (err, data) => {
+    if (err)
+      return (console.log(err))
+    const re = `
+    const legendsLaboratory = "${legendsLaboratory.address}"
+    const legendsNFT = "${children[0]}"
+    const legendsToken = "${children[1]}"
+    const legendsMarketplace = "${children[2]}"
 
-  // const Token = await hre.ethers.getContractFactory("Token");
-  // const token = await Token.deploy();
-  // await token.deployed();
-  // console.log("Token deployed to:", token.address);
+    export { legendsLaboratory, legendsNFT, legendsToken, legendsMarketplace }
+    `
+    fs.writeFile(contract_config, re, 'utf-8', (err) => {
+      if (err) console.log(err)
 
-  const LegendsNFT = await hre.ethers.getContractFactory("LegendsNFT");
-  const legendsnft = await LegendsNFT.deploy();
-  await legendsnft.deployed();
-  console.log("LegendsNFT deployed to:", legendsnft.address);
+      console.log('New Addresses Loaded')
+    })
 
-  // const LegendsNFT = await hre.ethers.getContractFactory("LegendsLabratory");
-  // const legendsnft = await LegendsNFT.deploy();
-  // await legendsnft.deployed();
-  // console.log("LegendsNFT deployed to:", legendsnft.address);
+  })
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+  // .then(res => {
+  // loadNewAddresses(res)
+  // })
+  // .then(() => process.exit(0))
+  // .catch((error) => {
+    // console.error(error);
+    // process.exit(1);
+  // });
