@@ -14,40 +14,42 @@ abstract contract LegendSale is ILegendListing {
     mapping(uint256 => mapping(address => uint256)) internal _legendOwed;
 
     function _createLegendSale(
-        address nftContract,
-        uint256 tokenId,
-        uint256 price
+        address _nftContract,
+        uint256 _tokenId,
+        uint256 _price
     ) internal {
         _listingIds.increment();
         uint256 _listingId = _listingIds.current();
 
         LegendListing storage l = legendListing[_listingId];
         l.listingId = _listingId;
-        l.nftContract = nftContract;
-        l.tokenId = tokenId;
+        l.nftContract = _nftContract;
+        l.tokenId = _tokenId;
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
-        l.price = price;
-        l.isAuction = false;
+        l.price = _price;
+        // l.isAuction = false; // should be false by default 
+        // l.isOffer =
         l.status = ListingStatus.Open;
 
         emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
-    function _buyLegend(uint256 listingId) internal {
-        LegendListing storage l = legendListing[listingId];
+    function _buyLegend(uint256 _listingId) internal {
+        LegendListing storage l = legendListing[_listingId];
+
         l.buyer = payable(msg.sender);
         l.status = ListingStatus.Closed;
 
-        _legendOwed[listingId][payable(msg.sender)] = l.tokenId;
+        _legendOwed[_listingId][payable(msg.sender)] = l.tokenId;
 
         _listingsClosed.increment();
 
-        emit ListingStatusChanged(listingId, ListingStatus.Closed); // try with l.status, on all
+        emit ListingStatusChanged(_listingId, ListingStatus.Closed); // try with l.status, on all
     }
 
-    function _cancelLegendListing(uint256 listingId) internal {
-        LegendListing storage l = legendListing[listingId];
+    function _cancelLegendListing(uint256 _listingId) internal {
+        LegendListing storage l = legendListing[_listingId];
 
         l.status = ListingStatus.Cancelled;
 
@@ -55,6 +57,6 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsCancelled.increment();
 
-        emit ListingStatusChanged(listingId, ListingStatus.Cancelled);
+        emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
     }
 }

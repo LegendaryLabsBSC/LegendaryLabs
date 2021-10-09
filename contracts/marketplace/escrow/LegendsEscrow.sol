@@ -39,6 +39,7 @@ contract LegendsEscrow is
 
     mapping(address => uint256) private _paymentOwed;
     mapping(uint256 => mapping(address => uint256)) private _pendingBid;
+    mapping(uint256 => mapping(address => uint256)) private _pendingOffer;
 
     //TODO: change name; paymentsOwed ?
     function depositsOf(address payee) public view returns (uint256) {
@@ -66,7 +67,7 @@ contract LegendsEscrow is
         emit Deposited(payee, amount);
     }
 
-    function depositBid(uint256 listingId, address bidder)
+    function depositBid(uint256 listingId, address payer)
         public
         payable
         virtual
@@ -74,24 +75,35 @@ contract LegendsEscrow is
     {
         uint256 amount = msg.value;
 
-        _pendingBid[listingId][bidder] += amount;
+        _pendingBid[listingId][payer] = amount; // try without + for increase bid issue
 
-        emit Deposited(bidder, amount);
+        emit Deposited(payer, amount);
     }
 
-        function depositBid1(uint256 listingId, address bidder)
-        public
-        payable
-        virtual
-        onlyOwner
-    {
-        // uint256 amount = msg.value;
+    // function depositOffer(uint256 listingId, address payee)
+    //     public
+    //     payable
+    //     virtual
+    //     onlyOwner
+    // {
+    //     uint256 amount = msg.value;
 
-        // _pendingBid[listingId][bidder] += amount;
+    //     _pendingOffer[listingId][payee] = amount;
 
-        // emit Deposited(bidder, amount);
-        // bool good;
-    }
+    //     emit Deposited(payee, amount);
+    // }
+
+    // function depositBid1(uint256 listingId, address bidder)
+    //     public
+    //     payable
+    //     virtual
+    //     onlyOwner
+    // {
+    //     // uint256 amount = msg.value;
+    //     // _pendingBid[listingId][bidder] += amount;
+    //     // emit Deposited(bidder, amount);
+    //     // bool good;
+    // }
 
     function obligateBid(
         uint256 listingId,
@@ -121,6 +133,21 @@ contract LegendsEscrow is
 
         // emit Deposited(bidder, amount);
     }
+
+    // function refundOffer(uint256 listingId, address payable bidder)
+    //     public
+    //     payable
+    //     virtual
+    //     onlyOwner
+    // {
+    //     uint256 amount = _pendingBid[listingId][bidder];
+
+    //     _pendingBid[listingId][bidder] = 0;
+
+    //     bidder.sendValue(amount);
+
+    //     // emit Deposited(bidder, amount);
+    // }
 
     // function depositLegend(address payee, uint256 tokenId)
     //     public

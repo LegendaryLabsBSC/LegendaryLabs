@@ -76,6 +76,14 @@ abstract contract LegendsAuctioneer {
         _escrow.refundBid(listingId, payee);
     }
 
+    // function _withdrawOffer(uint256 listingId, address payable payee)
+    //     internal
+    //     virtual
+    // {
+    //     require(_withdrawAllowed[listingId][payee], "Not authorized");
+    //     _escrow.refundOffer(listingId, payee);
+    // }
+
     /*/*
      * @dev Called by the payer to store the sent amount as credit to be pulled.
      * Funds sent in this way are stored in an intermediate {Escrow} contract, so
@@ -104,7 +112,7 @@ abstract contract LegendsAuctioneer {
         return _escrow.depositsOf(dest);
     }
 
-    /**
+    /*/*
      * @dev Called by the payer to store the sent amount as credit to be pulled.
      * Funds sent in this way are stored in an intermediate {Escrow} contract, so
      * there is no danger of them being spent before withdrawal.
@@ -112,25 +120,33 @@ abstract contract LegendsAuctioneer {
      * @param dest The destination address of the funds.
      * @param amount The amount to transfer.
      */
-    function _asyncTransfer(address dest, uint256 amount) internal virtual {
-        _escrow.deposit{value: amount}(dest);
+    function _asyncTransfer(address payee, uint256 amount) internal virtual {
+        _escrow.deposit{value: amount}(payee);
     }
 
     function _asyncTransferBid(
         uint256 listingId,
-        address bidder,
+        address payer,
         uint256 amount
     ) internal virtual {
-        _escrow.depositBid{value: amount}(listingId, bidder);
+        _escrow.depositBid{value: amount}(listingId, payer);
     }
 
-        function _asyncTransferBid1(
-        uint256 listingId,
-        address bidder,
-        uint256 amount
-    ) internal virtual {
-        _escrow.depositBid1{value: amount}(listingId, bidder);
-    }
+    // function _asyncTransferOffer(
+    //     uint256 listingId,
+    //     address dest,
+    //     uint256 amount
+    // ) internal virtual {
+    //     _escrow.depositOffer{value: amount}(listingId, dest);
+    // }
+
+    // function _asyncTransferBid1(
+    //     uint256 listingId,
+    //     address bidder,
+    //     uint256 amount
+    // ) internal virtual {
+    //     _escrow.depositBid1{value: amount}(listingId, bidder);
+    // }
 
     function _obligateBid(
         uint256 listingId,

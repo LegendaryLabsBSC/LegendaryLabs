@@ -451,6 +451,7 @@ function App() {
       const b = await marketplace.read.legendListing(1)
       const l = await marketplace.read.legendListing(id)
       const a = await marketplace.read.auctionDetails(id)
+      const o = await marketplace.read.offerDetails(id)
 
       console.log(`Listing ID: ${l.listingId}`)
       console.log(`Contract: ${l.nftContract}`)
@@ -459,9 +460,10 @@ function App() {
       console.log(`Buyer: ${l.buyer}`)
       console.log(`Price: ${l.price}`)
       console.log(`is Auction: ${l.isAuction}`)
+      console.log(`is Offer: ${l.isOffer}`)
       if (l.status === 0) {
         console.log('Status: Null')
-      }else if (l.status === 1) {
+      } else if (l.status === 1) {
         console.log('Status: Open')
       } else if (l.status === 2) {
         console.log('Status: Closed')
@@ -503,6 +505,13 @@ function App() {
         // // console.log(a)
 
         console.log(`Instant Buy: ${a.instantBuy}`)
+        console.log('')
+      }
+      if (l.isOffer) {
+        console.log(`Place At: ${o.placedAt}`)
+        console.log(`Expiration Time: ${o.expirationTime}`)
+        console.log(`Token Owner: ${o.tokenOwner}`)
+        console.log(`Is Accepted: ${o.isAccepted}`)
         console.log('')
       }
     }
@@ -564,6 +573,7 @@ function App() {
         console.log(`Buyer: ${listing.buyer}`)
         console.log(`Price: ${listing.price}`)
         console.log(`is Auction: ${listing.isAuction}`)
+        console.log(`is Offer: ${listing.isOffer}`)
         console.log(`Status: ${listing.status}`)
         console.log('')
         if (listing.isAuction) {
@@ -674,17 +684,19 @@ function App() {
   async function bidOnLegend() {
     if (typeof window.ethereum !== 'undefined') {
       const auctionBid = ethers.utils.parseUnits(bid, 'ether')
-      await marketplace.write.placeBid(id, {
+      const transaction = await marketplace.write.debugBid(id, {
         value: auctionBid,
       })
+      await transaction.wait
     }
   }
   async function increaseBid() {
     if (typeof window.ethereum !== 'undefined') {
       const auctionBid = ethers.utils.parseUnits(bid, 'ether')
-      await marketplace.write.placeBid1(id, {
+      const transaction = await marketplace.write.placeBid1(id, {
         value: auctionBid,
       })
+      await transaction.wait
     }
   }
   async function depositsOf() {
@@ -866,6 +878,49 @@ function App() {
   //   return pinataGeteway + cid.split('//')[1]
   // }
 
+  async function makeLegendOffer() {
+    if (typeof window.ethereum !== 'undefined') {
+      const price = ethers.utils.parseUnits(sellPrice, 'ether')
+      // console.log(price)
+      const transaction = await marketplace.write.makeLegendOffer(legendsNFTAddress, id, { value: price })
+      await transaction.wait
+
+      // const price = ethers.utils.parseUnits(sellPrice, 'ether')
+      // const transaction = await marketplace.write.createLegendSale(legendsNFTAddress, id, price)
+      // await transaction.wait
+      // .then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // }),
+      // )
+    }
+  }
+
+  async function acceptLegendOffer() {
+    if (typeof window.ethereum !== 'undefined') {
+      const transaction = await marketplace.write.decideLegendOffer(id, true)
+      await transaction.wait
+      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // })
+    }
+  }
+
+  async function rejectLegendOffer() {
+    if (typeof window.ethereum !== 'undefined') {
+      const transaction = await marketplace.write.decideLegendOffer(id, false)
+      await transaction.wait
+      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // })
+    }
+  }
+
   return (
     <div>
       <header>
@@ -951,6 +1006,9 @@ function App() {
           <button type="submit" onClick={createLegendSale}>
             Create Legend Listing
           </button>
+          <button type="submit" onClick={makeLegendOffer}>
+            Make Legend Offer
+          </button>
           <br />
           <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={buyLegend}>
@@ -958,6 +1016,12 @@ function App() {
           </button>
           <button type="submit" onClick={cancelLegendSale}>
             Cancel Listing
+          </button>
+          <button type="submit" onClick={acceptLegendOffer}>
+            Accept Offer
+          </button>
+          <button type="submit" onClick={rejectLegendOffer}>
+            Reject Offer
           </button>
           <br />
           <button type="submit" onClick={fetchLegendListings}>

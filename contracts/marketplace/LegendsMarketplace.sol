@@ -2,11 +2,12 @@
 
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./escrow/LegendsAuctioneer.sol";
 import "../control/LegendsLaboratory.sol";
 import "../legend/LegendsNFT.sol"; // remove, use an interface/abstract where needed
 import "./listings/LegendAuction.sol";
+import "./listings/LegendOffer.sol";
 
 /** TODO:
  * incorporate royalties
@@ -15,21 +16,18 @@ import "./listings/LegendAuction.sol";
  */
 
 contract LegendsMarketplace is
-    LegendAuction,
+    ReentrancyGuard,
     LegendsAuctioneer,
-    ReentrancyGuard
+    LegendAuction,
+    LegendOffer
 {
-    // using SafeMath for uint256; // try to get rid of
+    using SafeMath for uint256; // try to get rid of
 
     event BidRefunded(uint256 listingId, address bidder, uint256 bidAmount);
 
     uint256 public marketplaceFee;
 
-    address payable owner;
     LegendsLaboratory lab;
-
-    // mapping(ListingType => mapping(uint256 => mapping(address => uint256)))
-    //     public listingsEntered;
 
     modifier onlyLab() {
         require(msg.sender == address(lab));
@@ -37,7 +35,6 @@ contract LegendsMarketplace is
     }
 
     constructor() {
-        owner = payable(msg.sender);
         lab = LegendsLaboratory(msg.sender);
     }
 
@@ -59,28 +56,13 @@ contract LegendsMarketplace is
         return counts;
     }
 
-    //TODO: check out returing array of structs
-    // function fetchLegendListings()
-    //     public
-    //     view
-    //     returns (LegendListing memory)
-    // {
-    //     LegendListing memory counts = [
-    //         _listingIds,
-    //         _listingsClosed,
-    //         _listingsCancelled
-    //     ];
-
-    //     return counts;
-    // }
-
     function createLegendSale(
         address nftContract,
         uint256 tokenId,
         uint256 price
     ) public payable nonReentrant {
         LegendsNFT legendsNFT = LegendsNFT(nftContract);
-        require(legendsNFT.ownerOf(tokenId) == msg.sender); // ? reworkable
+        require(legendsNFT.ownerOf(tokenId) == msg.sender); // ? reworkable; to modifier?
         require(price > 0, "Price can not be 0");
 
         // _asyncTransferLegend(address(0), tokenId);
@@ -140,8 +122,10 @@ contract LegendsMarketplace is
             require(msg.value >= a.startingPrice, "Minimum price not met");
         }
 
-        uint256 newBid = bids[listingId][msg.sender] + (msg.value); // ! thoroughly test without SM
+        uint256 newBid = bids[listingId][msg.sender].add((msg.value)); // ! thoroughly test without SC
         require(newBid > a.highestBid, "Bid must be higher than current bid"); // ! allowing same price bid
+
+        _withdrawAllowed[listingId][msg.sender] = false;
 
         // bids[listingId][msg.sender] = newBid; // redundant LAuction.sol 70
         _asyncTransferBid(listingId, payable(msg.sender), newBid);
@@ -151,8 +135,6 @@ contract LegendsMarketplace is
 
         _placeBid(listingId, newBid);
 
-        _withdrawAllowed[listingId][msg.sender] = false;
-
         if (a.instantBuy) {
             if (newBid >= instantBuyPrice[listingId]) {
                 //TODO: do not allow user input over IB-price on FE
@@ -162,48 +144,87 @@ contract LegendsMarketplace is
         }
     }
 
-    function placeBid1(uint256 listingId) public payable {
-        AuctionDetails storage a = auctionDetails[listingId];
-        LegendListing storage l = legendListing[listingId];
+    function debugBid(uint256 listingId) external payable {
+        uint256 newBid = bids[listingId][msg.sender].add((msg.value)); // ! thoroughly test without SC
 
-        require(l.status == ListingStatus.Open);
-        require(!isExpired(listingId), "Auction has expired");
-        require(msg.sender != l.seller, "Seller can not bid");
-
-        if (a.bidders.length == 0) {
-            require(msg.value >= a.startingPrice, "Minimum price not met");
-        }
-
-        uint256 newBid = bids[listingId][msg.sender] + (msg.value); // ! thoroughly test without SM
-        require(newBid > a.highestBid, "Bid must be higher than current bid"); // ! allowing same price bid
-
-        // bids[listingId][msg.sender] = newBid; // redundant LAuction.sol 70
-        // _asyncTransferBid1(listingId, payable(msg.sender), newBid);
-        _asyncTransfer(payable(msg.sender), newBid);
-
-        // Allow previous highest bidder to reclaim or increase their bid  !! did we test this with PoP??
-        _withdrawAllowed[listingId][a.highestBidder] = true;
+        _asyncTransferBid(listingId, payable(msg.sender), newBid);
 
         _placeBid(listingId, newBid);
-
-        _withdrawAllowed[listingId][msg.sender] = false;
-
-        if (a.instantBuy) {
-            if (newBid >= instantBuyPrice[listingId]) {
-                //TODO: do not allow user input over IB-price on FE
-                _closeAuction(listingId);
-                _withdrawAllowed[listingId][l.seller] = true;
-            }
-        }
     }
 
+    //TODO: change name to accommodate offer
     function withdrawBid(uint256 listingId) external payable {
+        LegendListing memory l = legendListing[listingId];
+        require(msg.sender != l.seller);
+
         _withdrawBid(listingId, payable(msg.sender));
 
-        bids[listingId][msg.sender] = 0;
+        if (legendListing[listingId].isAuction) {
+            bids[listingId][msg.sender] = 0;
+        }
+
         _withdrawAllowed[listingId][msg.sender] = false;
 
         emit BidRefunded(listingId, msg.sender, payments(msg.sender)); // will error ; payments not set up for bidders
+    }
+
+    function makeLegendOffer(address nftContract, uint256 tokenId)
+        public
+        payable
+        // uint256 price
+        nonReentrant
+    {
+        LegendsNFT legendsNFT = LegendsNFT(nftContract);
+        // require(legendsNFT.ownerOf(tokenId) == msg.sender); // ? reworkable
+        // owner cant be... make dynamic offer blacklist
+        require(msg.value > 0, "Price can not be 0");
+
+        address tokenOwner = legendsNFT.ownerOf(tokenId);
+
+        uint256 listingId = _makeLegendOffer(nftContract, tokenOwner, tokenId);
+
+        _withdrawAllowed[listingId][msg.sender] = false;
+
+        _asyncTransferBid(listingId, msg.sender, msg.value);
+    }
+
+    function decideLegendOffer(uint256 listingId, bool isAccepted)
+        external
+        payable
+        nonReentrant
+    {
+        LegendListing memory l = legendListing[listingId];
+        OfferDetails memory o = offerDetails[listingId];
+        LegendsNFT legendsNFT = LegendsNFT(l.nftContract);
+
+        require(
+            legendsNFT.ownerOf(l.tokenId) == msg.sender &&
+                msg.sender == o.tokenOwner,
+            "Not authorized"
+        );
+        require(block.timestamp < o.expirationTime, "Offer is expired");
+        require(l.status == ListingStatus.Open);
+
+        // uint256 laboratoryFee = (l.price * marketplaceFee) / 100;
+        // TODO:  include royality payment logic
+        // TODO: include Lab fee
+
+        if (isAccepted) {
+            legendsNFT.transferFrom(msg.sender, address(this), l.tokenId);
+            _acceptLegendOffer(listingId);
+
+            _obligateBid(listingId, l.buyer, msg.sender);
+
+            _withdrawAllowed[listingId][msg.sender] = true; // make sure l.seller is updated intime
+        } else {
+            /**
+             * Token owner can also just let the offer expire
+             * if they do not wish to pay gas to reject
+             */
+
+            _rejectLegendOffer(listingId);
+            _withdrawAllowed[listingId][l.buyer] = true;
+        }
     }
 
     function closeListing(uint256 listingId) external payable {
@@ -231,6 +252,7 @@ contract LegendsMarketplace is
                 _withdrawAllowed[listingId][l.seller] = true;
             }
         }
+
         if (msg.sender == l.seller) {
             _claimPayment(listingId);
         } else if (msg.sender == l.buyer) {
@@ -242,8 +264,13 @@ contract LegendsMarketplace is
 
     function cancelLegendListing(uint256 listingId) public nonReentrant {
         LegendListing memory l = legendListing[listingId];
-        require(msg.sender == l.seller);
         require(l.status == ListingStatus.Open);
+
+        if (l.isOffer) {
+            require(msg.sender == l.buyer);
+        } else {
+            require(msg.sender == l.seller);
+        }
 
         if (l.isAuction) {
             require(
@@ -252,12 +279,17 @@ contract LegendsMarketplace is
             );
         }
 
-        // this must be reworked if we get ierc721 escrow
-        LegendsNFT(l.nftContract).transferFrom(
-            address(this),
-            l.seller,
-            l.tokenId
-        );
+        if (l.isOffer) {
+            _withdrawAllowed[listingId][msg.sender] = true;
+        } else {
+            // this must be reworked if we get ierc721 escrow
+            LegendsNFT(l.nftContract).transferFrom(
+                address(this),
+                l.seller,
+                l.tokenId
+            );
+        }
+
         _cancelLegendListing(listingId);
     }
 
@@ -291,6 +323,14 @@ contract LegendsMarketplace is
         } else if (l.isAuction) {
             amount = payments(l.buyer);
         }
+
+        // if (l.isOffer) {
+        //     amount = payments(l.seller);
+        // } else if (l.isAuction) {
+        //     amount = payments(l.buyer);
+        // } else if (!l.isAuction && !l.isOffer) {
+        //     amount = payments(l.seller);
+        // }
 
         require(amount != 0, "Address is owed 0");
 

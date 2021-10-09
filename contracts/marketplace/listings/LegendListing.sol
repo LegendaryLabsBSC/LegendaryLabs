@@ -20,6 +20,7 @@ interface ILegendListing {
         address payable buyer;
         uint256 price;
         bool isAuction;
+        bool isOffer;
         ListingStatus status;
     }
 }

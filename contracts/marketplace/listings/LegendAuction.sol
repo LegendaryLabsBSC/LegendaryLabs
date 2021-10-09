@@ -38,25 +38,26 @@ abstract contract LegendAuction is LegendSale {
     mapping(uint256 => mapping(address => bool)) internal exists;
 
     function _createLegendAuction(
-        address nftContract,
-        uint256 tokenId,
-        uint256 duration,
-        uint256 startingPrice,
-        uint256 instantPrice
+        address _nftContract,
+        uint256 _tokenId,
+        uint256 _duration,
+        uint256 _startingPrice,
+        uint256 _instantPrice
     ) internal {
         _listingIds.increment();
         uint256 _listingId = _listingIds.current();
 
-        bool _instantBuy;
-        if (instantPrice != 0) {
-            _instantBuy = true;
-            instantBuyPrice[_listingId] = instantPrice;
+        bool instantBuy;
+
+        if (_instantPrice != 0) {
+            instantBuy = true;
+            instantBuyPrice[_listingId] = _instantPrice;
         }
 
         LegendListing storage l = legendListing[_listingId];
         l.listingId = _listingId;
-        l.nftContract = nftContract;
-        l.tokenId = tokenId;
+        l.nftContract = _nftContract;
+        l.tokenId = _tokenId;
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
         l.isAuction = true;
@@ -64,59 +65,59 @@ abstract contract LegendAuction is LegendSale {
 
         AuctionDetails storage a = auctionDetails[_listingId];
         a.createdAt = block.timestamp;
-        a.duration = duration;
-        a.startingPrice = startingPrice;
-        a.instantBuy = _instantBuy;
+        a.duration = _duration;
+        a.startingPrice = _startingPrice;
+        a.instantBuy = instantBuy;
 
         emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
-    function _placeBid(uint256 listingId, uint256 newBid) internal {
-        AuctionDetails storage a = auctionDetails[listingId];
+    function _placeBid(uint256 _listingId, uint256 _newBid) internal {
+        AuctionDetails storage a = auctionDetails[_listingId];
 
-        bids[listingId][msg.sender] = newBid; // redundant LMplace.sol 153
+        bids[_listingId][msg.sender] = _newBid; //TODO: redundant LMplace.sol 153
 
-        if (!exists[listingId][msg.sender]) {
+        if (!exists[_listingId][msg.sender]) {
             a.bidders.push(msg.sender);
-            listBidders[listingId].push(msg.sender);
-            exists[listingId][msg.sender] = true;
+            listBidders[_listingId].push(msg.sender);
+            exists[_listingId][msg.sender] = true;
 
             // TODO:
             // // Adds to the auctions where the user is participating
             // auctionsParticipating[msg.sender].push(_auctionId);
         }
 
-        a.highestBid = newBid;
+        a.highestBid = _newBid;
         a.highestBidder = payable(msg.sender);
 
-        if (shouldExtend(listingId)) {
-            if (newBid != instantBuyPrice[listingId]) {
+        if (shouldExtend(_listingId)) {
+            if (_newBid != instantBuyPrice[_listingId]) {
                 a.duration = (a.duration + 600); // TODO: make extension a state variable
 
-                emit AuctionExtended(listingId, a.duration);
+                emit AuctionExtended(_listingId, a.duration);
             }
         }
 
-        emit BidPlaced(listingId, a.highestBidder, a.highestBid);
+        emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
     }
 
-    function _closeAuction(uint256 listingId) internal {
-        LegendListing storage l = legendListing[listingId];
-        AuctionDetails storage a = auctionDetails[listingId];
+    function _closeAuction(uint256 _listingId) internal {
+        LegendListing storage l = legendListing[_listingId];
+        AuctionDetails storage a = auctionDetails[_listingId];
 
         l.buyer = a.highestBidder;
         l.price = a.highestBid;
         l.status = ListingStatus.Closed;
 
-        _legendOwed[listingId][a.highestBidder] = l.tokenId; // ? does this belong in this contract ; yes, until we get moved over to escrow
+        _legendOwed[_listingId][a.highestBidder] = l.tokenId; // ? does this belong in this contract ; yes, until we get moved over to escrow
 
         _listingsClosed.increment();
 
-        emit ListingStatusChanged(listingId, ListingStatus.Closed);
+        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
     }
 
-    function isExpired(uint256 listingId) public view returns (bool) {
-        AuctionDetails memory a = auctionDetails[listingId];
+    function isExpired(uint256 _listingId) public view returns (bool) {
+        AuctionDetails memory a = auctionDetails[_listingId];
         bool _isExpired;
 
         uint256 expirationTime = a.createdAt + a.duration;
@@ -127,8 +128,8 @@ abstract contract LegendAuction is LegendSale {
         return _isExpired;
     }
 
-    function shouldExtend(uint256 listingId) internal view returns (bool) {
-        AuctionDetails memory a = auctionDetails[listingId];
+    function shouldExtend(uint256 _listingId) internal view returns (bool) {
+        AuctionDetails memory a = auctionDetails[_listingId];
         bool _shouldExtend;
 
         uint256 expirationTime = a.createdAt + a.duration;
