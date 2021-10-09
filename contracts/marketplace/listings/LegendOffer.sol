@@ -6,13 +6,11 @@ import "./LegendSale.sol";
 abstract contract LegendOffer is LegendSale {
     using Counters for Counters.Counter;
 
-    // event AuctionExpired(uint256 listingId, string); //TODO:
-    // event AuctionExtended(uint256 listingId, uint256 newDuration);
-    // event BidPlaced(
-    //     uint256 listingId,
-    //     address newHighestBidder,
-    //     uint256 newHighestBid
-    // );
+    event OfferMade(uint256 listingId, uint256 price);
+    event OfferDecided(uint256 listingId, bool isAccepted);
+
+    // uint256 internal offerDuration; // commented out for testing
+    uint256 internal offerDuration = 432000; // 5 days
 
     struct OfferDetails {
         uint256 placedAt;
@@ -21,21 +19,9 @@ abstract contract LegendOffer is LegendSale {
         bool isAccepted; // make enum if theres space
     }
 
-    // uint256 internal offerDuration; // commented out for debugging
-    uint256 internal offerDuration = 432000; // 5 days
-
-    // mapping(uint256 => address[]) internal listBidders; // for debug
-
-    // function gaH(uint256 listingId) public view returns (address[] memory) {
-    //     return listBidders[listingId];
-    // }
-
-    // mapping(uint256 => uint256) public instantBuyPrice;
     mapping(uint256 => OfferDetails) public offerDetails;
 
-    // //TODO: change to bid
-    // mapping(uint256 => mapping(address => uint256)) internal bids; // make getter
-    // mapping(uint256 => mapping(address => bool)) internal exists;
+    //TODO: offers placed
 
     function _makeLegendOffer(
         address _nftContract,
@@ -45,13 +31,15 @@ abstract contract LegendOffer is LegendSale {
         _listingIds.increment();
         uint256 _listingId = _listingIds.current();
 
+        uint256 _price = msg.value;
+
         LegendListing storage l = legendListing[_listingId];
         l.listingId = _listingId;
         l.nftContract = _nftContract;
         l.tokenId = _tokenId;
         l.seller = payable(address(0));
         l.buyer = payable(msg.sender);
-        l.price = msg.value;
+        l.price = _price;
         l.isOffer = true;
         l.status = ListingStatus.Open;
 
@@ -60,7 +48,7 @@ abstract contract LegendOffer is LegendSale {
         o.expirationTime = block.timestamp + offerDuration;
         o.tokenOwner = payable(_tokenOwner);
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Open);
+        emit OfferMade(_listingId, _price);
 
         return (_listingId);
     }
@@ -77,7 +65,7 @@ abstract contract LegendOffer is LegendSale {
 
         _listingsClosed.increment();
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Closed); // try with l.status, on all
+        emit OfferDecided(_listingId, true);
     }
 
     function _rejectLegendOffer(uint256 _listingId) internal {
@@ -89,18 +77,6 @@ abstract contract LegendOffer is LegendSale {
 
         _listingsClosed.increment();
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Closed); // try with l.status, on all
+        emit OfferDecided(_listingId, false);
     }
-
-    // function isExpired(uint256 listingId) public view returns (bool) {
-    //     AuctionDetails memory a = auctionDetails[listingId];
-    //     bool _isExpired;
-
-    //     uint256 expirationTime = a.createdAt + a.duration;
-    //     if (block.timestamp >= expirationTime) {
-    //         _isExpired = true;
-    //     }
-
-    //     return _isExpired;
-    // }
 }

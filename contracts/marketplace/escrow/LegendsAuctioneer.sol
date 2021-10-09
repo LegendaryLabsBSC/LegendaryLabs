@@ -2,20 +2,11 @@
 
 /**
  * Original contract by OpenZeppelin (Pull Payments)
- * Only slightly modified to fit Legendary Labs needs
+ * Slightly modified to fit Legendary Labs needs
  * These changes were made primarily to facilitate auctions
- * Additions are as follow:
- *
- * LAClerk ...
- * _withdrawlAllowed .. state variable,
- * listingId parameter in withdrawPayments function
- * withdrawHighestBid internal function
- *
  */
 
 pragma solidity ^0.8.0;
-
-// import "./LegendsAuctionClerk.sol";
 import "./LegendsEscrow.sol";
 
 /**
@@ -39,7 +30,7 @@ import "./LegendsEscrow.sol";
 abstract contract LegendsAuctioneer {
     LegendsEscrow private immutable _escrow;
 
-    mapping(uint256 => mapping(address => bool)) internal _withdrawAllowed; // public for testing ; no assignment picked yet
+    mapping(uint256 => mapping(address => bool)) internal _withdrawAllowed;
 
     constructor() {
         _escrow = new LegendsEscrow();
@@ -76,34 +67,6 @@ abstract contract LegendsAuctioneer {
         _escrow.refundBid(listingId, payee);
     }
 
-    // function _withdrawOffer(uint256 listingId, address payable payee)
-    //     internal
-    //     virtual
-    // {
-    //     require(_withdrawAllowed[listingId][payee], "Not authorized");
-    //     _escrow.refundOffer(listingId, payee);
-    // }
-
-    /*/*
-     * @dev Called by the payer to store the sent amount as credit to be pulled.
-     * Funds sent in this way are stored in an intermediate {Escrow} contract, so
-     * there is no danger of them being spent before withdrawal.
-     *
-     * @param dest The destination address of the funds.
-     * @param amount The amount to transfer.
-     */
-    // function withdrawHighestBid(
-    //     uint256 listingId,
-    //     address payable buyer,
-    //     address payable seller
-    // ) internal virtual {
-    //     require(
-    //         _withdrawAllowed[listingId][seller], // take into account the various listing types
-    //         "ConditionalEscrow: payee is not allowed to withdraw"
-    //     );
-    //     _escrow.auctionWithdraw(listingId, buyer, seller);
-    // }
-
     /**
      * @dev Returns the payments owed to an address.
      * @param dest The creditor's address.
@@ -132,22 +95,6 @@ abstract contract LegendsAuctioneer {
         _escrow.depositBid{value: amount}(listingId, payer);
     }
 
-    // function _asyncTransferOffer(
-    //     uint256 listingId,
-    //     address dest,
-    //     uint256 amount
-    // ) internal virtual {
-    //     _escrow.depositOffer{value: amount}(listingId, dest);
-    // }
-
-    // function _asyncTransferBid1(
-    //     uint256 listingId,
-    //     address bidder,
-    //     uint256 amount
-    // ) internal virtual {
-    //     _escrow.depositBid1{value: amount}(listingId, bidder);
-    // }
-
     function _obligateBid(
         uint256 listingId,
         address buyer,
@@ -155,8 +102,4 @@ abstract contract LegendsAuctioneer {
     ) internal virtual {
         _escrow.obligateBid(listingId, buyer, payable(seller));
     }
-
-    // function _asyncTransferLegend(address dest, uint256 tokenId) internal virtual {
-    //     _escrow.depositLegend(dest, tokenId);
-    // }
 }

@@ -6,6 +6,7 @@ import "./LegendListing.sol";
 
 abstract contract LegendSale is ILegendListing {
     using Counters for Counters.Counter;
+
     Counters.Counter internal _listingIds;
     Counters.Counter internal _listingsClosed;
     Counters.Counter internal _listingsCancelled;
@@ -28,8 +29,6 @@ abstract contract LegendSale is ILegendListing {
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
         l.price = _price;
-        // l.isAuction = false; // should be false by default 
-        // l.isOffer =
         l.status = ListingStatus.Open;
 
         emit ListingStatusChanged(_listingId, ListingStatus.Open);
@@ -45,7 +44,7 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsClosed.increment();
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Closed); // try with l.status, on all
+        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
     }
 
     function _cancelLegendListing(uint256 _listingId) internal {

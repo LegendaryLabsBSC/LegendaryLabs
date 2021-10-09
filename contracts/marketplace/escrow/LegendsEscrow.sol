@@ -4,7 +4,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
+// import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
  * Original contract by OpenZeppelin (Escrow)
@@ -25,17 +26,12 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
  */
-contract LegendsEscrow is
-    Ownable
-    // , IERC721Receiver
-{
+contract LegendsEscrow is Ownable {
     using Address for address payable;
 
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
-
-    // mapping(uint256 => mapping(address => uint256)) private _deposits;
-    // mapping(address => uint256) private _nftDeposit;
+    event BidRefunded(uint256 listingId, address bidder, uint256 bidAmount);
 
     mapping(address => uint256) private _paymentOwed;
     mapping(uint256 => mapping(address => uint256)) private _pendingBid;
@@ -80,31 +76,6 @@ contract LegendsEscrow is
         emit Deposited(payer, amount);
     }
 
-    // function depositOffer(uint256 listingId, address payee)
-    //     public
-    //     payable
-    //     virtual
-    //     onlyOwner
-    // {
-    //     uint256 amount = msg.value;
-
-    //     _pendingOffer[listingId][payee] = amount;
-
-    //     emit Deposited(payee, amount);
-    // }
-
-    // function depositBid1(uint256 listingId, address bidder)
-    //     public
-    //     payable
-    //     virtual
-    //     onlyOwner
-    // {
-    //     // uint256 amount = msg.value;
-    //     // _pendingBid[listingId][bidder] += amount;
-    //     // emit Deposited(bidder, amount);
-    //     // bool good;
-    // }
-
     function obligateBid(
         uint256 listingId,
         address buyer,
@@ -115,8 +86,6 @@ contract LegendsEscrow is
         _pendingBid[listingId][buyer] = 0;
 
         _paymentOwed[seller] += amount;
-
-        // emit Deposited(bidder, amount);
     }
 
     function refundBid(uint256 listingId, address payable bidder)
@@ -131,34 +100,8 @@ contract LegendsEscrow is
 
         bidder.sendValue(amount);
 
-        // emit Deposited(bidder, amount);
+        emit BidRefunded(listingId, msg.sender, amount); // ! will show 0 payments not set up for bidders
     }
-
-    // function refundOffer(uint256 listingId, address payable bidder)
-    //     public
-    //     payable
-    //     virtual
-    //     onlyOwner
-    // {
-    //     uint256 amount = _pendingBid[listingId][bidder];
-
-    //     _pendingBid[listingId][bidder] = 0;
-
-    //     bidder.sendValue(amount);
-
-    //     // emit Deposited(bidder, amount);
-    // }
-
-    // function depositLegend(address payee, uint256 tokenId)
-    //     public
-    //     payable
-    //     virtual
-    //     onlyOwner
-    // {
-    //     uint256 token = tokenId;
-    //     _legendDeposits[payee] = token;
-    //     emit Deposited(payee, token);
-    // }
 
     /**
      * @dev Withdraw accumulated balance for a payee, forwarding all gas to the
@@ -179,27 +122,4 @@ contract LegendsEscrow is
 
         emit Withdrawn(payee, payment);
     }
-
-    // function auctionWithdraw(
-    //     uint256 listingId,
-    //     address buyer,
-    //     address payable seller
-    // ) external onlyOwner {
-    //     uint256 payment = [listingId][buyer];
-
-    //     _deposits[listingId][buyer] = 0;
-
-    //     seller.sendValue(payment);
-
-    //     // emit Withdrawn(payee, payment);
-    // }
-
-    //     function onERC721Received(
-    //         address,
-    //         address,
-    //         uint256,
-    //         bytes calldata
-    //     ) public pure override returns (bytes4) {
-    //         return ERC721_RECEIVED;
-    //     }
 }

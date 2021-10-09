@@ -26,15 +26,15 @@ abstract contract LegendAuction is LegendSale {
 
     mapping(uint256 => address[]) internal listBidders; // for debug
 
-    function gaH(uint256 listingId) public view returns (address[] memory) {
+    function fetchBidders(uint256 listingId) public view returns (address[] memory) {
         return listBidders[listingId];
     }
 
     mapping(uint256 => uint256) public instantBuyPrice;
     mapping(uint256 => AuctionDetails) public auctionDetails;
 
-    //TODO: change to bid
-    mapping(uint256 => mapping(address => uint256)) internal bids; // make getter
+    //TODO: ? change to bid
+    mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
     mapping(uint256 => mapping(address => bool)) internal exists;
 
     function _createLegendAuction(
@@ -75,7 +75,7 @@ abstract contract LegendAuction is LegendSale {
     function _placeBid(uint256 _listingId, uint256 _newBid) internal {
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        bids[_listingId][msg.sender] = _newBid; //TODO: redundant LMplace.sol 153
+        bids[_listingId][msg.sender] = _newBid; //TODO: redundant LMplace.sol ~153
 
         if (!exists[_listingId][msg.sender]) {
             a.bidders.push(msg.sender);
@@ -118,6 +118,7 @@ abstract contract LegendAuction is LegendSale {
 
     function isExpired(uint256 _listingId) public view returns (bool) {
         AuctionDetails memory a = auctionDetails[_listingId];
+
         bool _isExpired;
 
         uint256 expirationTime = a.createdAt + a.duration;
@@ -130,6 +131,7 @@ abstract contract LegendAuction is LegendSale {
 
     function shouldExtend(uint256 _listingId) internal view returns (bool) {
         AuctionDetails memory a = auctionDetails[_listingId];
+        
         bool _shouldExtend;
 
         uint256 expirationTime = a.createdAt + a.duration;

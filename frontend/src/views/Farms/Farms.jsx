@@ -438,7 +438,7 @@ function App() {
 
   async function biddys() {
     if (typeof window.ethereum !== 'undefined') {
-      const b = await marketplace.read.gaH(id)
+      const b = await marketplace.read.fetchBidders(id)
       console.log(b)
       console.log(b.length)
     }
@@ -684,7 +684,7 @@ function App() {
   async function bidOnLegend() {
     if (typeof window.ethereum !== 'undefined') {
       const auctionBid = ethers.utils.parseUnits(bid, 'ether')
-      const transaction = await marketplace.write.debugBid(id, {
+      const transaction = await marketplace.write.placeBid(id, {
         value: auctionBid,
       })
       await transaction.wait

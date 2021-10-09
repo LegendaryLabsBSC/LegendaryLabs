@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
-// import "./LegendsAccessories.sol";
 import "../marketplace/LegendsMarketplace.sol";
 import "../mating/LegendsMatingboard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -16,12 +15,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract LegendsLaboratory is Ownable {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
-    // LegendsAccessories public legendsAccessories = new LegendsAccessories(msg.sender);
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatingboard public legendsMatingboard = new LegendsMatingboard();
 
     constructor() {}
 
+    // for testing
     function getChildContracts()
         public
         view
@@ -46,22 +45,6 @@ contract LegendsLaboratory is Ownable {
         legendsNFT.setBreedingCooldown(newBreedingCooldown);
     }
 
-    // function mintPromo(
-    //     address recipient,
-    //     string memory prefix,
-    //     string memory postfix,
-    //     bool isLegendary,
-    //     bool skipIncubation
-    // ) public onlyOwner {
-    //     legendsNFT.mintPromo(
-    //         recipient,
-    //         prefix,
-    //         postfix,
-    //         isLegendary,
-    //         skipIncubation
-    //     );
-    // }
-
     function setOffspringLimit(uint256 newOffspringLimit) public onlyOwner {
         legendsNFT.setOffspringLimit(newOffspringLimit);
     }
@@ -79,10 +62,10 @@ contract LegendsLaboratory is Ownable {
     }
 
     // function mintPromotion(address receiver, string memory prefix, string memory postfix, uint dna) public onlyOwner {
-    //     strainzNFT.mintPromotion(receiver, prefix, postfix, dna);
+    //     legendsNFT.mintPromo(receiver, prefix, postfix, dna);
     // }
 
-    // function setMarketplaceFee(uint newFee) public onlyOwner {
-    //     strainzMarketplace.setMarketplaceFee(newFee);
-    // }
+    function setMarketplaceFee(uint256 newFee) public onlyOwner {
+        legendsMarketplace.setMarketplaceFee(newFee);
+    }
 }
