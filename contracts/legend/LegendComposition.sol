@@ -29,14 +29,14 @@ interface ILegendComposition{
         uint256 CdG3;
         uint256 CdB3;
     }
-    struct LegendStats {
-        uint256 level; // v1 1-5
-        uint256 health;
-        uint256 strength;
-        uint256 defense;
-        uint256 agility;
-        uint256 speed;
-        uint256 accuracy;
-        string destruction;
-    }
+    // struct LegendStats {
+    //     uint256 level; // v1 1-5
+    //     uint256 health;
+    //     uint256 strength;
+    //     uint256 defense;
+    //     uint256 agility;
+    //     uint256 speed;
+    //     uint256 accuracy;
+    //     string destruction;
+    // }
 }

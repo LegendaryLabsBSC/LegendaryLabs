@@ -6,10 +6,12 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../control/LegendsLaboratory.sol";
 import "./LegendBreeding.sol";
-import "./LegendStats.sol";
+// import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
+contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
+// , LegendStats
+ {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     using Strings for uint256;
@@ -193,7 +195,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         mixGenetics(parent1.id, parent2.id, newItemId);
-        mixStats(parent1.id, parent2.id, newItemId);
+        // mixStats(parent1.id, parent2.id, newItemId);
         // , baseHealth);
 
         uint256[2] memory parents = [_parent1, _parent2];
@@ -226,7 +228,7 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding, LegendStats {
         uint256 newItemId = _tokenIds.current();
 
         createGenetics(newItemId);
-        createStats(newItemId);
+        // createStats(newItemId);
         // , baseHealth);
 
         uint256 promoParent = 0;

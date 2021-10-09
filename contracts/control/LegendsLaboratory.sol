@@ -57,9 +57,9 @@ contract LegendsLaboratory is Ownable {
         legendsNFT.setSeason(newSeason);
     }
 
-    function setBaseHealth(uint256 baseHealth) public onlyOwner {
-        legendsNFT.setBaseHealth(baseHealth);
-    }
+    // function setBaseHealth(uint256 baseHealth) public onlyOwner {
+    //     legendsNFT.setBaseHealth(baseHealth);
+    // } // TODO: fix in stats removal
 
     // function mintPromotion(address receiver, string memory prefix, string memory postfix, uint dna) public onlyOwner {
     //     legendsNFT.mintPromo(receiver, prefix, postfix, dna);
