@@ -12,7 +12,7 @@ async function main() {
   const children = await contract.getChildContracts()
   console.log(children)
 
-  const contract_config = path.join(__dirname, '../frontend/src/artifacts/config/contract-config.js')
+  const contract_config = path.join(__dirname, '../frontend/src/contract_config/contract-config.js')
   fs.readFile(contract_config, 'utf-8', (err, data) => {
     if (err)
       return (console.log(err))
