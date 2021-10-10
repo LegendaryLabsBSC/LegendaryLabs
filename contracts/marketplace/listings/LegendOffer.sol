@@ -48,7 +48,7 @@ abstract contract LegendOffer is LegendSale {
         o.expirationTime = block.timestamp + offerDuration;
         o.tokenOwner = payable(_tokenOwner);
 
-        emit OfferMade(_listingId, _price);
+        // emit OfferMade(_listingId, _price);
 
         return (_listingId);
     }
@@ -65,7 +65,7 @@ abstract contract LegendOffer is LegendSale {
 
         _listingsClosed.increment();
 
-        emit OfferDecided(_listingId, true);
+        // emit OfferDecided(_listingId, true); // move to marketplace and remove one
     }
 
     function _rejectLegendOffer(uint256 _listingId) internal {
@@ -77,6 +77,6 @@ abstract contract LegendOffer is LegendSale {
 
         _listingsClosed.increment();
 
-        emit OfferDecided(_listingId, false);
+        // emit OfferDecided(_listingId, false);
     }
 }

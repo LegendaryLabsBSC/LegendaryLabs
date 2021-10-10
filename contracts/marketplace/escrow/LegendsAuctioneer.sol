@@ -67,12 +67,20 @@ abstract contract LegendsAuctioneer {
         _escrow.refundBid(listingId, payee);
     }
 
+    function _withdrawRoyalties(address payable payee) internal virtual {
+        _escrow.withdrawRoyalties(payee);
+    }
+
     /**
      * @dev Returns the payments owed to an address.
      * @param dest The creditor's address.
      */
     function payments(address dest) public view returns (uint256) {
         return _escrow.depositsOf(dest);
+    }
+
+    function royalties(address payee) public view returns (uint256) {
+        return _escrow.royaltiesOf(payee);
     }
 
     /*/*
@@ -95,11 +103,28 @@ abstract contract LegendsAuctioneer {
         _escrow.depositBid{value: amount}(listingId, payer);
     }
 
+    function _asyncTransferRoyalty(address payee, uint256 amount)
+        internal
+        virtual
+    {
+        _escrow.depositRoyalty{value: amount}(payee);
+    }
+
     function _obligateBid(
         uint256 listingId,
         address buyer,
-        address seller
+        address seller,
+        uint256 marketFee,
+        uint256 royaltyFee,
+        address legendCreator
     ) internal virtual {
-        _escrow.obligateBid(listingId, buyer, payable(seller));
+        _escrow.obligateBid(
+            listingId,
+            buyer,
+            payable(seller),
+            marketFee,
+            royaltyFee,
+            payable(legendCreator)
+        );
     }
 }

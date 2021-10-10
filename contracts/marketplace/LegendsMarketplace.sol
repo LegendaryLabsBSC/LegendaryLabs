@@ -17,8 +17,11 @@ contract LegendsMarketplace is
 {
     using SafeMath for uint256; // try to get rid of
 
-    // uint256 public marketplaceFee; commented out for testing
-    uint256 public marketplaceFee = 2;
+    // uint256 public _marketplaceFee; commented out for testing
+    uint256 public _marketplaceFee = 2;
+
+    // uint256 public _royaltyFee; commented out for testing
+    uint256 public _royaltyFee = 2;
 
     LegendsLaboratory lab;
 
@@ -67,14 +70,19 @@ contract LegendsMarketplace is
         require(msg.sender != l.seller, "Seller can not buy");
         require(msg.value == l.price, "Incorrect price submitted for item");
 
-        uint256 _marketplaceFee = (l.price * marketplaceFee) / 100;
+        // //TODO: finish after access control rework ; thoughout
+        // uint256 labFee = (l.price * _marketplaceFee) / 100;
+        // // _asyncTransfer(l.seller, _marketplaceFee);
 
-        //TODO: finish after access control rework ; thoughout
-        // _asyncTransfer(l.seller, _marketplaceFee);
+        (
+            uint256 marketFee,
+            uint256 royaltyFee,
+            address legendCreator
+        ) = _calculateFees(listingId);
 
-        // TODO:  include royality payment logic throughout
+        _asyncTransferRoyalty(legendCreator, royaltyFee);
 
-        _asyncTransfer(l.seller, (msg.value - _marketplaceFee));
+        _asyncTransfer(l.seller, (msg.value - (marketFee + royaltyFee)));
 
         _buyLegend(listingId);
 
@@ -192,9 +200,22 @@ contract LegendsMarketplace is
             legendsNFT.transferFrom(msg.sender, address(this), l.tokenId);
             _acceptLegendOffer(listingId);
 
-            _obligateBid(listingId, l.buyer, msg.sender);
+            (
+                uint256 marketFee,
+                uint256 royaltyFee,
+                address legendCreator
+            ) = _calculateFees(listingId);
 
-            _withdrawAllowed[listingId][msg.sender] = true;
+            _obligateBid(
+                listingId,
+                l.buyer,
+                msg.sender,
+                marketFee,
+                royaltyFee,
+                legendCreator
+            ); // ? move into closeListing
+
+            _withdrawAllowed[listingId][msg.sender] = true; // ? move into closeListing
         } else {
             /**
              * Token owner can also just let the offer expire
@@ -252,10 +273,20 @@ contract LegendsMarketplace is
                 require(isExpired(listingId), "Auction has not expired");
 
                 _closeAuction(listingId);
+
+                (
+                    uint256 marketFee,
+                    uint256 royaltyFee,
+                    address legendCreator
+                ) = _calculateFees(listingId);
+
                 _obligateBid(
                     listingId,
                     auctionDetails[listingId].highestBidder,
-                    l.seller
+                    l.seller,
+                    marketFee,
+                    royaltyFee,
+                    legendCreator
                 );
                 _withdrawAllowed[listingId][l.seller] = true;
             }
@@ -267,7 +298,7 @@ contract LegendsMarketplace is
             _claimLegend(listingId);
         }
 
-        emit PaymentClaimed(listingId, msg.sender);
+        // emit PaymentClaimed(listingId, msg.sender);
     }
 
     function _claimLegend(uint256 listingId) internal {
@@ -304,7 +335,41 @@ contract LegendsMarketplace is
         _withdrawPayments(listingId, l.seller);
     }
 
+    function claimRoyalties() external {
+        uint256 amount = royalties(msg.sender);
+        require(amount != 0, "Royalties are 0");
+
+        _withdrawRoyalties(payable(msg.sender));
+    }
+
+    function _calculateFees(uint256 listingId)
+        internal
+        view
+        returns (
+            uint256,
+            uint256,
+            address
+        )
+    {
+        LegendListing memory l = legendListing[listingId];
+
+        //TODO: finish after access control rework ; thoughout
+        uint256 marketFee = (l.price * _marketplaceFee) / 100;
+        // _asyncTransfer(l.seller, _marketplaceFee);
+
+        uint256 royaltyFee;
+        address legendCreator = lab.fetchRoyaltyRecipient(l.tokenId);
+
+        // ? no fees if buyer is creator ;; royalty blacklist probably needed
+        if (legendCreator != address(0)) {
+            if (legendCreator != l.seller)
+                royaltyFee = (l.price * _royaltyFee) / 100;
+        }
+
+        return (marketFee, royaltyFee, legendCreator);
+    }
+
     function setMarketplaceFee(uint256 newFee) public onlyLab {
-        marketplaceFee = newFee;
+        _marketplaceFee = newFee;
     }
 }

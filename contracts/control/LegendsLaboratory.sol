@@ -68,4 +68,13 @@ contract LegendsLaboratory is Ownable {
     function setMarketplaceFee(uint256 newFee) public onlyOwner {
         legendsMarketplace.setMarketplaceFee(newFee);
     }
+
+    function fetchRoyaltyRecipient(uint256 _tokenId)
+        public
+        view
+        returns (address payable)
+    //onlyMarketplace //TODO: in access control rework
+    {
+        return legendsNFT.tokenMeta(_tokenId).legendCreator;
+    }
 }

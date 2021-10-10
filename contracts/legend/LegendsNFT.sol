@@ -9,9 +9,12 @@ import "./LegendBreeding.sol";
 // import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
-// , LegendStats
- {
+contract LegendsNFT is
+    ERC721Enumerable,
+    Ownable,
+    LegendBreeding
+    // , LegendStats
+{
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     using Strings for uint256;
@@ -98,29 +101,30 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
         emit Burned(tokenId);
     }
 
-    function isHatchable(uint256 tokenId, bool testToggle)
-        public
-        view
-        returns (
-            bool,
-            uint256,
-            uint256
-        )
-    {
-        bool hatchable;
-        uint256 hatchableWhen;
-        LegendMetadata memory l = legendData[tokenId];
-        if (!testToggle) {
-            hatchableWhen = l.incubationDuration + l.birthDay;
-        } else {
-            hatchableWhen = block.timestamp;
-        }
-        if (hatchableWhen <= block.timestamp) {
-            hatchable = true;
-        }
+    //TODO: fix in incubation rework
+    // function isHatchable(uint256 tokenId, bool testToggle)
+    //     public
+    //     view
+    //     returns (
+    //         bool,
+    //         uint256,
+    //         uint256
+    //     )
+    // {
+    //     bool hatchable;
+    //     uint256 hatchableWhen;
+    //     LegendMetadata memory l = legendData[tokenId];
+    //     if (!testToggle) {
+    //         hatchableWhen = l.incubationDuration + l.birthDay;
+    //     } else {
+    //         hatchableWhen = block.timestamp;
+    //     }
+    //     if (hatchableWhen <= block.timestamp) {
+    //         hatchable = true;
+    //     }
 
-        return (hatchable, hatchableWhen, block.timestamp);
-    }
+    //     return (hatchable, hatchableWhen, block.timestamp);
+    // }
 
     function hatch(uint256 tokenId, string memory _tokenURI) public {
         // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
@@ -129,8 +133,9 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
         legendData[tokenId].isHatched = true;
     }
 
+    //TODO: rework variable naming throughout
     function mintTo(
-        address recipient,
+        address _recipient,
         uint256 newItemId,
         string memory prefix,
         string memory postfix,
@@ -141,7 +146,9 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
         uint256 _incubationDuration;
         bool isHatched;
 
-        _mint(recipient, newItemId);
+        address payable _creator;
+
+        _mint(_recipient, newItemId);
 
         if (skipIncubation == true) {
             _incubationDuration = 0;
@@ -151,14 +158,21 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
             isHatched = false;
         }
 
+        if (parents[0] == 0) {
+            _creator = payable(address(0));
+        } else {
+            _creator = payable(_recipient);
+        }
+
         // LegendMetadata memory m;
         LegendMetadata storage m = legendData[newItemId];
         m.id = newItemId;
+        m.legendCreator = _creator;
         m.prefix = prefix;
         m.postfix = postfix;
         m.parents = parents;
         m.birthDay = block.timestamp;
-        m.incubationDuration = _incubationDuration;
+        // m.incubationDuration = _incubationDuration;
         m.breedingCooldown = breedingCooldown;
         m.breedingCost = baseBreedingCost;
         m.offspringLimit = offspringLimit;
@@ -264,5 +278,4 @@ contract LegendsNFT is ERC721Enumerable, Ownable, LegendBreeding
     function setSeason(string memory _season) public onlyLab {
         season = _season;
     }
-
 }

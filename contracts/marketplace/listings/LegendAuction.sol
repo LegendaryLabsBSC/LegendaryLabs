@@ -69,7 +69,7 @@ abstract contract LegendAuction is LegendSale {
         a.startingPrice = _startingPrice;
         a.instantBuy = instantBuy;
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Open);
+        // emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
     function _placeBid(uint256 _listingId, uint256 _newBid) internal {
@@ -94,11 +94,11 @@ abstract contract LegendAuction is LegendSale {
             if (_newBid != instantBuyPrice[_listingId]) {
                 a.duration = (a.duration + 600); // TODO: make extension a state variable
 
-                emit AuctionExtended(_listingId, a.duration);
+                // emit AuctionExtended(_listingId, a.duration);
             }
         }
 
-        emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
+        // emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
     }
 
     function _closeAuction(uint256 _listingId) internal {
@@ -113,7 +113,7 @@ abstract contract LegendAuction is LegendSale {
 
         _listingsClosed.increment();
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
+        // emit ListingStatusChanged(_listingId, ListingStatus.Closed);
     }
 
     function isExpired(uint256 _listingId) public view returns (bool) {
