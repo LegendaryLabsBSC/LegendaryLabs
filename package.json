@@ -3,25 +3,36 @@
   "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-solhint": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.5",
-    "hardhat": "^2.6.1"
+    "hardhat": "^2.6.1",
+    "hardhat-contract-sizer": "^2.1.1",
+    "hardhat-docgen": "^1.1.2",
+    "hardhat-gas-reporter": "^1.0.4",
+    "hardhat-spdx-license-identifier": "^2.0.3",
+    "hardhat-storage-layout": "^0.1.6"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.0",
+    "@openzeppelin/contracts": "^4.3.2",
     "@pinata/ipfs-gateway-tools": "^1.1.6",
+    "axios": "^0.21.4",
     "dotenv": "^10.0.0",
+    "hardhat-tracer": "^1.0.0-alpha.6",
     "hardhat-watcher": "^2.1.1",
     "husky": "^7.0.2",
     "json2csv": "^5.0.6",
     "mv": "^2.1.1",
+    "nodemon": "^2.0.12",
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
-    "com": "npx hardhat compile",
+    "hh:load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
+    "hh:com": "npx hardhat compile",
+    "hh:size": "npx hardhat compile && hardhat size-contracts",
+    "hh:lint": "npx hardhat check",
     "start:api": "nodemon scripts/generateLegend.js"
   }
 }

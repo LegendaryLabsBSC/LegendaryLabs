@@ -33,4 +33,8 @@ oldcontracts
 #
 *-rc*.*
 Notes
-axie.sol
+axie.solcontracts/LegendaryTests.sol
+contracts/other
+.vscode
+.VSCodeCounter
+docs
