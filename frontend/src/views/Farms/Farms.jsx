@@ -921,6 +921,18 @@ function App() {
     }
   }
 
+  async function claimRoyalties() {
+    if (typeof window.ethereum !== 'undefined') {
+      const transaction = await marketplace.write.claimRoyalties()
+      await transaction.wait
+      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // })
+    }
+  }
+
   return (
     <div>
       <header>
@@ -1088,23 +1100,8 @@ function App() {
           </button>
           <br />
           <br />
-          <button type="submit" onClick={checkPaymentAmount}>
-            Check Owed Payment
-          </button>
-          <button type="submit" onClick={checkOwedBid}>
-            Check Owed Bid
-          </button>
-          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={claimPayment}>
-            Claim Payment
-          </button>
-          <br />
-          <button type="submit" onClick={checkLegendsOwed}>
-            Check Owed Legends
-          </button>
-          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={claimLegend}>
-            Claim Legend
+          <button type="submit" onClick={claimRoyalties}>
+            Claim Royalties
           </button>
           <br />
           <br />

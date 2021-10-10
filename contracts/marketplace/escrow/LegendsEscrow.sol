@@ -34,8 +34,8 @@ contract LegendsEscrow is Ownable {
     event BidRefunded(uint256 listingId, address bidder, uint256 bidAmount);
 
     mapping(address => uint256) private _paymentOwed;
+    mapping(address => uint256) private _royaltiesOwed;
     mapping(uint256 => mapping(address => uint256)) private _pendingBid;
-    mapping(uint256 => mapping(address => uint256)) private _pendingOffer;
 
     //TODO: change name; paymentsOwed ?
     function depositsOf(address payee) public view returns (uint256) {
@@ -51,6 +51,10 @@ contract LegendsEscrow is Ownable {
     //     return _paymentOwed[payee];
     // }
 
+    function royaltiesOf(address payee) public view returns (uint256) {
+        return _royaltiesOwed[payee];
+    }
+
     /**
      * @dev Stores the sent amount as credit to be withdrawn.
      * @param payee The destination address of the funds.
@@ -60,7 +64,7 @@ contract LegendsEscrow is Ownable {
 
         _paymentOwed[payee] += amount;
 
-        emit Deposited(payee, amount);
+        // emit Deposited(payee, amount);
     }
 
     function depositBid(uint256 listingId, address payer)
@@ -73,19 +77,38 @@ contract LegendsEscrow is Ownable {
 
         _pendingBid[listingId][payer] = amount; // try without + for increase bid issue
 
-        emit Deposited(payer, amount);
+        // emit Deposited(payer, amount);
+    }
+
+    function depositRoyalty(address payee) public payable virtual onlyOwner {
+        uint256 amount = msg.value;
+
+        _royaltiesOwed[payee] += amount;
+
+        // emit Deposited(payee, amount);
     }
 
     function obligateBid(
         uint256 listingId,
         address buyer,
-        address payable seller
+        address payable seller,
+        uint256 marketFee,
+        uint256 royaltyFee,
+        address payable tokenCreator
     ) public payable virtual onlyOwner {
         uint256 amount = _pendingBid[listingId][buyer];
 
+        //marketplace fee
+
+        if (royaltyFee != 0) {
+            _royaltiesOwed[tokenCreator] += royaltyFee;
+        }
+
+        uint256 finalAmount = amount - (marketFee + royaltyFee);
+
         _pendingBid[listingId][buyer] = 0;
 
-        _paymentOwed[seller] += amount;
+        _paymentOwed[seller] += finalAmount;
     }
 
     function refundBid(uint256 listingId, address payable bidder)
@@ -120,6 +143,16 @@ contract LegendsEscrow is Ownable {
 
         payee.sendValue(payment);
 
-        emit Withdrawn(payee, payment);
+        // emit Withdrawn(payee, payment);
+    }
+
+    function withdrawRoyalties(address payable payee) external onlyOwner {
+        uint256 payment = _royaltiesOwed[payee];
+
+        _royaltiesOwed[payee] = 0;
+
+        payee.sendValue(payment);
+
+        // emit Withdrawn(payee, payment);
     }
 }

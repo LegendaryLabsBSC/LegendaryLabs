@@ -31,7 +31,7 @@ abstract contract LegendSale is ILegendListing {
         l.price = _price;
         l.status = ListingStatus.Open;
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Open);
+        // emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
     function _buyLegend(uint256 _listingId) internal {
@@ -44,7 +44,7 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsClosed.increment();
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
+        // emit ListingStatusChanged(_listingId, ListingStatus.Closed);
     }
 
     function _cancelLegendListing(uint256 _listingId) internal {
@@ -56,6 +56,6 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsCancelled.increment();
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
+        // emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
     }
 }
