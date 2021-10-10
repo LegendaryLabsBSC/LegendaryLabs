@@ -37,7 +37,7 @@ module.exports = {
     enabled: (process.env.REPORT_GAS) ? true : false
   },
   spdxLicenseIdentifier: {
-    overwrite: true,
+    overwrite: false,
     runOnCompile: true,
   },
   networks: {

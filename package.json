@@ -13,7 +13,8 @@
     "hardhat-docgen": "^1.1.2",
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-spdx-license-identifier": "^2.0.3",
-    "hardhat-storage-layout": "^0.1.6"
+    "hardhat-storage-layout": "^0.1.6",
+    "solc-0.8": "npm:solc@0.8.4"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
@@ -33,6 +34,7 @@
     "hh:com": "npx hardhat compile",
     "hh:size": "npx hardhat compile && hardhat size-contracts",
     "hh:lint": "npx hardhat check",
+    "hh:docs": "npx hardhat compile && yarn run hardhat docgen",
     "start:api": "nodemon scripts/generateLegend.js"
   }
 }

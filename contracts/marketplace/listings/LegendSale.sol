@@ -4,9 +4,14 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./LegendListing.sol";
 
+/**
+ * @dev Outlines a Legend NFT market sale. Functions called by LegendsMarketplace contract.
+ */
+
 abstract contract LegendSale is ILegendListing {
     using Counters for Counters.Counter;
 
+    /// @dev intialize counters, used for all three marketplace types (Sale, Auction, Offer)
     Counters.Counter internal _listingIds;
     Counters.Counter internal _listingsClosed;
     Counters.Counter internal _listingsCancelled;
