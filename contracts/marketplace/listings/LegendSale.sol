@@ -24,6 +24,7 @@ abstract contract LegendSale is ILegendListing {
 
         LegendListing storage l = legendListing[_listingId];
         l.listingId = _listingId;
+        l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
         l.tokenId = _tokenId;
         l.seller = payable(msg.sender);

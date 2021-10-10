@@ -13,7 +13,6 @@ abstract contract LegendOffer is LegendSale {
     uint256 internal offerDuration = 432000; // 5 days
 
     struct OfferDetails {
-        uint256 placedAt;
         uint256 expirationTime;
         address payable tokenOwner;
         bool isAccepted; // make enum if theres space
@@ -35,6 +34,7 @@ abstract contract LegendOffer is LegendSale {
 
         LegendListing storage l = legendListing[_listingId];
         l.listingId = _listingId;
+        l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
         l.tokenId = _tokenId;
         l.seller = payable(address(0));
@@ -44,7 +44,6 @@ abstract contract LegendOffer is LegendSale {
         l.status = ListingStatus.Open;
 
         OfferDetails storage o = offerDetails[_listingId];
-        o.placedAt = block.timestamp;
         o.expirationTime = block.timestamp + offerDuration;
         o.tokenOwner = payable(_tokenOwner);
 

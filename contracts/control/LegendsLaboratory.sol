@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../marketplace/LegendsMarketplace.sol";
-import "../mating/LegendsMatingboard.sol";
+import "../matching/LegendsMatchingBoard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 //TODO: look into openZeppelin Access Control docs more ; OZ Governor
@@ -16,7 +16,7 @@ contract LegendsLaboratory is Ownable {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
-    LegendsMatingboard public legendsMatingboard = new LegendsMatingboard();
+    LegendsMatchingBoard public legendsMatchingBoard = new LegendsMatchingBoard();
 
     constructor() {}
 

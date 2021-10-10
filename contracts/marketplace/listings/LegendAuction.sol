@@ -15,7 +15,6 @@ abstract contract LegendAuction is LegendSale {
     );
 
     struct AuctionDetails {
-        uint256 createdAt;
         uint256 duration;
         uint256 startingPrice;
         uint256 highestBid;
@@ -26,7 +25,11 @@ abstract contract LegendAuction is LegendSale {
 
     mapping(uint256 => address[]) internal listBidders; // for debug
 
-    function fetchBidders(uint256 listingId) public view returns (address[] memory) {
+    function fetchBidders(uint256 listingId)
+        public
+        view
+        returns (address[] memory)
+    {
         return listBidders[listingId];
     }
 
@@ -56,6 +59,7 @@ abstract contract LegendAuction is LegendSale {
 
         LegendListing storage l = legendListing[_listingId];
         l.listingId = _listingId;
+        l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
         l.tokenId = _tokenId;
         l.seller = payable(msg.sender);
@@ -64,7 +68,6 @@ abstract contract LegendAuction is LegendSale {
         l.status = ListingStatus.Open;
 
         AuctionDetails storage a = auctionDetails[_listingId];
-        a.createdAt = block.timestamp;
         a.duration = _duration;
         a.startingPrice = _startingPrice;
         a.instantBuy = instantBuy;
@@ -90,7 +93,7 @@ abstract contract LegendAuction is LegendSale {
         a.highestBid = _newBid;
         a.highestBidder = payable(msg.sender);
 
-        if (shouldExtend(_listingId)) {
+        if (_shouldExtend(_listingId)) {
             if (_newBid != instantBuyPrice[_listingId]) {
                 a.duration = (a.duration + 600); // TODO: make extension a state variable
 
@@ -117,11 +120,11 @@ abstract contract LegendAuction is LegendSale {
     }
 
     function isExpired(uint256 _listingId) public view returns (bool) {
-        AuctionDetails memory a = auctionDetails[_listingId];
-
         bool _isExpired;
 
-        uint256 expirationTime = a.createdAt + a.duration;
+        uint256 expirationTime = legendListing[_listingId].createdAt +
+            auctionDetails[_listingId].duration;
+
         if (block.timestamp >= expirationTime) {
             _isExpired = true;
         }
@@ -129,20 +132,20 @@ abstract contract LegendAuction is LegendSale {
         return _isExpired;
     }
 
-    function shouldExtend(uint256 _listingId) internal view returns (bool) {
-        AuctionDetails memory a = auctionDetails[_listingId];
-        
-        bool _shouldExtend;
+    function _shouldExtend(uint256 _listingId) internal view returns (bool) {
+        bool shouldExtend;
 
-        uint256 expirationTime = a.createdAt + a.duration;
+        uint256 expirationTime = legendListing[_listingId].createdAt +
+            auctionDetails[_listingId].duration;
+
         uint256 extensionTime = 600; // 10 minute window ; TODO: make state variable
         if (
             block.timestamp < expirationTime &&
             block.timestamp >= (expirationTime - extensionTime)
         ) {
-            _shouldExtend = true;
+            shouldExtend = true;
         }
 
-        return _shouldExtend;
+        return shouldExtend;
     }
 }
