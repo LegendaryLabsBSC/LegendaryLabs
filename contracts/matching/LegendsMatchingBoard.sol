@@ -2,14 +2,18 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../control/LegendsLaboratory.sol";
+import "./listing/LegendMatching.sol";
 import "../token/LegendToken.sol";
-import "./LegendMatching.sol";
 
 contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     using Counters for Counters.Counter;
+
+    event TokensClaimed(address payee, uint256 amount);
+    event EggClaimed(uint256 matchingId, address recipient, uint256 childId);
+    event DecideRelisting(uint256 matchingId, uint256 tokenId, bool isRelisted);
 
     // uint256 public _matingBoardFee; // commented for testing
     uint256 public _matchingBoardFee = 10;
@@ -66,6 +70,8 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         require(m.status == MatchingStatus.Open);
         require(m.surrogate != msg.sender);
 
+        //TODO: require legend is breedable - wait on NFT rework
+
         uint256 matchingBoardFee = (m.price * _matchingBoardFee) / 100;
         lab.legendToken().matchingBurn(msg.sender, matchingBoardFee); // may become liqlock
 
@@ -76,7 +82,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             matchingPayment
         );
 
-        // transfer breeder's token to contract
+        // transfer breeder's token to contract .. put in natspec
         legendsNFT.transferFrom(msg.sender, address(this), tokenId);
 
         uint256 childId = lab.legendsNFT().breed(
@@ -94,7 +100,6 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             matchingPayment
         );
 
-        // return the  breeder token to the owner
         legendsNFT.safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
@@ -132,6 +137,8 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
                 m.surrogateToken
             );
         }
+
+        emit DecideRelisting(matchingId, m.surrogateToken, isRelisted);
     }
 
     function claimEgg(uint256 matchingId) external {
@@ -146,19 +153,23 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         _eggOwed[matchingId][m.breeder] = 0;
 
         lab.legendsNFT().safeTransferFrom(address(this), m.breeder, eggOwed);
+
+        emit EggClaimed(matchingId, m.breeder, eggOwed);
     }
 
     function checkTokensOwed() public view returns (uint256) {
         return _tokensOwed[msg.sender];
     }
 
-    function claimTokens() external payable {
+    function claimTokens() external {
         uint256 tokensOwed = _tokensOwed[msg.sender];
         require(tokensOwed != 0, "Address is owed 0");
 
         _tokensOwed[msg.sender] = 0;
 
         lab.legendToken().transferFrom(address(this), msg.sender, tokensOwed);
+
+        emit TokensClaimed(msg.sender, tokensOwed);
     }
 
     function setMatchingBoardFee(uint256 newFee) public onlyLab {

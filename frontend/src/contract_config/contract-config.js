@@ -1,8 +1,8 @@
 
-    const legendsLaboratory = "0x30CE7d39bDA1430d29ad85E2c4C0D45DA212353f"
-    const legendsNFT = "0xAdb398093528eb02C29246a31370B7AC09addc61"
-    const legendsToken = "0x38679A7e658B8F9c6a2bB9f870bBab2e90B901af"
-    const legendsMarketplace = "0x6CA562066395986c5cb1440AcAB6cC140f25DF84"
+    const legendsLaboratory = "0x51cF0eBb30D674f1B6B143572138239F7FFc0dd4"
+    const legendsNFT = "0x152e0cB2369BB7267BBaB4d147074e41417063bF"
+    const legendsToken = "0xC2CB820C2d43a47077b90F537ad6D6Bf12a2919a"
+    const legendsMarketplace = "0xD136B2B89312B8939dbd20467Ab94e15CAE70A3b"
 
     export { legendsLaboratory, legendsNFT, legendsToken, legendsMarketplace }
     

@@ -3,8 +3,8 @@
 pragma solidity ^0.8.0;
 
 interface ILegendMatch {
-    // event ListingStatusChanged(uint256 listingId, ListingStatus status);
-    // event PaymentClaimed(uint256 listingId, address payee);
+    event MatchingStatusChanged(uint256 matchingId, MatchingStatus status);
+    event MatchMade(uint256 matchingId, uint256 childId, MatchingStatus status);
 
     enum MatchingStatus {
         Null,
@@ -13,7 +13,7 @@ interface ILegendMatch {
         Cancelled
     }
     struct LegendMatching {
-        uint256 matchId;
+        uint256 matchingId;
         uint256 createdAt;
         address nftContract;
         uint256 surrogateToken;

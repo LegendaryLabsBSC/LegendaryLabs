@@ -20,10 +20,10 @@ abstract contract LegendSale is ILegendListing {
         uint256 _price
     ) internal {
         _listingIds.increment();
-        uint256 _listingId = _listingIds.current();
+        uint256 listingId = _listingIds.current();
 
-        LegendListing storage l = legendListing[_listingId];
-        l.listingId = _listingId;
+        LegendListing storage l = legendListing[listingId];
+        l.listingId = listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
         l.tokenId = _tokenId;

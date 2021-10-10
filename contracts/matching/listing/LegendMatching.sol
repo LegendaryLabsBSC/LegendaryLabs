@@ -22,10 +22,10 @@ abstract contract LegendMatching is ILegendMatch {
         uint256 _price
     ) internal {
         _matchingIds.increment();
-        uint256 matchId = _matchingIds.current();
+        uint256 matchingId = _matchingIds.current();
 
-        LegendMatching storage m = legendMatching[matchId];
-        m.matchId = matchId;
+        LegendMatching storage m = legendMatching[matchingId];
+        m.matchingId = matchingId;
         m.createdAt = block.timestamp;
         m.nftContract = _nftContract;
         m.surrogateToken = _tokenId;
@@ -34,7 +34,7 @@ abstract contract LegendMatching is ILegendMatch {
         m.price = _price;
         m.status = MatchingStatus.Open;
 
-        // emit MatchingStatusChanged(listingId, MatchingStatus.Open);
+        emit MatchingStatusChanged(matchingId, MatchingStatus.Open);
     }
 
     function _matchWithLegend(
@@ -55,6 +55,8 @@ abstract contract LegendMatching is ILegendMatch {
         _eggOwed[_matchingId][_breeder] = _childId;
 
         _matchingsClosed.increment();
+
+        emit MatchMade(_matchingId, _childId, MatchingStatus.Closed);
     }
 
     function _cancelLegendMatching(uint256 _matchingId) internal {
@@ -62,6 +64,6 @@ abstract contract LegendMatching is ILegendMatch {
 
         _matchingsCancelled.increment();
 
-        // emit MatchingStatusChanged(listingId, MatchingStatus.Cancelled);
+        emit MatchingStatusChanged(_matchingId, MatchingStatus.Cancelled);
     }
 }

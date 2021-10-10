@@ -65,6 +65,10 @@ function App() {
   const [bid, setBid] = useState(0)
   // const [amount, setAmount] = useState(0)
 
+  /**
+   * Admin Start
+   */
+
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
       // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -102,6 +106,14 @@ function App() {
       await contract.write.setSeason(season)
     }
   }
+
+  /**
+   * Admin End
+   */
+
+  /**
+   * Legend NFT Start
+   */
 
   async function fetchURI() {
     if (typeof window.ethereum !== 'undefined') {
@@ -319,78 +331,14 @@ function App() {
     }
   }
 
-  async function approveTransaction() {
-    if (typeof window.ethereum !== 'undefined') {
-      await contract.write.approve(legendsMarketplaceAddress, id)
-      // await contract.write.approve('0x94726120565094F1a443eE8abd0fd8c3bd76c555', id)
-    }
-  }
+  /**
+   * Legend NFT End
+   */
 
-  // TODO: change to payment owed
-  async function checkPaymentAmount() {
-    if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const payment = await marketplace.read.payments(account)
-      console.log(payment.toString())
-    }
-  }
+  /**
+   * Sale Start
+   */
 
-  async function checkOwedBid() {
-    if (typeof window.ethereum !== 'undefined') {
-      const auction = await marketplace.read.legendListing(id)
-      const payment = await marketplace.read.payments(auction.buyer)
-      console.log(payment.toString())
-    }
-  }
-
-  async function checkLegendsOwed() {
-    if (typeof window.ethereum !== 'undefined') {
-      const payment = await marketplace.read.checkLegendsOwed(0)
-      console.log(payment.toString())
-    }
-  }
-
-  async function claimPayment() {
-    if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.claimPayment(id)
-    }
-  }
-
-  async function claimLegend() {
-    if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.claimLegend(id)
-    }
-  }
-  async function checkOwedTokens() {
-    if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const tokensOwed = await marketplace.read.checkTokensOwed(id)
-      console.log(tokensOwed.toString())
-    }
-  }
-  async function claimTokens() {
-    if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.claimTokens(id)
-    }
-  }
-  async function claimEgg() {
-    if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.claimEgg(id)
-    }
-  }
-
-  async function withdrawFromMatching() {
-    if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.withdrawFromMatching(id)
-    }
-  }
-  async function relistInMatching() {
-    if (typeof window.ethereum !== 'undefined') {
-      await marketplace.write.relistInMatching(id)
-    }
-  }
-
-  // TODO: control aution/non-auction with toggle
   async function createLegendSale() {
     if (typeof window.ethereum !== 'undefined') {
       const price = ethers.utils.parseUnits(sellPrice, 'ether')
@@ -428,27 +376,11 @@ function App() {
       // )
     }
   }
-
-  async function loadBidders(bidder) {
-    // const imgURL = await contract.read.tokenURI(tokenID)
-    console.log(`Bidder: ${bidder}`)
-    return { bidder }
-    // Logic for rendering Legend Card Component here from pinata ?
-  }
-
-  async function biddys() {
-    if (typeof window.ethereum !== 'undefined') {
-      const b = await marketplace.read.fetchBidders(id)
-      console.log(b)
-      console.log(b.length)
-    }
-  }
-
   async function fetchLegendListings() {
     if (typeof window.ethereum !== 'undefined') {
       // const listingCounts = await marketplace.read.fetchListingCounts()
       // const count = listingCounts[0]
-      const b = await marketplace.read.legendListing(1)
+      // const b = await marketplace.read.legendListing(1)
       const l = await marketplace.read.legendListing(id)
       const a = await marketplace.read.auctionDetails(id)
       const o = await marketplace.read.offerDetails(id)
@@ -516,40 +448,6 @@ function App() {
       }
     }
   }
-
-  // async function fetchLegendListing2s() {
-  //   if (typeof window.ethereum !== 'undefined') {
-  //     const totalListings = await marketplace.read.fetchLegendListings()
-  //     const auctionDetails = await marketplace.read.fetchAuctionDetails()
-  //     totalListings.forEach((l) => {
-  //       // marketplace.read.legendLisi(sale).then((l) => {
-  //       console.log(`Listing ID: ${l.listingId}`)
-  //       console.log(`Contract: ${l.nftContract}`)
-  //       console.log(`Token ID: ${l.tokenId}`)
-  //       console.log(`Seller: ${l.seller}`)
-  //       console.log(`Buyer: ${l.buyer}`)
-  //       console.log(`Price: ${l.price}`)
-  //       console.log(`is Auction: ${l.isAuction}`)
-  //       console.log(`Status: ${l.status}`)
-  //       console.log('')
-  //       if (l.isAuction) {
-  //         auctionDetails.forEach((a) => {
-  //           // const a = await marketplace.read.auctionDetails(id)
-  //           // const a = marketplace.read.fetchAuctionDetails()
-  //           console.log(`Created At: ${a.createdAt}`)
-  //           console.log(`Duration: ${a.duration}`)
-  //           console.log(`Starting Price: ${a.startingPrice}`)
-  //           console.log(`Highest Bid: ${a.highestBid}`)
-  //           console.log(`Highest Bidder: ${a.highestBidder}`)
-  //           console.log(`Bidders: ${a.bidders}`)
-  //           console.log(`Instant Buy: ${a.instantBuy}`)
-  //           console.log('')
-  //         })
-  //       }
-  //     })
-  //   }
-  // }
-
   async function fetchListingData() {
     if (typeof window.ethereum !== 'undefined') {
       const listingCounts = await marketplace.read.fetchListingCounts()
@@ -591,73 +489,49 @@ function App() {
     }
   }
 
-  // const itemCount = itemData[0]
-  // const unsoldItemCount = itemData[0] - itemData[1]
-  // const currentIndex = 0
-  // const l = await marketplace.read.legendListing(id)
-  // //
-  // // for (let i = 0; i < itemCount; i++) {
-  // console.log(`Listing ID: ${l.listingId}`)
-  // console.log(`Contract: ${l.nftContract}`)
-  // console.log(`Token ID: ${l.tokenId}`)
-  // console.log(`Seller: ${l.seller}`)
-  // console.log(`Buyer: ${l.buyer}`)
-  // console.log(`Price: ${l.price}`)
-  // console.log(`is Auction: ${l.isAuction}`)
-  // console.log(`Status: ${l.status}`)
-  // console.log('')
-  // if (l.isAuction) {
-  //   const a = await marketplace.read.auctionDetails(id)
-  //   console.log(`Created At: ${a.createdAt}`)
-  //   console.log(`Duration: ${a.duration}`)
-  //   console.log(`Starting Price: ${a.startingPrice}`)
-  //   console.log(`Highest Bid: ${a.highestBid}`)
-  //   console.log(`Highest Bidder: ${a.highestBidder}`)
-  //   console.log(`Bidders: ${a.bidders}`)
-  //   console.log(`Instant Buy: ${a.instantBuy}`)
-  //   console.log('')
-  // }
-  // console.log(legendListing.buyer)
-  // if (legendListing(i+1).buyer == )
-  // }
-  // }
+  async function approveTransaction() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.write.approve(legendsMarketplaceAddress, id)
+      // await contract.write.approve('0x94726120565094F1a443eE8abd0fd8c3bd76c555', id)
+    }
+  }
 
-  // debug function to see status of closed listings
-  // async function fetchListingData() {
-  //   if (typeof window.ethereum !== 'undefined') {
-  //     // const auctionDetails = await marketplace.read.fetchAuctionDetails()
-  //     // const itemCount = itemData[0]
-  //     // const unsoldItemCount = itemData[0] - itemData[1]
-  //     const currentIndex = 0
-  //     const l = await marketplace.read.legendListing(id)
-  //     //
-  //     // for (let i = 0; i < itemCount; i++) {
-  //     console.log(`Listing ID: ${l.listingId}`)
-  //     console.log(`Contract: ${l.nftContract}`)
-  //     console.log(`Token ID: ${l.tokenId}`)
-  //     console.log(`Seller: ${l.seller}`)
-  //     console.log(`Buyer: ${l.buyer}`)
-  //     console.log(`Price: ${l.price}`)
-  //     console.log(`is Auction: ${l.isAuction}`)
-  //     console.log(`Status: ${l.status}`)
-  //     console.log('')
-  //     if (l.isAuction) {
-  //       const a = await marketplace.read.auctionDetails(id)
-  //       console.log(`Created At: ${a.createdAt}`)
-  //       console.log(`Duration: ${a.duration}`)
-  //       console.log(`Starting Price: ${a.startingPrice}`)
-  //       console.log(`Highest Bid: ${a.highestBid}`)
-  //       console.log(`Highest Bidder: ${a.highestBidder}`)
-  //       console.log(`Bidders: ${a.bidders}`)
-  //       console.log(`Instant Buy: ${a.instantBuy}`)
-  //       console.log('')
-  //     }
-  //     // console.log(legendListing.buyer)
-  //     // if (legendListing(i+1).buyer == )
-  //     // }
-  //   }
-  // }
+  // TODO: change to payment owed
+  async function checkPaymentAmount() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const payment = await marketplace.read.payments(account)
+      console.log(payment.toString())
+    }
+  }
 
+  async function checkOwedBid() {
+    if (typeof window.ethereum !== 'undefined') {
+      const auction = await marketplace.read.legendListing(id)
+      const payment = await marketplace.read.payments(auction.buyer)
+      console.log(payment.toString())
+    }
+  }
+
+  async function claimPayment() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimPayment(id)
+    }
+  }
+
+  async function claimLegend() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimLegend(id)
+    }
+  }
+
+  /**
+   * Sale End
+   */
+
+  /**
+   * Auction Start
+   */
   async function createLegendAuction() {
     if (typeof window.ethereum !== 'undefined') {
       // const duration = _duration * 86400
@@ -757,8 +631,89 @@ function App() {
       console.log('')
     }
   }
+  async function loadBidders(bidder) {
+    // const imgURL = await contract.read.tokenURI(tokenID)
+    console.log(`Bidder: ${bidder}`)
+    return { bidder }
+    // Logic for rendering Legend Card Component here from pinata ?
+  }
 
-  // TODO: bundle and turn into a single function in smart contract; check matching id exist
+  async function biddys() {
+    if (typeof window.ethereum !== 'undefined') {
+      const b = await marketplace.read.fetchBidders(id)
+      console.log(b)
+      console.log(b.length)
+    }
+  }
+
+  /**
+   * Auction End
+   */
+
+  /**
+   *  Offer Start
+   */
+  async function makeLegendOffer() {
+    if (typeof window.ethereum !== 'undefined') {
+      const price = ethers.utils.parseUnits(sellPrice, 'ether')
+      // console.log(price)
+      const transaction = await marketplace.write.makeLegendOffer(legendsNFTAddress, id, { value: price })
+      await transaction.wait
+
+      // const price = ethers.utils.parseUnits(sellPrice, 'ether')
+      // const transaction = await marketplace.write.createLegendSale(legendsNFTAddress, id, price)
+      // await transaction.wait
+      // .then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // }),
+      // )
+    }
+  }
+
+  async function acceptLegendOffer() {
+    if (typeof window.ethereum !== 'undefined') {
+      const transaction = await marketplace.write.decideLegendOffer(id, true)
+      await transaction.wait
+      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // })
+    }
+  }
+
+  async function rejectLegendOffer() {
+    if (typeof window.ethereum !== 'undefined') {
+      const transaction = await marketplace.write.decideLegendOffer(id, false)
+      await transaction.wait
+      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // })
+    }
+  }
+
+  async function claimRoyalties() {
+    if (typeof window.ethereum !== 'undefined') {
+      const transaction = await marketplace.write.claimRoyalties()
+      await transaction.wait
+      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
+      // marketplace.write.once('ListingStatusChanged', (data, event) => {
+      //   console.log(`data: ${data[0]} ${data[1]}`)
+      //   console.log(`event: ${event[0]} ${event[1]}`)
+      // })
+    }
+  }
+  /**
+   *  Offer End
+   */
+
+  /**
+   * Matching Start
+   */
   async function approveMatching() {
     if (typeof window.ethereum !== 'undefined') {
       await contract.write.approve(legendsMarketplaceAddress, breedingToken)
@@ -842,6 +797,35 @@ function App() {
     }
   }
 
+  async function checkOwedTokens() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const tokensOwed = await marketplace.read.checkTokensOwed(id)
+      console.log(tokensOwed.toString())
+    }
+  }
+  async function claimTokens() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimTokens(id)
+    }
+  }
+  async function claimEgg() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.claimEgg(id)
+    }
+  }
+
+  async function withdrawFromMatching() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.withdrawFromMatching(id)
+    }
+  }
+  async function relistInMatching() {
+    if (typeof window.ethereum !== 'undefined') {
+      await marketplace.write.relistInMatching(id)
+    }
+  }
+
   // debug function to see status of closed matchings
   async function fetchMatchingData() {
     if (typeof window.ethereum !== 'undefined') {
@@ -858,6 +842,9 @@ function App() {
       console.log('')
     }
   }
+  /**
+   * Matching End
+   */
 
   // const NftContainer = styled.div`
   //   & {
@@ -878,85 +865,10 @@ function App() {
   //   return pinataGeteway + cid.split('//')[1]
   // }
 
-  async function makeLegendOffer() {
-    if (typeof window.ethereum !== 'undefined') {
-      const price = ethers.utils.parseUnits(sellPrice, 'ether')
-      // console.log(price)
-      const transaction = await marketplace.write.makeLegendOffer(legendsNFTAddress, id, { value: price })
-      await transaction.wait
-
-      // const price = ethers.utils.parseUnits(sellPrice, 'ether')
-      // const transaction = await marketplace.write.createLegendSale(legendsNFTAddress, id, price)
-      // await transaction.wait
-      // .then(
-      // marketplace.write.once('ListingStatusChanged', (data, event) => {
-      //   console.log(`data: ${data[0]} ${data[1]}`)
-      //   console.log(`event: ${event[0]} ${event[1]}`)
-      // }),
-      // )
-    }
-  }
-
-  async function acceptLegendOffer() {
-    if (typeof window.ethereum !== 'undefined') {
-      const transaction = await marketplace.write.decideLegendOffer(id, true)
-      await transaction.wait
-      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
-      // marketplace.write.once('ListingStatusChanged', (data, event) => {
-      //   console.log(`data: ${data[0]} ${data[1]}`)
-      //   console.log(`event: ${event[0]} ${event[1]}`)
-      // })
-    }
-  }
-
-  async function rejectLegendOffer() {
-    if (typeof window.ethereum !== 'undefined') {
-      const transaction = await marketplace.write.decideLegendOffer(id, false)
-      await transaction.wait
-      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
-      // marketplace.write.once('ListingStatusChanged', (data, event) => {
-      //   console.log(`data: ${data[0]} ${data[1]}`)
-      //   console.log(`event: ${event[0]} ${event[1]}`)
-      // })
-    }
-  }
-
-  async function claimRoyalties() {
-    if (typeof window.ethereum !== 'undefined') {
-      const transaction = await marketplace.write.claimRoyalties()
-      await transaction.wait
-      // await marketplace.write.createLegendListing(legendsNFTAddress, id, price).then(
-      // marketplace.write.once('ListingStatusChanged', (data, event) => {
-      //   console.log(`data: ${data[0]} ${data[1]}`)
-      //   console.log(`event: ${event[0]} ${event[1]}`)
-      // })
-    }
-  }
-
   return (
     <div>
       <header>
         <div>
-          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={fetchURI}>
-            Fetch URI
-          </button>
-          <button type="submit" onClick={fetchLegendComposition}>
-            Fetch Legend Composition
-          </button>
-          <button type="submit" onClick={fetchMeta}>
-            Fetch Legend Metadata
-          </button>
-          <button type="submit" onClick={fetchGenetics}>
-            Fetch IPFS Genetics
-          </button>
-          <button type="submit" onClick={fetchStats}>
-            Fetch Legend Stats
-          </button>
-          <button type="submit" onClick={isHatchable}>
-            is Hatchable ?
-          </button>
-          <br /> <br />
           <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
           <button type="submit" onClick={setIncubationDuration}>
             Set Base Incubation Duration
@@ -978,35 +890,57 @@ function App() {
           <button type="submit" onClick={setSeason}>
             Set Season
           </button>
-          <br /> <br />
+        </div>
+        <br />
+        <div>
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={fetchURI}>
+            Fetch URI
+          </button>
+          <button type="submit" onClick={fetchLegendComposition}>
+            Fetch Legend Composition
+          </button>
+          <button type="submit" onClick={fetchMeta}>
+            Fetch Legend Metadata
+          </button>
+          <button type="submit" onClick={fetchGenetics}>
+            Fetch IPFS Genetics
+          </button>
+          <button type="submit" onClick={fetchStats}>
+            Fetch Legend Stats
+          </button>
+        </div>
+        <div>
           <button type="submit" onClick={getTokensByOwner}>
             Print Owned Legend IDs
           </button>
           <button type="submit" onClick={getAllLegends}>
             Print All Legend Ids
           </button>
-          <br /> <br />
           <button type="submit" onClick={mintPromo}>
             Mint Promotional NFT
           </button>
-          <br /> <br />
+          <br/>
           <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setParent1(e.target.value)} />
           <input type="number" placeholder="Parent 2 Token ID" onChange={(e) => setParent2(e.target.value)} />
           <button type="submit" onClick={breed}>
             Breed
           </button>
-          <br /> <br />
+          <br />
+          <br />
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={isHatchable}>
+            is Hatchable ?
+          </button>
+          <button type="submit" onClick={hatch}>
+            Hatch Legend
+          </button>
+          <br />
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={destroy}>
             Destroy Legend
           </button>
-          <br />
-          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={hatch}>
-            Hatch Legend
-          </button>
         </div>
-        <br />
         <br />
         <div>
           <button type="submit" onClick={approveTransaction}>
@@ -1020,36 +954,6 @@ function App() {
           </button>
           <button type="submit" onClick={makeLegendOffer}>
             Make Legend Offer
-          </button>
-          <br />
-          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
-          <button type="submit" onClick={buyLegend}>
-            Buy Legend
-          </button>
-          <button type="submit" onClick={cancelLegendSale}>
-            Cancel Listing
-          </button>
-          <button type="submit" onClick={acceptLegendOffer}>
-            Accept Offer
-          </button>
-          <button type="submit" onClick={rejectLegendOffer}>
-            Reject Offer
-          </button>
-          <br />
-          <button type="submit" onClick={fetchLegendListings}>
-            Fetch Legend Listings
-          </button>
-          <button type="submit" onClick={fetchListingData}>
-            Fetch Listing Data
-          </button>
-          <button type="submit" onClick={biddys}>
-            Fetch Listing Bids
-          </button>
-        </div>
-        <br />
-        <div>
-          <button type="submit" onClick={approveTransaction}>
-            Approve Transaction
           </button>
           <br />
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
@@ -1071,39 +975,65 @@ function App() {
             Create Legend Auction
           </button>
           <br />
+          <button type="submit" onClick={fetchLegendListings}>
+            Fetch Legend Listings
+          </button>
+          <button type="submit" onClick={fetchListingData}>
+            Fetch Listing Data
+          </button>
+          <button type="submit" onClick={biddys}>
+            Fetch Listing Bids
+          </button>
+        </div>
+        <br />
+        <div>
+          <br />
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={buyLegend}>
+            Buy Legend
+          </button>
+          <button type="submit" onClick={acceptLegendOffer}>
+            Accept Offer (approval needed)
+          </button>
+          <button type="submit" onClick={rejectLegendOffer}>
+            Reject Offer
+          </button>
+          {/* <button type="submit" onClick={approveTransaction}>
+            Approve Transaction
+          </button> */}
+          <br />
           <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
           <input type="number" placeholder="Bid Amount(BSC)" onChange={(e) => setBid(e.target.value)} />
           <button type="submit" onClick={bidOnLegend}>
             Bid On Legend
           </button>
-          <button type="submit" onClick={increaseBid}>
-            Debug Bid
+          <br />
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={cancelLegendSale}>
+            Cancel Listing
           </button>
           <button type="submit" onClick={withdrawFromAuction}>
-            Withdraw From Auction
-          </button>
-          <button type="submit" onClick={closeAuction}>
-            Close Auction
-          </button>
-          <button type="submit" onClick={cancelLegendSale}>
-            Cancel Auction
+            Withdraw Bid From Auction
           </button>
           <br />
-          <button type="submit" onClick={fetchLegendAuctions}>
-            Fetch Legend Auctions
-          </button>
-          <button type="submit" onClick={fetchAuctionData}>
-            Fetch Auction Data
-          </button>
-          <button type="submit" onClick={depositsOf}>
+          {/* <button type="submit" onClick={depositsOf}>
             Deposited Amount
+          </button> */}
+          <br />
+        </div>
+        <div>
+          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={closeAuction}>
+            Close Listing & Claim Output
           </button>
           <br />
           <br />
           <button type="submit" onClick={claimRoyalties}>
+            Check Royalties
+          </button>
+          <button type="submit" onClick={claimRoyalties}>
             Claim Royalties
           </button>
-          <br />
           <br />
         </div>
         <br />
@@ -1126,19 +1056,12 @@ function App() {
           <button type="submit" onClick={matchWithLegend}>
             Match With Legend
           </button>
-          <button type="submit" onClick={cancelLegendMatching}>
-            Cancel Matching
-          </button>
           <br />
           <button type="submit" onClick={fetchLegendMatchings}>
             Fetch Legend Matchings
           </button>
           <button type="submit" onClick={fetchMatchingData}>
             Fetch Matching Data
-          </button>
-          <br />
-          <button type="submit" onClick={fetchData}>
-            Fetch Data
           </button>
         </div>
         <br />
@@ -1154,15 +1077,14 @@ function App() {
           <button type="submit" onClick={checkOwedTokens}>
             Check Owed Tokens
           </button>
-          <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={claimTokens}>
             Claim Tokens
           </button>
           <br />
-          <button type="submit" onClick={checkPaymentAmount}>
-            Check Reclaimable Legends
-          </button>
           <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={cancelLegendMatching}>
+            Cancel Matching
+          </button>
           <button type="submit" onClick={withdrawFromMatching}>
             Withdraw From Matching
           </button>
