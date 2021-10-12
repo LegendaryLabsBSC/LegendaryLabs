@@ -27,9 +27,17 @@ contract LegendToken is ERC20 {
         _;
     }
 
+        modifier onlyMatchingBoard() {
+        require(
+            msg.sender == address(lab.legendsMatchingBoard()),
+            "not matchingBoard"
+        );
+        _;
+    }
+
     function matchingBurn(address account, uint256 amount)
         public
-        onlyMarketplace
+        onlyMatchingBoard
     {
         _burn(account, amount);
     }

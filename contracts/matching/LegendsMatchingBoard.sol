@@ -68,7 +68,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         IERC721 legendsNFT = LegendsNFT(m.nftContract);
 
         require(m.status == MatchingStatus.Open);
-        require(m.surrogate != msg.sender);
+        require(m.surrogate != msg.sender, "Seller not authorized");
 
         //TODO: require legend is breedable - wait on NFT rework
 
