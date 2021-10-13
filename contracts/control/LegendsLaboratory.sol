@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-
-
 pragma solidity ^0.8.0;
 
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../marketplace/LegendsMarketplace.sol";
 import "../matching/LegendsMatchingBoard.sol";
+import "../rejuvenation/LegendRejuvenation.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+
 /**
-* 
+ *
  */
 contract LegendsLaboratory is Ownable {
     LegendsNFT public legendsNFT = new LegendsNFT();
@@ -18,6 +18,7 @@ contract LegendsLaboratory is Ownable {
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
+    LegendRejuvenation public legendRejuvenation = new LegendRejuvenation();
 
     constructor() {}
 

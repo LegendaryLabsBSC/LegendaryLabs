@@ -26,7 +26,7 @@ contract LegendsNFT is
 
     uint256 public incubationDuration;
     uint256 public breedingCooldown;
-    uint256 public offspringLimit;
+    uint256 public offspringLimit; // 4 staring out
     uint256 public baseBreedingCost;
     string public season;
 

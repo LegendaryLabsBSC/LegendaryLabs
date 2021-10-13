@@ -10,10 +10,10 @@ import "./listings/LegendAuction.sol";
 import "./listings/LegendOffer.sol";
 
 contract LegendsMarketplace is
-    ReentrancyGuard,
     LegendsAuctioneer,
     LegendAuction,
-    LegendOffer
+    LegendOffer,
+    ReentrancyGuard
 {
     using SafeMath for uint256; // try to get rid of
 
@@ -117,7 +117,7 @@ contract LegendsMarketplace is
         AuctionDetails storage a = auctionDetails[listingId];
         LegendListing storage l = legendListing[listingId];
 
-        require(l.status == ListingStatus.Open, "bad1");
+        require(l.status == ListingStatus.Open);
         require(!isExpired(listingId), "Auction has expired");
         require(msg.sender != l.seller, "Seller can not bid");
 
