@@ -7,18 +7,17 @@ pragma solidity ^0.8.0;
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../marketplace/LegendsMarketplace.sol";
-import "../mating/LegendsMatingboard.sol";
+import "../matching/LegendsMatchingBoard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-//TODO: look into openZeppelin Access Control docs more ; OZ Governor
-//TODO: fix lab owner for setter functions
-//TODO: ?? put all state variables in a struct and pull from/ set
-
+/**
+* 
+ */
 contract LegendsLaboratory is Ownable {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
-    LegendsMatingboard public legendsMatingboard = new LegendsMatingboard();
+    LegendsMatchingBoard public legendsMatchingBoard =
+        new LegendsMatchingBoard();
 
     constructor() {}
 
@@ -30,10 +29,16 @@ contract LegendsLaboratory is Ownable {
         returns (
             LegendsNFT,
             LegendToken,
-            LegendsMarketplace
+            LegendsMarketplace,
+            LegendsMatchingBoard
         )
     {
-        return (legendsNFT, legendToken, legendsMarketplace);
+        return (
+            legendsNFT,
+            legendToken,
+            legendsMarketplace,
+            legendsMatchingBoard
+        );
     }
 
     function setIncubationDuration(uint256 newIncubationDuration)

@@ -16,6 +16,7 @@ interface ILegendListing {
     }
     struct LegendListing {
         uint256 listingId;
+        uint256 createdAt;
         address nftContract;
         uint256 tokenId;
         address payable seller;

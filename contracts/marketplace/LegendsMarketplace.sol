@@ -260,11 +260,12 @@ contract LegendsMarketplace is
 
     function closeListing(uint256 listingId) external payable {
         LegendListing storage l = legendListing[listingId];
+        AuctionDetails storage a = auctionDetails[listingId];
 
         require(
             msg.sender == l.seller ||
                 msg.sender == l.buyer ||
-                msg.sender == auctionDetails[listingId].highestBidder,
+                msg.sender == a.highestBidder,
             "Not authorized to close"
         );
 
@@ -282,7 +283,7 @@ contract LegendsMarketplace is
 
                 _obligateBid(
                     listingId,
-                    auctionDetails[listingId].highestBidder,
+                    a.highestBidder,
                     l.seller,
                     marketFee,
                     royaltyFee,
@@ -353,7 +354,7 @@ contract LegendsMarketplace is
     {
         LegendListing memory l = legendListing[listingId];
 
-        //TODO: finish after access control rework ; thoughout
+        //TODO: finish after access control rework ; throughout
         uint256 marketFee = (l.price * _marketplaceFee) / 100;
         // _asyncTransfer(l.seller, _marketplaceFee);
 

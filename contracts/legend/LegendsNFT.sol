@@ -163,7 +163,8 @@ contract LegendsNFT is
         if (parents[0] == 0) {
             _creator = payable(address(0));
         } else {
-            _creator = payable(_recipient);
+            ///@dev To accommodate matching, creator is legend's second parent creator(breeder address)
+            _creator = payable(legendData[parents[1]].legendCreator);
         }
 
         // LegendMetadata memory m;
