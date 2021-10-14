@@ -15,7 +15,7 @@ interface ILegendComposition{
         // uint256 incubationDuration; // TODO: not needed, remove with incubator rework
         uint256 breedingCooldown; // length of time before Legend can breed again, make change after each breed?
         uint256 breedingCost; // cost to breed Legend
-        uint256 offspringLimit; // max times Legend can breed // ? change to offspring count
+        uint256 offspringCount; // max times Legend can breed // ? change to offspring count ;; make limit a state variable
         string season; // season of Legend
         bool isLegendary; // Legendary concept will need to be reevaluated
         bool isHatched; 
