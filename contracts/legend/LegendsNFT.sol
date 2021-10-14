@@ -178,7 +178,7 @@ contract LegendsNFT is
         // m.incubationDuration = _incubationDuration;
         m.breedingCooldown = breedingCooldown;
         m.breedingCost = baseBreedingCost;
-        m.offspringLimit = offspringLimit;
+        // m.offspringLimit = offspringLimit;
         m.season = season;
         m.isLegendary = isLegendary;
         m.isHatched = isHatched;

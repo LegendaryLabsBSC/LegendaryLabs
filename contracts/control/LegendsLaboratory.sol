@@ -85,4 +85,22 @@ contract LegendsLaboratory is Ownable {
     {
         return legendsNFT.tokenMeta(_tokenId).legendCreator;
     }
+
+    function fetchOffspringCount(uint256 _tokenId)
+        public
+        view
+        returns (uint256)
+    //only ? //TODO: in access control rework
+    {
+        return legendsNFT.tokenMeta(_tokenId).offspringCount;
+    }
+
+    function restoreBreedingSlots(uint256 _tokenId, uint256 _newOffspringCount)
+        internal
+        view
+        returns (uint256)
+    //only ? //TODO: in access control rework
+    {
+        return legendsNFT.tokenMeta(_tokenId).offspringCount;
+    }
 }

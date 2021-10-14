@@ -13,6 +13,7 @@ interface IRejuvenationPool {
         address depositedBy;
         uint256 depositBlock;
         uint256 offspringCount;
+        uint256 multiplier;
         // uint256 earnedReJu;
     }
 
@@ -21,8 +22,8 @@ interface IRejuvenationPool {
         uint256 initializedAt;
         address nftContract;
         uint256 tokenId;
-        uint256 tokenAmountSecured; // can leave tokens secured while unoccupied
-        uint256 remainderReJu;
+        uint256 tokenAmountSecured;
+        uint256 remainderReJu; // needs to transfer over after pivkup/remove/increase
         uint256 previousRemovalTime;
         PoolVisit visit;
         PoolStatus status;
