@@ -8,6 +8,7 @@ import "../marketplace/LegendsMarketplace.sol";
 import "../matching/LegendsMatchingBoard.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./TicketMachine.sol";
 
 /**
  *
@@ -21,6 +22,8 @@ contract LegendsLaboratory is Ownable {
     LegendRejuvenation public legendRejuvenation = new LegendRejuvenation();
 
     constructor() {}
+
+    TicketMachine ticket;
 
     // for testing
     function getChildContracts()
@@ -42,6 +45,24 @@ contract LegendsLaboratory is Ownable {
         );
     }
 
+    mapping(string => mapping(address => uint256)) private promoApprovalList;
+
+    function grantPromoTicket(string memory promoEvent, address recipient) 
+
+    function dispenseTicket(string memory promoEvent, address recipient)
+        public
+    // returns (uint256)
+    {
+        require(
+            promoApprovalList[promoEvent][msg.sender] != 0,
+            "Not Authorized"
+        );
+
+        promoApprovalList[promoEvent][msg.sender] -= 1;
+
+        ticket._dispenseTicket(promoEvent, recipient);
+    }
+
     function setIncubationDuration(uint256 newIncubationDuration)
         public
         onlyOwner
@@ -61,9 +82,9 @@ contract LegendsLaboratory is Ownable {
         legendsNFT.setBreedingCost(breedingCost);
     }
 
-    function setSeason(string memory newSeason) public onlyOwner {
-        legendsNFT.setSeason(newSeason);
-    }
+    // function setSeason(string memory newSeason) public onlyOwner {
+    //     legendsNFT.setSeason(newSeason);
+    // }
 
     // function setBaseHealth(uint256 baseHealth) public onlyOwner {
     //     legendsNFT.setBaseHealth(baseHealth);
@@ -86,21 +107,21 @@ contract LegendsLaboratory is Ownable {
         return legendsNFT.tokenMeta(_tokenId).legendCreator;
     }
 
-    function fetchOffspringCount(uint256 _tokenId)
-        public
-        view
-        returns (uint256)
-    //only ? //TODO: in access control rework
-    {
-        return legendsNFT.tokenMeta(_tokenId).offspringCount;
-    }
+    // function fetchOffspringCount(uint256 _tokenId)
+    //     public
+    //     view
+    //     returns (uint256)
+    // //only ? //TODO: in access control rework
+    // {
+    //     return legendsNFT.tokenMeta(_tokenId).offspringCount;
+    // }
 
-    function restoreBreedingSlots(uint256 _tokenId, uint256 _newOffspringCount)
-        internal
-        view
-        returns (uint256)
-    //only ? //TODO: in access control rework
-    {
-        return legendsNFT.tokenMeta(_tokenId).offspringCount;
-    }
+    //     function restoreBreedingSlots(uint256 _tokenId, uint256 _newOffspringCount)
+    //         internal
+    //         view
+    //         returns (uint256)
+    //     //only ? //TODO: in access control rework
+    //     {
+    //         return legendsNFT.tokenMeta(_tokenId).breedingInstancesUsed;
+    //     }
 }

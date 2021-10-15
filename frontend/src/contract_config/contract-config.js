@@ -1,7 +1,9 @@
-const legendsLaboratory = '0xB43a19584929e710f1cA9Ac040c63412670F2CF1'
-const legendsNFT = '0xDfF995AE15F17001ECAA2330b84cb0655959d140'
-const legendsToken = '0xB6776D538c689583916ebF785236a722C81EB63E'
-const legendsMarketplace = '0xb197412F99BD284E2a63e03E2bD8318150f86926'
-const legendsMatchingBoard = '0x31c8663C313867188a16dfa854C0871BB8Be6Fe2'
 
-export { legendsLaboratory, legendsNFT, legendsToken, legendsMarketplace, legendsMatchingBoard }
+    const legendsLaboratory = "0x0440f91A35C1a6d9826B04C28C5544e37d04f5D4"
+    const legendsNFT = "0xf7D4317d3Aa23894b198E5552bD03E43c0702571"
+    const legendsToken = "0x5D656244a6F9FB070bfb6EB6bBe040C99ED2a88c"
+    const legendsMarketplace = "0xE21F1eBCeA9072AB38a8e483B00031191A0438d6"
+    const legendsMatchingBoard = "0xaDfdf84d325f8eDBD30cE03bF183Bcca130dE126"
+
+    export { legendsLaboratory, legendsNFT, legendsToken, legendsMarketplace, legendsMatchingBoard }
+    

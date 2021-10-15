@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-
-
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "../control/LegendsLaboratory.sol";
-import "./LegendBreeding.sol";
+import "../lab/LegendsLaboratory.sol";
+import "./formation/LegendBreeding.sol";
 // import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
@@ -103,30 +101,30 @@ contract LegendsNFT is
         emit Burned(tokenId);
     }
 
-    //TODO: fix in incubation rework
-    // function isHatchable(uint256 tokenId, bool testToggle)
-    //     public
-    //     view
-    //     returns (
-    //         bool,
-    //         uint256,
-    //         uint256
-    //     )
-    // {
-    //     bool hatchable;
-    //     uint256 hatchableWhen;
-    //     LegendMetadata memory l = legendData[tokenId];
-    //     if (!testToggle) {
-    //         hatchableWhen = l.incubationDuration + l.birthDay;
-    //     } else {
-    //         hatchableWhen = block.timestamp;
-    //     }
-    //     if (hatchableWhen <= block.timestamp) {
-    //         hatchable = true;
-    //     }
+    // TODO: fix in incubation rework
+    function isHatchable(uint256 tokenId, bool testToggle)
+        public
+        view
+        returns (
+            bool,
+            uint256,
+            uint256
+        )
+    {
+        bool hatchable;
+        uint256 hatchableWhen;
+        LegendMetadata memory l = legendData[tokenId];
+        if (!testToggle) {
+            hatchableWhen = incubationDuration + l.birthDay;
+        } else {
+            hatchableWhen = block.timestamp;
+        }
+        if (hatchableWhen <= block.timestamp) {
+            hatchable = true;
+        }
 
-    //     return (hatchable, hatchableWhen, block.timestamp);
-    // }
+        return (hatchable, hatchableWhen, block.timestamp);
+    }
 
     function hatch(uint256 tokenId, string memory _tokenURI) public {
         // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
@@ -170,16 +168,14 @@ contract LegendsNFT is
         // LegendMetadata memory m;
         LegendMetadata storage m = legendData[newItemId];
         m.id = newItemId;
-        m.legendCreator = _creator;
+        m.season = season;
         m.prefix = prefix;
         m.postfix = postfix;
         m.parents = parents;
         m.birthDay = block.timestamp;
-        // m.incubationDuration = _incubationDuration;
-        m.breedingCooldown = breedingCooldown;
+        // m.incubationDuration = _incubationDuration; //TODO: make state var in lab or this
         m.breedingCost = baseBreedingCost;
-        // m.offspringLimit = offspringLimit;
-        m.season = season;
+        m.legendCreator = _creator;
         m.isLegendary = isLegendary;
         m.isHatched = isHatched;
         m.isDestroyed = false;
@@ -241,6 +237,8 @@ contract LegendsNFT is
         bool isLegendary,
         bool skipIncubation
     ) public {
+        // require(lab._promoTickets[msg.sender] != 0, "No tickets");
+
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
@@ -278,7 +276,7 @@ contract LegendsNFT is
         baseBreedingCost = _baseBreedingCost;
     }
 
-    function setSeason(string memory _season) public onlyLab {
-        season = _season;
-    }
+    // function setSeason(string memory _season) public onlyLab {
+    //     season = _season;
+    // } // TODO: only have in lab, pull state variable from lab.var
 }

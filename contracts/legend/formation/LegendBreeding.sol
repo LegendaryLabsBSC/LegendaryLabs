@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-
-
 pragma solidity ^0.8.0;
 
-import "./LegendComposition.sol";
+import "./LegendMetadata.sol";
 
 /**
  * TODO: look into if modifiers such as this are needed
@@ -20,24 +18,25 @@ import "./LegendComposition.sol";
 // TODO: breeding token burn
 //TODO: do not allow breeding or matching with same token
 
-contract LegendBreeding is ILegendComposition {
+contract LegendBreeding is ILegendMetadata {
     mapping(uint256 => LegendGenetics) public legendGenetics;
 
     event GeneticsGenerated(LegendGenetics g);
 
+    // 115792089237316195423570985008687907853269984665640564039457584007913129639935
     function createGenetics(uint256 id) public {
-        uint256 randomValue1 = random(255);
-        uint256 randomValue2 = random(100);
+        // uint256 randomValue1 = random(255);
+        // uint256 randomValue2 = random(100);
         LegendGenetics memory g;
-        g.CdR1 = (randomValue1 - 8);
-        g.CdG1 = (randomValue2 + 81);
-        g.CdB1 = (randomValue1 - 4);
-        g.CdR2 = (randomValue2 + 31);
-        g.CdG2 = (randomValue1 - 13);
-        g.CdB2 = (randomValue2 + 33);
-        g.CdR3 = (randomValue1 - 22);
-        g.CdG3 = (randomValue2 + 5);
-        g.CdB3 = (randomValue1 - 10);
+        g.CdR1 = 255255255255255255255255255255255255255255255255255;
+        g.CdG1 = 255255255255255255255255255255255255255255255255255;
+        g.CdB1 = 255255255255255255255255255255255255255255255255255;
+        g.CdR2 = 255255255255255255255255255255255255255255255255255;
+        g.CdG2 = 255255255255255255255255255255255255255255255255255;
+        g.CdB2 = 255255255255255255255255255255255255255255255255255;
+        g.CdR3 = 255255255255255255255255255255255255255255255255255;
+        g.CdG3 = 255255255255255255255255255255255255255255255255255;
+        g.CdB3 = 255255255255255255255255255255255255255255255255255;
 
         legendGenetics[id] = g;
 

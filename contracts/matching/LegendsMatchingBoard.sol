@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../control/LegendsLaboratory.sol";
+import "../lab/LegendsLaboratory.sol";
 import "./listing/LegendMatching.sol";
 import "../token/LegendToken.sol";
 

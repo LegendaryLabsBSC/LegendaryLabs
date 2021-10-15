@@ -110,7 +110,7 @@ function pinPNG(dir, file, legend) {
                 name: `${legend.id + legend.genetics + legend.parents + legend.birthDay}`
                     .replace(/,/g, '')
                 ,
-                keyvalues: {
+                keyvalues: { // TODO: move to pindata function
                     id: `${legend.id}`,
                     genetics: `${legend.genetics}`,
                     parents: `${legend.parents}`,

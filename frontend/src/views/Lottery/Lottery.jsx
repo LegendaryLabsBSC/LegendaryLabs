@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator'
 import LegendsNFT from '../../artifacts/contracts/legend/LegendsNFT.sol/LegendsNFT.json'
 import LegendsMarketplace from '../../artifacts/contracts/marketplace/LegendsMarketplace.sol/LegendsMarketplace.json'
-import LegendsLaboratory from '../../artifacts/contracts/control/LegendsLaboratory.sol/LegendsLaboratory.json'
+import LegendsLaboratory from '../../artifacts/contracts/lab/LegendsLaboratory.sol/LegendsLaboratory.json'
 // import { NftCard } from './components/nftCard'
 // import gif from '../../eater.gif'
 

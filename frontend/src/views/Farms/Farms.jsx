@@ -14,7 +14,7 @@ import {
 import LegendsNFT from '../../artifacts/contracts/legend/LegendsNFT.sol/LegendsNFT.json'
 import LegendsMarketplace from '../../artifacts/contracts/marketplace/LegendsMarketplace.sol/LegendsMarketplace.json'
 import LegendsMatchingBoard from '../../artifacts/contracts/matching/LegendsMatchingBoard.sol/LegendsMatchingBoard.json'
-import LegendsLaboratory from '../../artifacts/contracts/control/LegendsLaboratory.sol/LegendsLaboratory.json'
+import LegendsLaboratory from '../../artifacts/contracts/lab/LegendsLaboratory.sol/LegendsLaboratory.json'
 import LegendToken from '../../artifacts/contracts/token/LegendToken.sol/LegendToken.json'
 import { NftCard } from './components/nftCard'
 import gif from '../../eater.gif'
@@ -317,7 +317,7 @@ function App() {
         // ! receiving multiple responses ?
         // ? is .then even needed
         contract.nft.write.once('NewLegend', (data, event) => {
-          console.log('New Token Created:', data.toString())
+          console.log('New Token Created:', data.toString()) // return token id instead of watching for event
           const newItemId = data.toString()
           generateImage(newItemId)
         }),
