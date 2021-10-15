@@ -2,28 +2,28 @@
 
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
+import "../rejuvenation/LegendRejuvenation.sol";
 import "../marketplace/LegendsMarketplace.sol";
 import "../matching/LegendsMatchingBoard.sol";
-import "../rejuvenation/LegendRejuvenation.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./TicketMachine.sol";
 
 /**
  *
  */
-contract LegendsLaboratory is Ownable {
+contract LegendsLaboratory is Ownable, TicketMachine {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
+    LegendRejuvenation public legendRejuvenation = new LegendRejuvenation();
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
-    LegendRejuvenation public legendRejuvenation = new LegendRejuvenation();
+
+    string public season;
 
     constructor() {}
-
-    TicketMachine ticket;
 
     // for testing
     function getChildContracts()
@@ -45,34 +45,56 @@ contract LegendsLaboratory is Ownable {
         );
     }
 
-    mapping(string => mapping(address => uint256)) private promoApprovalList;
-
-    function grantPromoTicket(string memory promoEvent, address recipient) 
-
-    function dispenseTicket(string memory promoEvent, address recipient)
-        public
-    // returns (uint256)
-    {
-        require(
-            promoApprovalList[promoEvent][msg.sender] != 0,
-            "Not Authorized"
-        );
-
-        promoApprovalList[promoEvent][msg.sender] -= 1;
-
-        ticket._dispenseTicket(promoEvent, recipient);
+    function createPromoEvent(
+        string memory eventName,
+        uint256 maxTicketCount,
+        bool isUnrestricted
+    ) public onlyOwner {
+        _createPromoEvent(eventName, maxTicketCount, isUnrestricted);
     }
 
-    function setIncubationDuration(uint256 newIncubationDuration)
-        public
-        onlyOwner
-    {
-        legendsNFT.setIncubationDuration(newIncubationDuration);
+    function closePromoEvent(string memory name) public onlyOwner {
+        _closePromoEvent(name);
     }
 
-    function setBreedingCooldown(uint256 newBreedingCooldown) public onlyOwner {
-        legendsNFT.setBreedingCooldown(newBreedingCooldown);
-    }
+    function dispensePromoTicket(
+        string memory promoName,
+        address recipient,
+        uint256 ticketAmount
+    ) public {
+        // if (promoEvent[promoName].isUnrestricted == false) {
+        //     require(owner() == msg.sender);
+            _dispensePromoTicket(promoName, recipient, ticketAmount);
+        }
+    // }
+
+    // function dispensePromoTicket(
+    //     string memory eventName,
+    //     address recipient,
+    //     uint256 ticketAmount
+    // ) public {
+    //     PromoEvent storage p = promoEvent[eventName];
+    //     require(!p.eventClosed, "Promo Closed");
+
+    //     if (p.unrestricted == false) {
+    //         require(owner() == msg.sender);
+    //     } else if (p.unrestricted == true) {
+    //         require(p.claimed[recipient] == false, "Promo already claimed");
+    //         require(ticketAmount == 1, "One ticket per address");
+    //     }
+
+    //     p.claimed[recipient] = true;
+
+    //     promoTicket[eventName][recipient] += ticketAmount;
+    // }
+
+    // function setIncubationDuration(uint256 newIncubationDuration)
+    //     public
+    //     onlyOwner
+    // {
+    //     legendsNFT.setIncubationDuration(newIncubationDuration);
+    // }
+
 
     function setOffspringLimit(uint256 newOffspringLimit) public onlyOwner {
         legendsNFT.setOffspringLimit(newOffspringLimit);
@@ -104,7 +126,7 @@ contract LegendsLaboratory is Ownable {
         returns (address payable)
     //onlyMarketplace //TODO: in access control rework
     {
-        return legendsNFT.tokenMeta(_tokenId).legendCreator;
+        return legendsNFT.fetchTokenMetadata(_tokenId).legendCreator;
     }
 
     // function fetchOffspringCount(uint256 _tokenId)

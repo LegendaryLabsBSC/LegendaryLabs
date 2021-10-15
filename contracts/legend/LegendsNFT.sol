@@ -3,134 +3,40 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../lab/LegendsLaboratory.sol";
-import "./formation/LegendBreeding.sol";
-// import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "../lab/LegendsLaboratory.sol";
+import "./formation/LegendMetadata.sol";
+import "./formation/LegendBreeding.sol";
+import "./formation/LegendIncubation.sol";
 
 contract LegendsNFT is
     ERC721Enumerable,
-    Ownable,
-    LegendBreeding
-    // , LegendStats
+    LegendBreeding,
+    ILegendMetadata
 {
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
     using Strings for uint256;
 
-    mapping(uint256 => string) private _tokenURIs;
-    mapping(uint256 => LegendMetadata) public legendData;
-
-    uint256 public incubationDuration;
-    uint256 public breedingCooldown;
-    uint256 public offspringLimit; // 4 staring out
-    uint256 public baseBreedingCost;
-    string public season;
-
-    event NewLegend(uint256 newItemId);
     event Minted(uint256 tokenId);
     event Breed(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
 
+    Counters.Counter private _tokenIds;
+
+    mapping(uint256 => string) private _tokenURIs;
+    mapping(uint256 => LegendMetadata) public legendMetadata;
+
+    uint256 public offspringLimit = 4;
+    uint256 public baseBreedingCost = 100;
+
     LegendsLaboratory lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(lab), "not lab owner");
+        require(msg.sender == address(lab), "Not Lab");
         _;
     }
-
-    // modifier isHatchable
-
     constructor() ERC721("Legend", "LEGEND") {
         lab = LegendsLaboratory(msg.sender);
-    }
-
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
-    {
-        _tokenURIs[tokenId] = _tokenURI;
-    }
-
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        string memory _tokenURI = _tokenURIs[tokenId];
-        return _tokenURI;
-    }
-
-    function tokenDATA(
-        uint256 tokenId // TODO: Clean this up, possibly not needed at all
-    ) public view virtual returns (LegendGenetics memory) {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        return legendGenetics[tokenId];
-    }
-
-    function tokenMeta(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (LegendMetadata memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        return legendData[tokenId];
-    }
-
-    function immolate(uint256 tokenId) public {
-        require(ownerOf(tokenId) == msg.sender);
-
-        LegendMetadata storage legend = legendData[tokenId];
-        legend.isDestroyed = true;
-        _burn(tokenId);
-
-        emit Burned(tokenId);
-    }
-
-    // TODO: fix in incubation rework
-    function isHatchable(uint256 tokenId, bool testToggle)
-        public
-        view
-        returns (
-            bool,
-            uint256,
-            uint256
-        )
-    {
-        bool hatchable;
-        uint256 hatchableWhen;
-        LegendMetadata memory l = legendData[tokenId];
-        if (!testToggle) {
-            hatchableWhen = incubationDuration + l.birthDay;
-        } else {
-            hatchableWhen = block.timestamp;
-        }
-        if (hatchableWhen <= block.timestamp) {
-            hatchable = true;
-        }
-
-        return (hatchable, hatchableWhen, block.timestamp);
-    }
-
-    function hatch(uint256 tokenId, string memory _tokenURI) public {
-        // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
-        _setTokenURI(tokenId, _tokenURI);
-        // LegendMetadata memory legend = legendData[tokenId];
-        legendData[tokenId].isHatched = true;
     }
 
     //TODO: rework variable naming throughout
@@ -154,7 +60,7 @@ contract LegendsNFT is
             _incubationDuration = 0;
             isHatched = true;
         } else {
-            _incubationDuration = incubationDuration;
+            // _incubationDuration = incubationDuration;
             isHatched = false;
         }
 
@@ -162,13 +68,13 @@ contract LegendsNFT is
             _creator = payable(address(0));
         } else {
             ///@dev To accommodate matching, creator is legend's second parent creator(breeder address)
-            _creator = payable(legendData[parents[1]].legendCreator);
+            _creator = payable(legendMetadata[parents[1]].legendCreator);
         }
 
         // LegendMetadata memory m;
-        LegendMetadata storage m = legendData[newItemId];
+        LegendMetadata storage m = legendMetadata[newItemId];
         m.id = newItemId;
-        m.season = season;
+        // m.season = season;
         m.prefix = prefix;
         m.postfix = postfix;
         m.parents = parents;
@@ -180,7 +86,7 @@ contract LegendsNFT is
         m.isHatched = isHatched;
         m.isDestroyed = false;
 
-        // legendData[newItemId] = m;
+        // legendMetadata[newItemId] = m;
 
         // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
 
@@ -189,7 +95,7 @@ contract LegendsNFT is
 
         _setTokenURI(newItemId, enumEgg);
 
-        emit NewLegend(newItemId);
+        // emit NewLegend(newItemId);
     }
 
     function breed(
@@ -202,8 +108,8 @@ contract LegendsNFT is
             ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
         );
 
-        LegendMetadata storage parent1 = legendData[_parent1];
-        LegendMetadata storage parent2 = legendData[_parent2];
+        LegendMetadata storage parent1 = legendMetadata[_parent1];
+        LegendMetadata storage parent2 = legendMetadata[_parent2];
 
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
@@ -260,13 +166,50 @@ contract LegendsNFT is
         );
     }
 
-    function setIncubationDuration(uint256 _incubationDuration) public onlyLab {
-        incubationDuration = (_incubationDuration);
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
+        internal
+        virtual
+    {
+        _tokenURIs[tokenId] = _tokenURI;
     }
 
-    function setBreedingCooldown(uint256 _breedingCooldown) public onlyLab {
-        breedingCooldown = _breedingCooldown;
+    function fetchTokenURI(uint256 tokenId)
+        public
+        view
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        return _tokenURIs[tokenId];
     }
+
+    function fetchTokenMetadata(uint256 tokenId)
+        public
+        view
+        returns (LegendMetadata memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        return legendMetadata[tokenId];
+    }
+
+    function destroyLegend(uint256 tokenId) public {
+        require(ownerOf(tokenId) == msg.sender);
+
+        legendMetadata[tokenId].isDestroyed = true;
+
+        _burn(tokenId);
+
+        emit Burned(tokenId);
+    }
+
+    // function setIncubationDuration(uint256 _incubationDuration) public onlyLab {
+    //     incubationDuration = (_incubationDuration);
+    // }
 
     function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
         offspringLimit = _offspringLimit;

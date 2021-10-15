@@ -126,7 +126,7 @@ function App() {
   }
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.nft.read.legendData(id) // doesn't return parents for some reason
+      // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.nft.read.tokenMeta(id)
       const legendGenetics = await contract.nft.read.legendGenetics(id)
       const legendStats = await contract.nft.read.legendStats(id)
@@ -167,7 +167,7 @@ function App() {
   }
   async function fetchMeta() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.nft.read.legendData(id) // doesn't return parents for some reason
+      // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.nft.read.tokenMeta(id)
       console.log(`Meta: ${legendMeta}`)
     }
@@ -187,7 +187,7 @@ function App() {
   async function isHatchable() {
     if (typeof window.ethereum !== 'undefined') {
       legends.forEach((legend) => {
-        contract.nft.read.legendData(legend.tokenID).then((legendMeta) => {
+        contract.nft.read.legendMetadata(legend.tokenID).then((legendMeta) => {
           if (!legendMeta.isHatched) {
             const testToggle = true // hatching test toggle
             contract.nft.read.isHatchable(legendMeta.id, testToggle).then((res) => {
@@ -211,7 +211,7 @@ function App() {
       setGettingLegends(true)
       const totalLegends = await contract.read.totalSupply()
       for (let i = 1; i <= totalLegends; i++) {
-        contract.nft.read.legendData(i).then((legendMeta) => {
+        contract.nft.read.legendMetadata(i).then((legendMeta) => {
           if (!legendMeta.isDestroyed) {
             loadLegends(legendMeta.id.toString())
           }
