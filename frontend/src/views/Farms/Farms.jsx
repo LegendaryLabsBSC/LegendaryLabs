@@ -178,6 +178,14 @@ function App() {
       await contract.lab.write.setSeason(season)
     }
   }
+  async function _setURI() {
+    if (typeof window.ethereum !== 'undefined') {
+      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // await contract.nft.write._setTokenURI(id, newURI)
+      const tt = await contract.nft.read.fetchTokenURI(id)
+      console.log(tt)
+    }
+  }
   /**
    * Admin End
    */
@@ -816,7 +824,7 @@ function App() {
             Fetch Promo Details
           </button>
           <br />
-          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <input type="number" placeholder="Promo ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={dispensePromoTicket}>
             Dispense Promo Ticket
           </button>
@@ -825,6 +833,11 @@ function App() {
           </button>
           <button type="submit" onClick={fetchRedeemableTickets}>
             Fetch Redeemable Tickets
+          </button>
+          <input type="number" placeholder="Promo ID" onChange={(e) => setID(e.target.value)} />
+          <input type="text" placeholder="uri" onChange={(e) => setURI(e.target.value)} />
+          <button type="submit" onClick={_setURI}>
+            Set URI
           </button>
         </div>
         <br />
@@ -835,9 +848,9 @@ function App() {
           <button type="submit" onClick={getAllLegends}>
             Print All Legend Ids
           </button>
-          {/* <button type="submit" onClick={mintPromo}>
+          <button type="submit" onClick={mintPromo}>
             Mint Promotional NFT
-          </button> */}
+          </button>
         </div>
         <div>
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />

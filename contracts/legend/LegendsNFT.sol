@@ -89,36 +89,32 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
 
         // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
 
+        // string memory id = Strings.toString(newLegendId);
+
+        // string memory data;
+
+        // if (promoId == 0) {
+        //     data = string(
+        //         abi.encodePacked(
+        //             Strings.toString(parents[0]),
+        //             "-",
+        //             Strings.toString(parents[0])
+        //         )
+        //     );
+        // } else {
+        //     data = Strings.toString(promoId);
+        // }
+
         string
             memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
 
-        string memory data;
+        // string memory _uri = string(
+        //     abi.encodePacked(id, ",", data, ",", enumEgg)
+        // );
 
-        if (promoId == 0) {
-            data = string(
-                abi.encodePacked(
-                    Strings.toString(parents[0]),
-                    "-",
-                    Strings.toString(parents[0])
-                )
-            );
-        } else {
-            data = Strings.toString(promoId);
-        }
+        _setTokenURI(newLegendId, enumEgg);
 
-        string memory _uri = string(
-            abi.encodePacked(
-                Strings.toString(newLegendId),
-                ",",
-                data,
-                ",",
-                enumEgg
-            )
-        );
-
-        _setTokenURI(newLegendId, _uri);
-
-        emit Debug(_uri);
+        // emit Debug(_uri);
     }
 
     function blendDNA(
@@ -163,7 +159,9 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
         string memory _postfix,
         uint256 _promoId,
         bool _isLegendary
-    ) public onlyLab {
+    ) public 
+    // onlyLab
+     {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
@@ -191,12 +189,13 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
     // function _createTokenURI(uint256 newLegendId, uint256)
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
+        public
         virtual
     {
         _tokenURIs[tokenId] = _tokenURI;
     }
 
+    // ? not needed, base function (erc721.sol)
     function fetchTokenURI(uint256 tokenId)
         public
         view
