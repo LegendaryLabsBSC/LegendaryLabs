@@ -2,8 +2,11 @@
 
 pragma solidity ^0.8.4;
 
-contract LegendIncubation {
-    uint256 public incubationDuration;
+import "../../lab/LegendsLaboratory.sol";
+
+abstract contract LegendIncubation {
+    uint256 internal incubationDuration; // move to lab ?
+
 
     // TODO: fix in incubation rework
     // function isHatchable(uint256 tokenId, bool testToggle)
@@ -36,4 +39,6 @@ contract LegendIncubation {
     //     // LegendMetadata memory legend = legendMetadata[tokenId];
     //     legendMetadata[tokenId].isHatched = true;
     // }
+
+    function setIncubationDuration(uint256) public virtual {}
 }

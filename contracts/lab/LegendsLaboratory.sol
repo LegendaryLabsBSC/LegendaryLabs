@@ -21,6 +21,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
 
+    // secure ?
     string public season;
 
     constructor() {}
@@ -86,25 +87,23 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         address recipient,
         string memory prefix,
         string memory postfix
-    ) public
-    //  onlyOwner
-      {
+    ) public {
         _redeemPromoTicket(promoId, recipient);
 
         // approval lock needed ?
-        legendsNFT.mintPromo(recipient, prefix, postfix, promoId, false);
+        legendsNFT.createLegend(recipient, prefix, postfix, promoId, false);
     }
 
     function closePromoEvent(uint256 promoId) public onlyOwner {
         _closePromoEvent(promoId);
     }
 
-    // function setIncubationDuration(uint256 newIncubationDuration)
-    //     public
-    //     onlyOwner
-    // {
-    //     legendsNFT.setIncubationDuration(newIncubationDuration);
-    // }
+    function setIncubationDuration(uint256 newIncubationDuration)
+        public
+        onlyOwner
+    {
+        legendsNFT.setIncubationDuration(newIncubationDuration);
+    }
 
     //TODO: mint legendary function
 
@@ -116,9 +115,9 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsNFT.setBreedingCost(breedingCost);
     }
 
-    // function setSeason(string memory newSeason) public onlyOwner {
-    //     legendsNFT.setSeason(newSeason);
-    // }
+    function setSeason(string memory newSeason) public onlyOwner {
+        season = newSeason;
+    }
 
     // function setBaseHealth(uint256 baseHealth) public onlyOwner {
     //     legendsNFT.setBaseHealth(baseHealth);
