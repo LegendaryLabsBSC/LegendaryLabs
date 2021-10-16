@@ -48,6 +48,14 @@ contract LegendsMarketplace is
         return counts;
     }
 
+    function fetchLegendListing(uint256 listingId)
+        public
+        view
+        returns (LegendListing memory)
+    {
+        return legendListing[listingId];
+    }
+
     function createLegendSale(
         address nftContract,
         uint256 tokenId,

@@ -1,88 +1,147 @@
 // SPDX-License-Identifier: MIT
 
-// tickets can still be redeemed after event is closed
-import "../lab/LegendsLaboratory.sol";
-
 pragma solidity ^0.8.4;
 
-abstract contract TicketMachine {
-    LegendsLaboratory lab;
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-    modifier onlyLab() {
-        require(msg.sender == address(lab), "Not Lab");
-        _;
-    }
+abstract contract TicketMachine {
+    using Counters for Counters.Counter;
+
+    Counters.Counter private _promoIds;
+    Counters.Counter private _closedPromos;
+
+    event PromoCreated(uint256 promoId, string promoName, uint256 expireTime);
+    event TicketDispensed(uint256 promoId, uint256 currentDispensed);
+    event TicketRedeemed(uint256 promoId, uint256 currentRedeemed);
+    event PromoClosed(
+        uint256 promoId,
+        uint256 totalDispensed,
+        uint256 totalRedeemed
+    );
 
     struct PromoEvent {
         string promoName;
-        uint256 maxTicketCount;
+        uint256 startTime;
+        uint256 expireTime;
         bool isUnrestricted; // if unrestricted then one per
-        bool promoClosed;
-        mapping(address => bool) claimed;
+        bool promoClosed; // ticket can be redeemed after expire but not after close
+        Counters.Counter ticketsClaimed;
+        Counters.Counter ticketsRedeemed;
     }
 
-    mapping(string => PromoEvent) public promoEvent;
+    /* promoId => PromoEvent */
+    mapping(uint256 => PromoEvent) internal promoEvent;
 
-    /* promoName => recipient => ticketCount */
-    mapping(string => mapping(address => uint256)) private promoTicket;
+    /* promoId => recipient => isClaimed */
+    mapping(uint256 => mapping(address => bool)) private claimedPromo;
+
+    /* promoId => recipient => ticketCount */
+    mapping(uint256 => mapping(address => uint256)) private promoTicket;
+
+    function fetchPromoEvent(uint256 promoId)
+        public
+        view
+        returns (PromoEvent memory)
+    {
+        return promoEvent[promoId];
+    }
+
+    function fetchRedeemableTickets(uint256 _promoId, address _recipient)
+        public
+        view
+        returns (uint256)
+    {
+        return promoTicket[_promoId][_recipient];
+    }
+
+    function queryIfClaimed(uint256 promoId, address recipient)
+        public
+        view
+        returns (bool)
+    {
+        return claimedPromo[promoId][recipient];
+    }
 
     function _createPromoEvent(
         string memory _name,
-        uint256 _max,
+        uint256 _duration,
         bool _isUnrestricted
-    ) internal onlyLab {
-        PromoEvent storage p = promoEvent[_name];
+    ) internal returns (uint256) {
+        _promoIds.increment();
+        uint256 promoId = _promoIds.current();
+
+        uint256 expireTime = block.timestamp + _duration;
+
+        PromoEvent storage p = promoEvent[promoId];
         p.promoName = _name;
-        p.maxTicketCount = _max;
+        p.startTime = block.timestamp;
+        p.expireTime = expireTime;
         p.isUnrestricted = _isUnrestricted;
 
-        // emit
+        if (_isUnrestricted) {
+            emit PromoCreated(promoId, _name, expireTime);
+        }
+
+        return (promoId);
     }
 
     function _dispensePromoTicket(
-        string memory _eventName,
+        uint256 _promoId,
         address _recipient,
         uint256 _ticketAmount
     ) internal {
-        PromoEvent storage p = promoEvent[_eventName];
-        require(!p.promoClosed, "Promo Closed");
+        PromoEvent storage p = promoEvent[_promoId];
+        require(block.timestamp <= p.expireTime, "Promo Expired");
 
-        if (p.isUnrestricted == false) {
-            require(msg.sender == address(lab));
-        } else if (p.isUnrestricted == true) {
-            require(p.claimed[_recipient] == false, "Promo already claimed");
+        if (p.isUnrestricted) {
+            require(
+                queryIfClaimed(_promoId, _recipient) == false,
+                "Promo already claimed"
+            );
             require(_ticketAmount == 1, "One ticket per address");
         }
 
-        p.claimed[_recipient] = true;
+        claimedPromo[_promoId][_recipient] = true;
 
-        promoTicket[_eventName][_recipient] += _ticketAmount;
+        promoTicket[_promoId][_recipient] += _ticketAmount;
+
+        p.ticketsClaimed.increment();
+
+        emit TicketDispensed(_promoId, p.ticketsClaimed.current());
     }
 
-    function _closePromoEvent(string memory _name) public {
-        PromoEvent storage p = promoEvent[_name];
+    function _redeemPromoTicket(uint256 _promoId, address _recipient) internal {
+        PromoEvent storage p = promoEvent[_promoId];
+
+        require(!p.promoClosed, "Promo Closed");
+
+        uint256 redeemableTickets = fetchRedeemableTickets(
+            _promoId,
+            _recipient
+        );
+        require(redeemableTickets != 0, "No tickets to redeem");
+
+        promoTicket[_promoId][_recipient] -= 1;
+
+        p.ticketsRedeemed.increment();
+
+        emit TicketRedeemed(_promoId, p.ticketsRedeemed.current());
+    }
+
+    function _closePromoEvent(uint256 _promoId) internal {
+        PromoEvent storage p = promoEvent[_promoId];
+
+        require(block.timestamp >= p.expireTime, "Promo not expired");
         require(!p.promoClosed, "Promo already closed");
 
         p.promoClosed = true;
 
-        // emit
+        if (p.isUnrestricted) {
+            emit PromoClosed(
+                _promoId,
+                p.ticketsClaimed.current(),
+                p.ticketsRedeemed.current()
+            );
+        }
     }
-
-    // //only lab
-    // function _dispenseTicket(string memory _promoEvent, address _recipient)
-    //     public
-    //     returns (uint256)
-    // {
-    //     _ticketIds.increment();
-    //     uint256 ticketId = _ticketIds.current();
-
-    //     PromoTicket storage t = promoTicket[ticketId];
-    //     t.ticketId = ticketId;
-    //     t.promoEvent = _promoEvent;
-    //     t.ticketOwner = _recipient;
-
-    //     return ticketId;
-    // }
-
-    //redeem ticket
 }

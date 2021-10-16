@@ -85,7 +85,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         // transfer breeder's token to contract .. put in natspec
         legendsNFT.transferFrom(msg.sender, address(this), tokenId);
 
-        uint256 childId = lab.legendsNFT().breed(
+        uint256 childId = lab.legendsNFT().blendDNA(
             address(this),
             m.surrogateToken,
             tokenId,

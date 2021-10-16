@@ -75,11 +75,40 @@ function App() {
   const [matchingPrice, setMatchingPrice] = useState(0)
   const [breedingToken, setBreedingToken] = useState(0)
   const [bid, setBid] = useState(0)
+  const [promoName, setPromoName] = useState('')
   // const [amount, setAmount] = useState(0)
 
   /**
    * Admin Start
    */
+  async function createPromoEvent() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.createPromoEvent(promoName, 86400, true, false)
+    }
+  }
+  async function fetchPromoDetails() {
+    if (typeof window.ethereum !== 'undefined') {
+      const p = await contract.lab.read.fetchPromoEvent(id)
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      console.log(`Promo: ${p.promoName}`)
+      console.log(`Start Time: ${p.startTime}`)
+      console.log(`Expire Time: ${p.expireTime}`)
+      console.log(`Unrestricted: ${p.isUnrestricted}`)
+      console.log(`Closed: ${p.promoClosed}`)
+      console.log(`Tickets Claimed: ${p.ticketsClaimed}`)
+      console.log(`Tickets Redeemed: ${p.ticketsRedeemed}`)
+
+      // const p1 = await contract.lab.read.promoEvent(promoName).claimed(account)
+      // console.log(p1)
+      // console.log(`Claimed: ${p.claimed(account)}`)
+    }
+  }
+  async function dispensePromoTicket() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contract.lab.write.dispensePromoTicket(promoName, account, 1)
+    }
+  }
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
       // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -313,15 +342,17 @@ function App() {
       const skipIncubation = false // for testing
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
-        // ! receiving multiple responses ?
-        // ? is .then even needed
-        contract.nft.write.once('NewLegend', (data, event) => {
-          console.log('New Token Created:', data.toString()) // return token id instead of watching for event
-          const newItemId = data.toString()
-          generateImage(newItemId)
-        }),
-      )
+      // await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
+      await contract.nft.write.mintPromo(account, prefix, postfix, id, isLegendary)
+      // .then(
+      //   // ! receiving multiple responses ?
+      //   // ? is .then even needed
+      //   contract.nft.write.once('NewLegend', (data, event) => {
+      //     console.log('New Token Created:', data.toString()) // return token id instead of watching for event
+      //     const newItemId = data.toString()
+      //     generateImage(newItemId)
+      //   }),
+      // )
     }
   }
   /**
@@ -730,6 +761,20 @@ function App() {
           <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
           <button type="submit" onClick={setSeason}>
             Set Season
+          </button>
+        </div>
+        <br />
+        <div>
+          <input type="text" placeholder="Name" onChange={(e) => setPromoName(e.target.value)} />
+          <button type="submit" onClick={createPromoEvent}>
+            Create Promo Event
+          </button>
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={fetchPromoDetails}>
+            Fetch Promo Details
+          </button>
+          <button type="submit" onClick={dispensePromoTicket}>
+            Dispense Promo Ticket
           </button>
         </div>
         <br />

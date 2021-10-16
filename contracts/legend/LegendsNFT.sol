@@ -9,19 +9,15 @@ import "./formation/LegendMetadata.sol";
 import "./formation/LegendBreeding.sol";
 import "./formation/LegendIncubation.sol";
 
-contract LegendsNFT is
-    ERC721Enumerable,
-    LegendBreeding,
-    ILegendMetadata
-{
+contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
     event Minted(uint256 tokenId);
-    event Breed(uint256 parent1, uint256 parent2, uint256 child);
+    event BlendDNA(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
 
-    Counters.Counter private _tokenIds;
+    Counters.Counter private _legendIds;
 
     mapping(uint256 => string) private _tokenURIs;
     mapping(uint256 => LegendMetadata) public legendMetadata;
@@ -35,6 +31,7 @@ contract LegendsNFT is
         require(msg.sender == address(lab), "Not Lab");
         _;
     }
+
     constructor() ERC721("Legend", "LEGEND") {
         lab = LegendsLaboratory(msg.sender);
     }
@@ -42,10 +39,11 @@ contract LegendsNFT is
     //TODO: rework variable naming throughout
     function mintTo(
         address _recipient,
-        uint256 newItemId,
+        uint256 newLegendId,
         string memory prefix,
         string memory postfix,
         uint256[2] memory parents,
+        uint256 promoId,
         bool isLegendary,
         bool skipIncubation
     ) private {
@@ -54,7 +52,7 @@ contract LegendsNFT is
 
         address payable _creator;
 
-        _mint(_recipient, newItemId);
+        _mint(_recipient, newLegendId);
 
         if (skipIncubation == true) {
             _incubationDuration = 0;
@@ -72,8 +70,8 @@ contract LegendsNFT is
         }
 
         // LegendMetadata memory m;
-        LegendMetadata storage m = legendMetadata[newItemId];
-        m.id = newItemId;
+        LegendMetadata storage m = legendMetadata[newLegendId];
+        m.id = newLegendId;
         // m.season = season;
         m.prefix = prefix;
         m.postfix = postfix;
@@ -86,19 +84,43 @@ contract LegendsNFT is
         m.isHatched = isHatched;
         m.isDestroyed = false;
 
-        // legendMetadata[newItemId] = m;
+        // legendMetadata[newLegendId] = m;
 
         // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
 
         string
             memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
 
-        _setTokenURI(newItemId, enumEgg);
+        string memory data;
 
-        // emit NewLegend(newItemId);
+        if (promoId == 0) {
+            data = string(
+                abi.encodePacked(
+                    Strings.toString(parents[0]),
+                    "-",
+                    Strings.toString(parents[0])
+                )
+            );
+        } else {
+            data = Strings.toString(promoId);
+        }
+
+        string memory _uri = string(
+            abi.encodePacked(
+                Strings.toString(newLegendId),
+                ",",
+                data,
+                ",",
+                enumEgg
+            )
+        );
+
+        _setTokenURI(newLegendId, _uri);
+
+        // emit NewLegend(newLegendId);
     }
 
-    function breed(
+    function blendDNA(
         address recipient,
         uint256 _parent1,
         uint256 _parent2,
@@ -111,60 +133,61 @@ contract LegendsNFT is
         LegendMetadata storage parent1 = legendMetadata[_parent1];
         LegendMetadata storage parent2 = legendMetadata[_parent2];
 
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-        mixGenetics(parent1.id, parent2.id, newItemId);
-        // mixStats(parent1.id, parent2.id, newItemId);
-        // , baseHealth);
+        _legendIds.increment();
+        uint256 newLegendId = _legendIds.current();
 
         uint256[2] memory parents = [_parent1, _parent2];
+
         bool mix = block.number % 2 == 0;
-        bool isLegendary = false; // only one of a kind handmade Legends can be "Legendary"
 
         mintTo(
             recipient,
-            newItemId,
+            newLegendId,
             mix ? parent1.prefix : parent2.prefix,
             mix ? parent2.postfix : parent1.postfix,
             parents,
-            isLegendary,
+            0,
+            false,
             skipIncubation
         );
 
-        emit Breed(parent1.id, parent2.id, newItemId);
-        return (newItemId);
+        emit BlendDNA(parent1.id, parent2.id, newLegendId);
+        return (newLegendId);
     }
 
     // TODO: restrict access control to lab
     function mintPromo(
-        address recipient,
-        string memory prefix,
-        string memory postfix,
-        bool isLegendary,
-        bool skipIncubation
-    ) public {
-        // require(lab._promoTickets[msg.sender] != 0, "No tickets");
+        address _recipient,
+        string memory _prefix,
+        string memory _postfix,
+        uint256 _promoId,
+        bool _isLegendary
+    ) public onlyLab {
+        _legendIds.increment();
+        uint256 newLegendId = _legendIds.current();
 
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        createGenetics(newItemId);
-        // createStats(newItemId);
+        // createGenetics(newLegendId);
+        // createStats(newLegendId);
         // , baseHealth);
 
         uint256 promoParent = 0;
         uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents
 
+        bool skipIncubation = lab.fetchPromoIncubation(_promoId);
+
         mintTo(
-            recipient,
-            newItemId,
-            prefix,
-            postfix,
+            _recipient,
+            newLegendId,
+            _prefix,
+            _postfix,
             parents,
-            isLegendary,
+            _promoId,
+            _isLegendary,
             skipIncubation
         );
     }
+
+    // function _createTokenURI(uint256 newLegendId, uint256)
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
         internal

@@ -33,6 +33,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         returns (
             LegendsNFT,
             LegendToken,
+            LegendRejuvenation,
             LegendsMarketplace,
             LegendsMatchingBoard
         )
@@ -40,53 +41,65 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         return (
             legendsNFT,
             legendToken,
+            legendRejuvenation,
             legendsMarketplace,
             legendsMatchingBoard
         );
     }
 
-    function createPromoEvent(
-        string memory eventName,
-        uint256 maxTicketCount,
-        bool isUnrestricted
-    ) public onlyOwner {
-        _createPromoEvent(eventName, maxTicketCount, isUnrestricted);
+    /* promoId => skipIncubation */
+    mapping(uint256 => bool) private _promoIncubation;
+
+    function fetchPromoIncubation(uint256 promoId) public view returns (bool) {
+        return _promoIncubation[promoId];
     }
 
-    function closePromoEvent(string memory name) public onlyOwner {
-        _closePromoEvent(name);
+    function createPromoEvent(
+        string memory eventName,
+        uint256 duration,
+        bool isUnrestricted,
+        bool skipIncubation
+    ) public onlyOwner {
+        uint256 promoId = _createPromoEvent(
+            eventName,
+            duration,
+            isUnrestricted
+        );
+
+        _promoIncubation[promoId] = skipIncubation;
     }
 
     function dispensePromoTicket(
-        string memory promoName,
+        uint256 promoId,
         address recipient,
         uint256 ticketAmount
     ) public {
-        // if (promoEvent[promoName].isUnrestricted == false) {
-        //     require(owner() == msg.sender);
-            _dispensePromoTicket(promoName, recipient, ticketAmount);
+        if (promoEvent[promoId].isUnrestricted == false) {
+            require(msg.sender == owner(), "Not Authorized");
         }
-    // }
 
-    // function dispensePromoTicket(
-    //     string memory eventName,
-    //     address recipient,
-    //     uint256 ticketAmount
-    // ) public {
-    //     PromoEvent storage p = promoEvent[eventName];
-    //     require(!p.eventClosed, "Promo Closed");
+        _dispensePromoTicket(promoId, recipient, ticketAmount);
+    }
 
-    //     if (p.unrestricted == false) {
-    //         require(owner() == msg.sender);
-    //     } else if (p.unrestricted == true) {
-    //         require(p.claimed[recipient] == false, "Promo already claimed");
-    //         require(ticketAmount == 1, "One ticket per address");
-    //     }
+    function redeemPromoTicket(
+        uint256 promoId,
+        address recipient,
+        string memory prefix,
+        string memory postfix
+    ) internal onlyOwner {
+        // require(!promoEvent[promoId].promoClosed, "Promo Closed");
 
-    //     p.claimed[recipient] = true;
+        // uint256 redeemableTickets = fetchRedeemableTickets(promoId, recipient);
+        // require(redeemableTickets != 0, "No tickets to redeem");
 
-    //     promoTicket[eventName][recipient] += ticketAmount;
-    // }
+        _redeemPromoTicket(promoId, recipient);
+
+        legendsNFT.mintPromo(recipient, prefix, postfix, promoId, false);
+    }
+
+    function closePromoEvent(uint256 promoId) public onlyOwner {
+        _closePromoEvent(promoId);
+    }
 
     // function setIncubationDuration(uint256 newIncubationDuration)
     //     public
@@ -95,6 +108,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //     legendsNFT.setIncubationDuration(newIncubationDuration);
     // }
 
+    //TODO: mint legendary function
 
     function setOffspringLimit(uint256 newOffspringLimit) public onlyOwner {
         legendsNFT.setOffspringLimit(newOffspringLimit);
