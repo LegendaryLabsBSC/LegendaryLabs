@@ -16,6 +16,7 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
     event Minted(uint256 tokenId);
     event BlendDNA(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
+    event Debug(string);
 
     Counters.Counter private _legendIds;
 
@@ -117,7 +118,7 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
 
         _setTokenURI(newLegendId, _uri);
 
-        // emit NewLegend(newLegendId);
+        emit Debug(_uri);
     }
 
     function blendDNA(

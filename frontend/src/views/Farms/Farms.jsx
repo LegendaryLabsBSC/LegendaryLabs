@@ -88,25 +88,63 @@ function App() {
   }
   async function fetchPromoDetails() {
     if (typeof window.ethereum !== 'undefined') {
-      const p = await contract.lab.read.fetchPromoEvent(id)
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      console.log(`Promo: ${p.promoName}`)
-      console.log(`Start Time: ${p.startTime}`)
-      console.log(`Expire Time: ${p.expireTime}`)
-      console.log(`Unrestricted: ${p.isUnrestricted}`)
-      console.log(`Closed: ${p.promoClosed}`)
-      console.log(`Tickets Claimed: ${p.ticketsClaimed}`)
-      console.log(`Tickets Redeemed: ${p.ticketsRedeemed}`)
 
-      // const p1 = await contract.lab.read.promoEvent(promoName).claimed(account)
-      // console.log(p1)
-      // console.log(`Claimed: ${p.claimed(account)}`)
+      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
+
+      for (let i = 1; i <= totalPromos; i++) {
+        contract.lab.read.fetchPromoEvent(i).then((p) => {
+          console.log(`Promo: ${p.promoName}`)
+          console.log(`Start Time: ${p.startTime}`)
+          console.log(`Expire Time: ${p.expireTime}`)
+          console.log(`Unrestricted: ${p.isUnrestricted}`)
+          console.log(`Closed: ${p.promoClosed}`)
+          console.log(`Tickets Claimed: ${p.ticketsClaimed}`)
+          console.log(`Tickets Redeemed: ${p.ticketsRedeemed}`)
+          console.log('')
+        })
+      }
     }
   }
   async function dispensePromoTicket() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.lab.write.dispensePromoTicket(promoName, account, 1)
+      await contract.lab.write.dispensePromoTicket(id, account, 1)
+    }
+  }
+  async function redeemPromoTicket() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contract.lab.write.redeemPromoTicket(
+        id,
+        account,
+        uniqueNamesGenerator(name.prefix),
+        uniqueNamesGenerator(name.postfix),
+      )
+    }
+  }
+
+  async function fetchRedeemableTickets() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+
+      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
+      // const amount = async await contract.lab.read.fetchRedeemableTickets(id, account)
+      // console.log(amount)
+
+      for (let i = 1; i <= totalPromos; i++) {
+        // contract.lab.read.fetchPromoEvent(i)
+        contract.lab.read.fetchRedeemableTickets(i, account).then((p) => {
+          // const amount = contract.lab.read.fetchRedeemableTickets(i, account)
+          console.log(`Tickets Owned: ${p}`)
+          console.log('')
+        })
+      }
+    }
+  }
+  async function closePromoEvent() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.closePromoEvent(id)
     }
   }
   async function setIncubationDuration() {
@@ -238,7 +276,7 @@ function App() {
   async function getAllLegends() {
     if (typeof window.ethereum !== 'undefined') {
       setGettingLegends(true)
-      const totalLegends = await contract.read.totalSupply()
+      const totalLegends = await contract.nft.read.totalSupply()
       for (let i = 1; i <= totalLegends; i++) {
         contract.nft.read.legendMetadata(i).then((legendMeta) => {
           if (!legendMeta.isDestroyed) {
@@ -272,6 +310,7 @@ function App() {
   }
   async function loadLegends(tokenID) {
     const imgURL = await contract.nft.read.tokenURI(tokenID)
+    console.log(imgURL)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
     return { tokenID, imgURL }
     // Logic for rendering Legend Card Component here from pinata ?
@@ -770,11 +809,22 @@ function App() {
             Create Promo Event
           </button>
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={closePromoEvent}>
+            Close Promo Event
+          </button>
           <button type="submit" onClick={fetchPromoDetails}>
             Fetch Promo Details
           </button>
+          <br />
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={dispensePromoTicket}>
             Dispense Promo Ticket
+          </button>
+          <button type="submit" onClick={redeemPromoTicket}>
+            Redeem Promo Ticket
+          </button>
+          <button type="submit" onClick={fetchRedeemableTickets}>
+            Fetch Redeemable Tickets
           </button>
         </div>
         <br />
@@ -785,9 +835,9 @@ function App() {
           <button type="submit" onClick={getAllLegends}>
             Print All Legend Ids
           </button>
-          <button type="submit" onClick={mintPromo}>
+          {/* <button type="submit" onClick={mintPromo}>
             Mint Promotional NFT
-          </button>
+          </button> */}
         </div>
         <div>
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />

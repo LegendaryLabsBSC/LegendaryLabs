@@ -86,14 +86,12 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         address recipient,
         string memory prefix,
         string memory postfix
-    ) internal onlyOwner {
-        // require(!promoEvent[promoId].promoClosed, "Promo Closed");
-
-        // uint256 redeemableTickets = fetchRedeemableTickets(promoId, recipient);
-        // require(redeemableTickets != 0, "No tickets to redeem");
-
+    ) public
+    //  onlyOwner
+      {
         _redeemPromoTicket(promoId, recipient);
 
+        // approval lock needed ?
         legendsNFT.mintPromo(recipient, prefix, postfix, promoId, false);
     }
 

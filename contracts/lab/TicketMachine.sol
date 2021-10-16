@@ -38,9 +38,19 @@ abstract contract TicketMachine {
     /* promoId => recipient => ticketCount */
     mapping(uint256 => mapping(address => uint256)) private promoTicket;
 
+    function fetchTotalPromoCount()
+        public
+        view
+        virtual
+        returns (Counters.Counter memory)
+    {
+        return _promoIds;
+    }
+
     function fetchPromoEvent(uint256 promoId)
         public
         view
+        virtual
         returns (PromoEvent memory)
     {
         return promoEvent[promoId];
@@ -49,6 +59,7 @@ abstract contract TicketMachine {
     function fetchRedeemableTickets(uint256 _promoId, address _recipient)
         public
         view
+        virtual
         returns (uint256)
     {
         return promoTicket[_promoId][_recipient];
@@ -57,6 +68,7 @@ abstract contract TicketMachine {
     function queryIfClaimed(uint256 promoId, address recipient)
         public
         view
+        virtual
         returns (bool)
     {
         return claimedPromo[promoId][recipient];
@@ -91,7 +103,7 @@ abstract contract TicketMachine {
         uint256 _ticketAmount
     ) internal {
         PromoEvent storage p = promoEvent[_promoId];
-        require(block.timestamp <= p.expireTime, "Promo Expired");
+        require(block.timestamp < p.expireTime, "Promo Expired");
 
         if (p.isUnrestricted) {
             require(
@@ -131,7 +143,7 @@ abstract contract TicketMachine {
     function _closePromoEvent(uint256 _promoId) internal {
         PromoEvent storage p = promoEvent[_promoId];
 
-        require(block.timestamp >= p.expireTime, "Promo not expired");
+        require(block.timestamp > p.expireTime, "Promo not expired");
         require(!p.promoClosed, "Promo already closed");
 
         p.promoClosed = true;
