@@ -19,6 +19,7 @@ abstract contract TicketMachine {
         uint256 totalRedeemed
     );
 
+    //TODO: work in promo id
     struct PromoEvent {
         string promoName;
         uint256 startTime;

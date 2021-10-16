@@ -16,7 +16,6 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
     event Minted(uint256 tokenId);
     event BlendDNA(uint256 parent1, uint256 parent2, uint256 child);
     event Burned(uint256 tokenId);
-    event Debug(string);
 
     Counters.Counter private _legendIds;
 
@@ -35,6 +34,22 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
 
     constructor() ERC721("Legend", "LEGEND") {
         lab = LegendsLaboratory(msg.sender);
+    }
+
+    //TODO: look more into
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        string memory _tokenURI = _tokenURIs[tokenId];
+        return _tokenURI;
     }
 
     //TODO: rework variable naming throughout
@@ -85,25 +100,23 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
         m.isHatched = isHatched;
         m.isDestroyed = false;
 
-        // legendMetadata[newLegendId] = m;
-
         // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
 
         // string memory id = Strings.toString(newLegendId);
 
-        // string memory data;
+        string memory data;
 
-        // if (promoId == 0) {
-        //     data = string(
-        //         abi.encodePacked(
-        //             Strings.toString(parents[0]),
-        //             "-",
-        //             Strings.toString(parents[0])
-        //         )
-        //     );
-        // } else {
-        //     data = Strings.toString(promoId);
-        // }
+        if (promoId == 0) {
+            data = string(
+                abi.encodePacked(
+                    Strings.toString(parents[0]),
+                    "-",
+                    Strings.toString(parents[0])
+                )
+            );
+        } else {
+            data = Strings.toString(promoId);
+        }
 
         string
             memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
@@ -112,9 +125,19 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
         //     abi.encodePacked(id, ",", data, ",", enumEgg)
         // );
 
-        _setTokenURI(newLegendId, enumEgg);
+        _setTokenURI(
+            newLegendId,
+            string(
+                abi.encodePacked(
+                    Strings.toString(newLegendId),
+                    ",",
+                    data,
+                    ",",
+                    enumEgg
+                )
+            )
+        );
 
-        // emit Debug(_uri);
     }
 
     function blendDNA(
@@ -159,9 +182,7 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
         string memory _postfix,
         uint256 _promoId,
         bool _isLegendary
-    ) public 
-    // onlyLab
-     {
+    ) public onlyLab {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
@@ -189,8 +210,8 @@ contract LegendsNFT is ERC721Enumerable, LegendBreeding, ILegendMetadata {
     // function _createTokenURI(uint256 newLegendId, uint256)
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        public
-        virtual
+        private
+    // virtual
     {
         _tokenURIs[tokenId] = _tokenURI;
     }

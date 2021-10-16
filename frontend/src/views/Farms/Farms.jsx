@@ -123,7 +123,6 @@ function App() {
       )
     }
   }
-
   async function fetchRedeemableTickets() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -176,14 +175,6 @@ function App() {
     if (typeof window.ethereum !== 'undefined') {
       // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.lab.write.setSeason(season)
-    }
-  }
-  async function _setURI() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      // await contract.nft.write._setTokenURI(id, newURI)
-      const tt = await contract.nft.read.fetchTokenURI(id)
-      console.log(tt)
     }
   }
   /**
@@ -318,7 +309,6 @@ function App() {
   }
   async function loadLegends(tokenID) {
     const imgURL = await contract.nft.read.tokenURI(tokenID)
-    console.log(imgURL)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
     return { tokenID, imgURL }
     // Logic for rendering Legend Card Component here from pinata ?
@@ -833,11 +823,6 @@ function App() {
           </button>
           <button type="submit" onClick={fetchRedeemableTickets}>
             Fetch Redeemable Tickets
-          </button>
-          <input type="number" placeholder="Promo ID" onChange={(e) => setID(e.target.value)} />
-          <input type="text" placeholder="uri" onChange={(e) => setURI(e.target.value)} />
-          <button type="submit" onClick={_setURI}>
-            Set URI
           </button>
         </div>
         <br />
