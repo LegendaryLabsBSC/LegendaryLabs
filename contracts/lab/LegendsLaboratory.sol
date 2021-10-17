@@ -102,11 +102,8 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsNFT.setKinBlendingLevel(newKinBlendingLevel);
     }
 
-    function setIncubationDuration(uint256 newIncubationDuration)
-        public
-        onlyOwner
-    {
-        legendsNFT.setIncubationDuration(newIncubationDuration);
+    function setIncubationPeriod(uint256 newIncubationPeriod) public onlyOwner {
+        legendsNFT.setIncubationPeriod(newIncubationPeriod);
     }
 
     //TODO: mint legendary function
@@ -115,11 +112,11 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsNFT.setBlendingLimit(_newBlendingLimit);
     }
 
-    function setBaseBreedingCost(uint256 _newBaseBreedingCost)
+    function setBaseBlendingCost(uint256 _newBaseBlendingCost)
         public
         onlyOwner
     {
-        legendsNFT.setBaseBreedingCost(_newBaseBreedingCost);
+        legendsNFT.setBaseBlendingCost(_newBaseBlendingCost);
     }
 
     function setSeason(string memory _newSeason) public onlyOwner {

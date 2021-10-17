@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 
 //TODO: clean out redundancy in imports-inheritance
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "../legend/LegendsNFT.sol";
+import "../legend/LegendsNFT.sol"; // needed?
 
 contract LegendToken is ERC20 {
     LegendsLaboratory lab;
