@@ -43,36 +43,36 @@ const PastLotteryRoundViewer = () => {
       isLoading: true,
     }))
 
-    getLotteryRoundData(lotteryNumber)
-      .then((data) => {
-        if (data.error) {
-          setState((prevState) => ({
-            ...prevState,
-            error: {
-              message: TranslateString(999, 'The lottery number you provided does not exist'),
-              type: 'out of range',
-            },
-            isLoading: false,
-            isInitialized: true,
-          }))
-        } else {
-          setState((prevState) => ({
-            ...prevState,
-            error: { message: null, type: null },
-            roundData: data,
-            isLoading: false,
-            isInitialized: true,
-          }))
-        }
-      })
-      .catch(() => {
-        setState((prevState) => ({
-          ...prevState,
-          error: { message: TranslateString(999, 'Error fetching data'), type: 'api' },
-          isLoading: false,
-          isInitialized: true,
-        }))
-      })
+    // getLotteryRoundData(lotteryNumber)
+    //   .then((data) => {
+    //     if (data.error) {
+    //       setState((prevState) => ({
+    //         ...prevState,
+    //         error: {
+    //           message: TranslateString(999, 'The lottery number you provided does not exist'),
+    //           type: 'out of range',
+    //         },
+    //         isLoading: false,
+    //         isInitialized: true,
+    //       }))
+    //     } else {
+    //       setState((prevState) => ({
+    //         ...prevState,
+    //         error: { message: null, type: null },
+    //         roundData: data,
+    //         isLoading: false,
+    //         isInitialized: true,
+    //       }))
+    //     }
+    //   })
+    //   .catch(() => {
+    //     setState((prevState) => ({
+    //       ...prevState,
+    //       error: { message: TranslateString(999, 'Error fetching data'), type: 'api' },
+    //       isLoading: false,
+    //       isInitialized: true,
+    //     }))
+    //   })
   }
 
   return (

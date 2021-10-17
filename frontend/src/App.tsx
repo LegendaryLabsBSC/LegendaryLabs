@@ -9,7 +9,7 @@ import GlobalStyle from './style/Global'
 import Menu from './components/Menu'
 import PageLoader from './components/PageLoader'
 import Pools from './views/Pools'
-import NftGlobalNotification from './views/Nft/components/NftGlobalNotification'
+// import NftGlobalNotification from './views/Nft/components/NftGlobalNotification'
 import XBLZD from './views/XBLZD'
 import FarmsApp from './views/Farms'
 
@@ -84,7 +84,7 @@ const App: React.FC = () => {
             <Route component={NotFound} />
           </Switch>
         </Suspense>
-      <NftGlobalNotification />
+      {/* <NftGlobalNotification /> */}
     </Router>
   )
 }

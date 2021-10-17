@@ -35,3 +35,9 @@ const CardValue: React.FC<CardValueProps> = ({ value, decimals, fontSize = '40px
 }
 
 export default CardValue
+
+CardValue.defaultProps = {
+  decimals: 2,
+  fontSize: '20px',
+  prefix: ''
+}

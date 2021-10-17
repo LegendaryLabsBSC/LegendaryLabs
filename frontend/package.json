@@ -36,7 +36,7 @@
     "@ethersproject/abi": "^5.0.7",
     "@legendarylabs/uikit": "^1.0.5",
     "@reduxjs/toolkit": "^1.5.0",
-    "@types/react": "^17.0.0",
+    "@types/react": "^17.0.27",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.1.5",
     "@types/styled-components": "^5.1.7",
@@ -63,13 +63,12 @@
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
-    "mini-css-extract-plugin": "^0.9.0",
     "@pancakeswap-libs/eslint-config-pancake": "1.0.0",
-    "rewire": "^5.0.0",
     "@types/jest": "^26.0.19",
-    "eslint": "^7.16.0",
     "husky": "^4.3.0",
+    "mini-css-extract-plugin": "^0.9.0",
     "prettier": "^2.1.2",
+    "rewire": "^5.0.0",
     "source-map-explorer": "^2.5.1"
   }
 }
