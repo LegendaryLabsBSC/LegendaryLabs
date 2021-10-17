@@ -7,10 +7,11 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../lab/LegendsLaboratory.sol";
 import "./escrow/LegendsMarketClerk.sol";
 import "./listings/LegendAuction.sol";
-import "./listings/LegendOffer.sol";
 
+// import "./listings/LegendOffer.sol";
+
+// LegendOffer,
 contract LegendsMarketplace is
-    LegendOffer,
     LegendAuction,
     LegendsMarketClerk,
     ReentrancyGuard
@@ -133,7 +134,7 @@ contract LegendsMarketplace is
             require(msg.value >= a.startingPrice, "Minimum price not met");
         }
 
-        uint256 newBid = bids[listingId][msg.sender].add((msg.value));
+        uint256 newBid = bids[listingId][msg.sender] += (msg.value);
         require(newBid > a.highestBid, "Bid must be higher than current bid");
 
         _withdrawAllowed[listingId][msg.sender] = false;
