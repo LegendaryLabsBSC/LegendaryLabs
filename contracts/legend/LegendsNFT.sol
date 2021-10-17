@@ -61,7 +61,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         string memory _postfix,
         uint256 _promoId,
         bool _isLegendary
-    ) public onlyLab {
+    ) external onlyLab {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
@@ -89,7 +89,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         uint256 _parent1,
         uint256 _parent2,
         bool _skipIncubation
-    ) public returns (uint256) {
+    ) external returns (uint256) {
         require(
             ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
         );

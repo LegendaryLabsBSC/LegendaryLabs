@@ -23,5 +23,10 @@ interface ILegendMatch {
     }
 
     event MatchingStatusChanged(uint256 matchingId, MatchingStatus status);
-    event MatchMade(uint256 matchingId, uint256 childId, MatchingStatus status);
+    event MatchMade(
+        uint256 matchingId,
+        uint256 childId,
+        uint256 price,
+        MatchingStatus status
+    );
 }

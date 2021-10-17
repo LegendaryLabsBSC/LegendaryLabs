@@ -11,14 +11,18 @@ abstract contract LegendMatching is ILegendMatch {
     Counters.Counter internal _matchingsClosed;
     Counters.Counter internal _matchingsCancelled;
 
-    mapping(uint256 => LegendMatching) public legendMatching; // make getter
+    /* matchingId => matchingDetails */
+    mapping(uint256 => LegendMatching) public legendMatching; //TODO make getter; make private?
 
+    /* playerAddress => amount */
     mapping(address => uint256) internal _tokensOwed;
+
+    /* matchingId => playerAddress => childId */
     mapping(uint256 => mapping(address => uint256)) internal _eggOwed;
 
     function _createLegendMatching(
         address _nftContract,
-        uint256 _tokenId,
+        uint256 _legendId,
         uint256 _price
     ) internal {
         _matchingIds.increment();
@@ -29,7 +33,7 @@ abstract contract LegendMatching is ILegendMatch {
         m.createdAt = block.timestamp;
         m.nftContract = _nftContract;
         m.surrogate = msg.sender;
-        m.surrogateToken = _tokenId;
+        m.surrogateToken = _legendId;
         m.breeder = address(0);
         m.price = _price;
         m.status = MatchingStatus.Open;
@@ -41,13 +45,13 @@ abstract contract LegendMatching is ILegendMatch {
         uint256 _matchingId,
         address _breeder,
         uint256 _childId,
-        uint256 _tokenId,
+        uint256 _legendId,
         uint256 _matchingPayment
     ) internal {
         LegendMatching storage m = legendMatching[_matchingId];
 
         m.breeder = _breeder;
-        m.breederToken = _tokenId;
+        m.breederToken = _legendId;
         m.childId = _childId;
         m.status = MatchingStatus.Closed;
 
@@ -56,7 +60,7 @@ abstract contract LegendMatching is ILegendMatch {
 
         _matchingsClosed.increment();
 
-        emit MatchMade(_matchingId, _childId, MatchingStatus.Closed);
+        emit MatchMade(_matchingId, _childId, m.price, MatchingStatus.Closed);
     }
 
     function _cancelLegendMatching(uint256 _matchingId) internal {
