@@ -97,11 +97,8 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         LegendMetadata storage p1 = legendMetadata[_parent1];
         LegendMetadata storage p2 = legendMetadata[_parent2];
 
-        require(
-            p1.blendingInstancesUsed < blendingLimit &&
-                p2.blendingInstancesUsed < blendingLimit,
-            "Blending limit reached"
-        );
+        require(isBlendable(_parent1), "Blending limit reached");
+        require(isBlendable(_parent2), "Blending limit reached");
 
         // thoroughly test bool returns
         if (kinBlendingLevel != KinBlendingLevel.Siblings) {
@@ -270,6 +267,24 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return true;
     }
 
+    function isBlendable(uint256 _legendId) public view returns (bool) {
+        return (legendMetadata[_legendId].blendingInstancesUsed <
+            blendingLimit); // test return thoroughly
+    }
+
+    function isHatchable(uint256 _legendId) public view returns (bool) {
+        require(!legendMetadata[_legendId].isHatched, "Not in incubator");
+
+        if (_noIncubation[_legendId]) return true;
+
+        uint256 hatchableWhen = (legendMetadata[_legendId].birthDay +
+            incubationPeriod);
+
+        if (block.timestamp < hatchableWhen) return false;
+
+        return true;
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
@@ -294,19 +309,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             "ERC721Metadata: URI query for nonexistent token"
         );
         return legendMetadata[tokenId];
-    }
-
-    function isHatchable(uint256 _legendId) public view returns (bool) {
-        require(!legendMetadata[_legendId].isHatched, "Not in incubator");
-
-        if (_noIncubation[_legendId]) return true;
-
-        uint256 hatchableWhen = (legendMetadata[_legendId].birthDay +
-            incubationPeriod);
-
-        if (block.timestamp < hatchableWhen) return false;
-
-        return true;
     }
 
     function setKinBlendingLevel(uint256 _kinBlendingLevel)

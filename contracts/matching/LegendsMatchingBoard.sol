@@ -2,70 +2,54 @@
 
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../lab/LegendsLaboratory.sol";
-import "./listing/LegendMatching.sol";
 import "../token/LegendToken.sol";
+import "./match/LegendMatching.sol";
 
 contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     using Counters for Counters.Counter;
 
-    event TokensClaimed(address payee, uint256 amount);
-    event EggClaimed(uint256 matchingId, address recipient, uint256 childId);
-    event DecideRelisting(uint256 matchingId, uint256 tokenId, bool isRelisted);
-
-    // uint256 public _matingBoardFee; // commented for testing
-    uint256 public _matchingBoardFee = 10;
+    uint256 private _matchingBoardFee = 10;
 
     LegendsLaboratory lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(lab));
+        require(msg.sender == address(lab), "Not Authorized");
         _;
     }
+
+    event TokensClaimed(address payee, uint256 amount);
+    event EggClaimed(uint256 matchingId, address recipient, uint256 childId);
+    event Relisting(uint256 matchingId, uint256 legendId, bool isRelisted);
 
     constructor() {
         lab = LegendsLaboratory(msg.sender);
     }
 
-    function fetchMatchingCounts()
-        public
-        view
-        returns (Counters.Counter[3] memory)
-    {
-        Counters.Counter[3] memory counts = [
-            _matchingIds,
-            _matchingsClosed,
-            _matchingsCancelled
-        ];
-
-        return counts;
-    }
-
     function createLegendMatching(
-        address nftContract,
-        uint256 tokenId,
-        uint256 price
-    ) public nonReentrant {
-        IERC721 legendsNFT = LegendsNFT(nftContract);
+        address _nftContract,
+        uint256 _legendId,
+        uint256 _price
+    ) external nonReentrant {
+        IERC721 legendsNFT = IERC721(_nftContract);
 
-        require(legendsNFT.ownerOf(tokenId) == msg.sender);
-        require(price > 0, "Price can not be 0");
+        require(legendsNFT.ownerOf(_legendId) == msg.sender);
+        require(lab.legendsNFT().isBlendable(_legendId));
+        require(_price > 0, "Price can not be 0");
 
-        //TODO: require legend is breedable - wait on NFT rework
+        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
-        legendsNFT.transferFrom(msg.sender, address(this), tokenId);
-
-        _createLegendMatching(nftContract, tokenId, price);
+        _createLegendMatching(_nftContract, _legendId, _price);
     }
 
-    function matchWithLegend(uint256 matchingId, uint256 tokenId)
+    function matchWithLegend(uint256 matchingId, uint256 legendId)
         public
         nonReentrant
     {
         LegendMatching memory m = legendMatching[matchingId];
-        IERC721 legendsNFT = LegendsNFT(m.nftContract);
+        IERC721 legendsNFT = IERC721(m.nftContract);
 
         require(m.status == MatchingStatus.Open);
         require(m.surrogate != msg.sender, "Seller not authorized");
@@ -83,12 +67,12 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         );
 
         // transfer breeder's token to contract .. put in natspec
-        legendsNFT.transferFrom(msg.sender, address(this), tokenId);
+        legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
         uint256 childId = lab.legendsNFT().blendLegends(
             address(this),
             m.surrogateToken,
-            tokenId,
+            legendId,
             false
         );
 
@@ -96,11 +80,11 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             matchingId,
             msg.sender,
             childId,
-            tokenId,
+            legendId,
             matchingPayment
         );
 
-        legendsNFT.safeTransferFrom(address(this), msg.sender, tokenId);
+        legendsNFT.safeTransferFrom(address(this), msg.sender, legendId);
     }
 
     function cancelLegendMatching(uint256 matchingId) public nonReentrant {
@@ -121,6 +105,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     function decideMatchingRelist(uint256 matchingId, bool isRelisted)
         external
         payable
+        nonReentrant
     {
         LegendMatching memory m = legendMatching[matchingId];
 
@@ -138,10 +123,10 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             );
         }
 
-        emit DecideRelisting(matchingId, m.surrogateToken, isRelisted);
+        emit Relisting(matchingId, m.surrogateToken, isRelisted);
     }
 
-    function claimEgg(uint256 matchingId) external {
+    function claimEgg(uint256 matchingId) external nonReentrant {
         LegendMatching memory m = legendMatching[matchingId];
 
         require(msg.sender == m.breeder);
@@ -161,7 +146,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         return _tokensOwed[msg.sender];
     }
 
-    function claimTokens() external {
+    function claimTokens() external nonReentrant {
         uint256 tokensOwed = _tokensOwed[msg.sender];
         require(tokensOwed != 0, "Address is owed 0");
 
@@ -170,6 +155,20 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         lab.legendToken().transferFrom(address(this), msg.sender, tokensOwed);
 
         emit TokensClaimed(msg.sender, tokensOwed);
+    }
+
+    function fetchMatchingCounts()
+        public
+        view
+        returns (Counters.Counter[3] memory)
+    {
+        Counters.Counter[3] memory counts = [
+            _matchingIds,
+            _matchingsClosed,
+            _matchingsCancelled
+        ];
+
+        return counts;
     }
 
     function setMatchingBoardFee(uint256 newFee) public onlyLab {

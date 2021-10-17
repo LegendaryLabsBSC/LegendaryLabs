@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
-import ".//LegendMatch.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "./LegendMatch.sol";
 
 abstract contract LegendMatching is ILegendMatch {
     using Counters for Counters.Counter;
@@ -11,7 +11,7 @@ abstract contract LegendMatching is ILegendMatch {
     Counters.Counter internal _matchingsClosed;
     Counters.Counter internal _matchingsCancelled;
 
-    mapping(uint256 => LegendMatching) public legendMatching;
+    mapping(uint256 => LegendMatching) public legendMatching; // make getter
 
     mapping(address => uint256) internal _tokensOwed;
     mapping(uint256 => mapping(address => uint256)) internal _eggOwed;
@@ -28,8 +28,8 @@ abstract contract LegendMatching is ILegendMatch {
         m.matchingId = matchingId;
         m.createdAt = block.timestamp;
         m.nftContract = _nftContract;
-        m.surrogateToken = _tokenId;
         m.surrogate = msg.sender;
+        m.surrogateToken = _tokenId;
         m.breeder = address(0);
         m.price = _price;
         m.status = MatchingStatus.Open;

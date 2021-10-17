@@ -120,7 +120,7 @@ contract LegendsMarketplace is
         );
     }
 
-    //TODO: ? look at making more modular
+    //TODO: ? look at making more modular ;; needs non reentrant
     function placeBid(uint256 listingId) public payable {
         AuctionDetails storage a = auctionDetails[listingId];
         LegendListing storage l = legendListing[listingId];
