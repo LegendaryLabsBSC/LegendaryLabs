@@ -19,7 +19,7 @@ abstract contract TicketMachine {
         uint256 totalRedeemed
     );
 
-    //TODO: work in promo id
+    //TODO: work in promo id and ticket max, can pick either or both when making event
     struct PromoEvent {
         string promoName;
         uint256 startTime;

@@ -190,6 +190,14 @@ function App() {
       console.log('IPFS URI: ', legendURI)
     }
   }
+
+  async function fetget() {
+    if (typeof window.ethereum !== 'undefined') {
+      const legendURI = await contract.nft.read.legendGenetics(id)
+      console.log(legendURI.toString())
+    }
+  }
+
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
       // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
@@ -823,6 +831,9 @@ function App() {
           </button>
           <button type="submit" onClick={fetchRedeemableTickets}>
             Fetch Redeemable Tickets
+          </button>
+          <button type="submit" onClick={fetget}>
+            Fetget
           </button>
         </div>
         <br />

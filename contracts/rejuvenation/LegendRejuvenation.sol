@@ -65,7 +65,9 @@ contract LegendRejuvenation is IRejuvenationPool {
         r.visit.depositedBy = msg.sender;
         r.visit.depositBlock = block.number;
         // r.visit.offspringCount = lab.fetchOffspringCount(tokenId);
-        r.visit.offspringCount = nft.fetchTokenMetadata(tokenId).breedingInstancesUsed; //TODO: chnage logic to fit nft rework
+        r.visit.offspringCount = nft
+            .fetchTokenMetadata(tokenId)
+            .blendingInstancesUsed; //TODO: chnage logic to fit nft rework
         r.visit.multiplier = _calculateMultiplier(tokensToSecure);
 
         // make more secure, modifer-function in token contract ?
@@ -214,7 +216,9 @@ contract LegendRejuvenation is IRejuvenationPool {
         ) = _calculateRejuvenation(_tokenId);
 
         // uint256 currentOffspringCount = lab.fetchOffspringCount(_tokenId);
-        uint256 currentOffspringCount = nft.fetchTokenMetadata(_tokenId).breedingInstancesUsed; // do for royalties ?
+        uint256 currentOffspringCount = nft
+            .fetchTokenMetadata(_tokenId)
+            .blendingInstancesUsed; // do for royalties ?
         uint256 newOffspringCount = currentOffspringCount - regainedSlots;
 
         // lab.restoreBreedingSlots(_tokenId) = newOffspringCount; // inside nft.sol ; only reju

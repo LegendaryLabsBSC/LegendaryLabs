@@ -7,6 +7,8 @@ import "../../lab/LegendsLaboratory.sol";
 abstract contract LegendIncubation {
     uint256 internal incubationDuration; // move to lab ?
 
+    /* legendId => skipIncubation */
+    mapping(uint256 => bool) internal _noIncubation;
 
     // TODO: fix in incubation rework
     // function isHatchable(uint256 tokenId, bool testToggle)
