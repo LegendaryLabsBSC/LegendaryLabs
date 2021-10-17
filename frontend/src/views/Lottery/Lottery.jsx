@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator'
 import LegendsNFT from '../../artifacts/contracts/legend/LegendsNFT.sol/LegendsNFT.json'
 import LegendsMarketplace from '../../artifacts/contracts/marketplace/LegendsMarketplace.sol/LegendsMarketplace.json'
-import LegendsLaboratory from '../../artifacts/contracts/control/LegendsLaboratory.sol/LegendsLaboratory.json'
+import LegendsLaboratory from '../../artifacts/contracts/lab/LegendsLaboratory.sol/LegendsLaboratory.json'
 // import { NftCard } from './components/nftCard'
 // import gif from '../../eater.gif'
 
@@ -97,7 +97,7 @@ function App() {
   }
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
+      // const legendMeta = await contract.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.read.tokenMeta(id)
       const legendGenetics = await contract.read.legendGenetics(id)
       const legendStats = await contract.read.legendStats(id)
@@ -138,7 +138,7 @@ function App() {
   }
   async function fetchMeta() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.read.legendData(id) // doesn't return parents for some reason
+      // const legendMeta = await contract.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.read.tokenMeta(id)
       console.log(`Meta: ${legendMeta}`)
     }
@@ -159,7 +159,7 @@ function App() {
   async function isHatchable() {
     if (typeof window.ethereum !== 'undefined') {
       legends.forEach((legend) => {
-        contract.read.legendData(legend.tokenID).then((legendMeta) => {
+        contract.read.legendMetadata(legend.tokenID).then((legendMeta) => {
           if (!legendMeta.isHatched) {
             const testToggle = true // hatching test toggle
             contract.read.isHatchable(legendMeta.id, testToggle).then((res) => {
@@ -185,7 +185,7 @@ function App() {
       setGettingLegends(true)
       const totalLegends = await contract.read.totalSupply()
       for (let i = 1; i <= totalLegends; i++) {
-        contract.read.legendData(i).then((legendMeta) => {
+        contract.read.legendMetadata(i).then((legendMeta) => {
           if (!legendMeta.isDestroyed) {
             loadLegends(legendMeta.id.toString())
           }

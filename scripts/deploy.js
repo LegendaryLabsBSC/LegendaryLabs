@@ -20,10 +20,11 @@ async function main() {
     const legendsLaboratory = "${legendsLaboratory.address}"
     const legendsNFT = "${children[0]}"
     const legendsToken = "${children[1]}"
-    const legendsMarketplace = "${children[2]}"
-    const legendsMatchingBoard = "${children[3]}"
+    const legendsRejuvination = "${children[2]}"
+    const legendsMarketplace = "${children[3]}"
+    const legendsMatchingBoard = "${children[4]}"
 
-    export { legendsLaboratory, legendsNFT, legendsToken, legendsMarketplace, legendsMatchingBoard }
+    export { legendsLaboratory, legendsNFT, legendsToken, legendsRejuvination, legendsMarketplace, legendsMatchingBoard }
     `
     fs.writeFile(contract_config, re, 'utf-8', (err) => {
       if (err) console.log(err)

@@ -14,7 +14,7 @@ import {
 import LegendsNFT from '../../artifacts/contracts/legend/LegendsNFT.sol/LegendsNFT.json'
 import LegendsMarketplace from '../../artifacts/contracts/marketplace/LegendsMarketplace.sol/LegendsMarketplace.json'
 import LegendsMatchingBoard from '../../artifacts/contracts/matching/LegendsMatchingBoard.sol/LegendsMatchingBoard.json'
-import LegendsLaboratory from '../../artifacts/contracts/control/LegendsLaboratory.sol/LegendsLaboratory.json'
+import LegendsLaboratory from '../../artifacts/contracts/lab/LegendsLaboratory.sol/LegendsLaboratory.json'
 import LegendToken from '../../artifacts/contracts/token/LegendToken.sol/LegendToken.json'
 import { NftCard } from './components/nftCard'
 import gif from '../../eater.gif'
@@ -75,11 +75,77 @@ function App() {
   const [matchingPrice, setMatchingPrice] = useState(0)
   const [breedingToken, setBreedingToken] = useState(0)
   const [bid, setBid] = useState(0)
+  const [promoName, setPromoName] = useState('')
   // const [amount, setAmount] = useState(0)
 
   /**
    * Admin Start
    */
+  async function createPromoEvent() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.createPromoEvent(promoName, 86400, true, false)
+    }
+  }
+  async function fetchPromoDetails() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+
+      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
+
+      for (let i = 1; i <= totalPromos; i++) {
+        contract.lab.read.fetchPromoEvent(i).then((p) => {
+          console.log(`Promo: ${p.promoName}`)
+          console.log(`Start Time: ${p.startTime}`)
+          console.log(`Expire Time: ${p.expireTime}`)
+          console.log(`Unrestricted: ${p.isUnrestricted}`)
+          console.log(`Closed: ${p.promoClosed}`)
+          console.log(`Tickets Claimed: ${p.ticketsClaimed}`)
+          console.log(`Tickets Redeemed: ${p.ticketsRedeemed}`)
+          console.log('')
+        })
+      }
+    }
+  }
+  async function dispensePromoTicket() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contract.lab.write.dispensePromoTicket(id, account, 1)
+    }
+  }
+  async function redeemPromoTicket() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      await contract.lab.write.redeemPromoTicket(
+        id,
+        account,
+        uniqueNamesGenerator(name.prefix),
+        uniqueNamesGenerator(name.postfix),
+      )
+    }
+  }
+  async function fetchRedeemableTickets() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+
+      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
+      // const amount = async await contract.lab.read.fetchRedeemableTickets(id, account)
+      // console.log(amount)
+
+      for (let i = 1; i <= totalPromos; i++) {
+        // contract.lab.read.fetchPromoEvent(i)
+        contract.lab.read.fetchRedeemableTickets(i, account).then((p) => {
+          // const amount = contract.lab.read.fetchRedeemableTickets(i, account)
+          console.log(`Tickets Owned: ${p}`)
+          console.log('')
+        })
+      }
+    }
+  }
+  async function closePromoEvent() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.closePromoEvent(id)
+    }
+  }
   async function setIncubationDuration() {
     if (typeof window.ethereum !== 'undefined') {
       // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -124,9 +190,17 @@ function App() {
       console.log('IPFS URI: ', legendURI)
     }
   }
+
+  async function fetget() {
+    if (typeof window.ethereum !== 'undefined') {
+      const legendURI = await contract.nft.read.legendGenetics(id)
+      console.log(legendURI.toString())
+    }
+  }
+
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.nft.read.legendData(id) // doesn't return parents for some reason
+      // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.nft.read.tokenMeta(id)
       const legendGenetics = await contract.nft.read.legendGenetics(id)
       const legendStats = await contract.nft.read.legendStats(id)
@@ -167,7 +241,7 @@ function App() {
   }
   async function fetchMeta() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.nft.read.legendData(id) // doesn't return parents for some reason
+      // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.nft.read.tokenMeta(id)
       console.log(`Meta: ${legendMeta}`)
     }
@@ -187,7 +261,7 @@ function App() {
   async function isHatchable() {
     if (typeof window.ethereum !== 'undefined') {
       legends.forEach((legend) => {
-        contract.nft.read.legendData(legend.tokenID).then((legendMeta) => {
+        contract.nft.read.legendMetadata(legend.tokenID).then((legendMeta) => {
           if (!legendMeta.isHatched) {
             const testToggle = true // hatching test toggle
             contract.nft.read.isHatchable(legendMeta.id, testToggle).then((res) => {
@@ -209,9 +283,9 @@ function App() {
   async function getAllLegends() {
     if (typeof window.ethereum !== 'undefined') {
       setGettingLegends(true)
-      const totalLegends = await contract.read.totalSupply()
+      const totalLegends = await contract.nft.read.totalSupply()
       for (let i = 1; i <= totalLegends; i++) {
-        contract.nft.read.legendData(i).then((legendMeta) => {
+        contract.nft.read.legendMetadata(i).then((legendMeta) => {
           if (!legendMeta.isDestroyed) {
             loadLegends(legendMeta.id.toString())
           }
@@ -313,15 +387,17 @@ function App() {
       const skipIncubation = false // for testing
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
-        // ! receiving multiple responses ?
-        // ? is .then even needed
-        contract.nft.write.once('NewLegend', (data, event) => {
-          console.log('New Token Created:', data.toString())
-          const newItemId = data.toString()
-          generateImage(newItemId)
-        }),
-      )
+      // await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
+      await contract.nft.write.mintPromo(account, prefix, postfix, id, isLegendary)
+      // .then(
+      //   // ! receiving multiple responses ?
+      //   // ? is .then even needed
+      //   contract.nft.write.once('NewLegend', (data, event) => {
+      //     console.log('New Token Created:', data.toString()) // return token id instead of watching for event
+      //     const newItemId = data.toString()
+      //     generateImage(newItemId)
+      //   }),
+      // )
     }
   }
   /**
@@ -730,6 +806,34 @@ function App() {
           <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
           <button type="submit" onClick={setSeason}>
             Set Season
+          </button>
+        </div>
+        <br />
+        <div>
+          <input type="text" placeholder="Name" onChange={(e) => setPromoName(e.target.value)} />
+          <button type="submit" onClick={createPromoEvent}>
+            Create Promo Event
+          </button>
+          <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={closePromoEvent}>
+            Close Promo Event
+          </button>
+          <button type="submit" onClick={fetchPromoDetails}>
+            Fetch Promo Details
+          </button>
+          <br />
+          <input type="number" placeholder="Promo ID" onChange={(e) => setID(e.target.value)} />
+          <button type="submit" onClick={dispensePromoTicket}>
+            Dispense Promo Ticket
+          </button>
+          <button type="submit" onClick={redeemPromoTicket}>
+            Redeem Promo Ticket
+          </button>
+          <button type="submit" onClick={fetchRedeemableTickets}>
+            Fetch Redeemable Tickets
+          </button>
+          <button type="submit" onClick={fetget}>
+            Fetget
           </button>
         </div>
         <br />

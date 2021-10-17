@@ -1,58 +1,273 @@
 // SPDX-License-Identifier: MIT
 
-
-
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "../control/LegendsLaboratory.sol";
-import "./LegendBreeding.sol";
-// import "./LegendStats.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "../lab/LegendsLaboratory.sol";
+import "./LegendMetadata.sol";
 
-contract LegendsNFT is
-    ERC721Enumerable,
-    Ownable,
-    LegendBreeding
-    // , LegendStats
-{
+// import "./legend/LegendIncubation.sol";
+
+contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
     using Strings for uint256;
 
-    mapping(uint256 => string) private _tokenURIs;
-    mapping(uint256 => LegendMetadata) public legendData;
-
-    uint256 public incubationDuration;
-    uint256 public breedingCooldown;
-    uint256 public offspringLimit; // 4 staring out
-    uint256 public baseBreedingCost;
-    string public season;
-
-    event NewLegend(uint256 newItemId);
-    event Minted(uint256 tokenId);
-    event Breed(uint256 parent1, uint256 parent2, uint256 child);
-    event Burned(uint256 tokenId);
+    Counters.Counter private _legendIds;
 
     LegendsLaboratory lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(lab), "not lab owner");
+        require(msg.sender == address(lab), "Not Authorized");
         _;
     }
 
-    // modifier isHatchable
+    enum KinBlendingLevel {
+        None,
+        Parents,
+        Siblings
+    }
+
+    KinBlendingLevel private kinBlendingLevel;
+
+    uint256 private blendingLimit = 4; // will need visable/getter for matching&rpools
+    uint256 private baseBlendingCost = 100;
+    uint256 private incubationPeriod; // seconds
+
+    /* legendId => ipfsHash */
+    mapping(uint256 => string) private _tokenURIs;
+
+    /* legendId => metadata */
+    mapping(uint256 => LegendMetadata) public legendMetadata; // private ?
+
+    /* legendId => skipIncubation? */
+    mapping(uint256 => bool) private _noIncubation;
+
+    /* parentId => childId => isParent? */
+    mapping(uint256 => mapping(uint256 => bool)) private parentOf;
+
+    event LegendCreated(uint256 legendId);
+    event LegendsBlended(uint256 parent1, uint256 parent2, uint256 childId);
+    event LegendHatched(uint256 legendId);
+    event LegendDestroyed(uint256 legendId);
 
     constructor() ERC721("Legend", "LEGEND") {
         lab = LegendsLaboratory(msg.sender);
     }
 
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
+    function createLegend(
+        address _recipient,
+        string memory _prefix,
+        string memory _postfix,
+        uint256 _promoId,
+        bool _isLegendary
+    ) public onlyLab {
+        _legendIds.increment();
+        uint256 newLegendId = _legendIds.current();
+
+        // promotional Legends wont have parents
+        uint256[2] memory parents = [uint256(0), uint256(0)];
+
+        string memory uri = _formatURI(newLegendId, Strings.toString(_promoId));
+
+        bool skipIncubation = lab.fetchPromoIncubation(_promoId);
+
+        _mintLegend(
+            _recipient,
+            newLegendId,
+            _prefix,
+            _postfix,
+            parents,
+            uri,
+            _isLegendary,
+            skipIncubation
+        );
+    }
+
+    function blendLegends(
+        address _recipient,
+        uint256 _parent1,
+        uint256 _parent2,
+        bool _skipIncubation
+    ) public returns (uint256) {
+        require(
+            ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
+        );
+
+        LegendMetadata storage p1 = legendMetadata[_parent1];
+        LegendMetadata storage p2 = legendMetadata[_parent2];
+
+        require(
+            p1.blendingInstancesUsed < blendingLimit &&
+                p2.blendingInstancesUsed < blendingLimit,
+            "Blending limit reached"
+        );
+
+        // thoroughly test bool returns
+        if (kinBlendingLevel != KinBlendingLevel.Siblings) {
+            require(_notSiblings(p1.parents, p2.parents));
+            if (kinBlendingLevel != KinBlendingLevel.Parents) {
+                require(_notParent(_parent1, _parent2));
+            }
+        }
+
+        lab.legendToken().blendingBurn(
+            msg.sender, // make sure corect party has fee applied in matching
+            ((p1.blendingCost + p2.blendingCost) / 2)
+        ); // may become liqlock
+
+        _legendIds.increment();
+        uint256 newLegendId = _legendIds.current();
+
+        uint256[2] memory parents = [_parent1, _parent2];
+
+        for (uint256 i = 0; i < parents.length; i++) {
+            // test thoroughly
+            LegendMetadata storage l = legendMetadata[parents[i]];
+
+            l.totalOffspring += 1;
+            l.blendingInstancesUsed += 1;
+            l.blendingCost = (l.blendingCost * 2);
+
+            parentOf[parents[i]][newLegendId] = true;
+        }
+
+        bool mix = block.number % 2 == 0;
+
+        string memory uri = _formatURI(
+            newLegendId,
+            string(
+                abi.encodePacked(
+                    Strings.toString(parents[0]),
+                    "+",
+                    Strings.toString(parents[1])
+                )
+            )
+        );
+
+        _mintLegend(
+            _recipient,
+            newLegendId,
+            mix ? p1.prefix : p2.prefix,
+            mix ? p2.postfix : p1.postfix,
+            parents,
+            uri,
+            false,
+            _skipIncubation
+        );
+
+        emit LegendsBlended(_parent1, _parent2, newLegendId);
+
+        return (newLegendId);
+    }
+
+    function hatchLegend(uint256 _legendId, string memory _ipfsHash) public {
+        require(ownerOf(_legendId) == msg.sender);
+        require(isHatchable(_legendId), "Needs to incubate longer");
+
+        _setLegendURI(_legendId, _ipfsHash);
+
+        legendMetadata[_legendId].isHatched = true;
+
+        emit LegendHatched(_legendId);
+    }
+
+    function destroyLegend(uint256 _legendId) public {
+        require(ownerOf(_legendId) == msg.sender);
+
+        legendMetadata[_legendId].isDestroyed = true;
+
+        _burn(_legendId);
+
+        emit LegendDestroyed(_legendId);
+    }
+
+    function _formatURI(uint256 _newLegendId, string memory data)
+        private
+        pure
+        returns (string memory)
     {
-        _tokenURIs[tokenId] = _tokenURI;
+        //TODO:
+        string
+            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
+
+        return
+            string(
+                abi.encodePacked(
+                    Strings.toString(_newLegendId),
+                    ",",
+                    enumEgg,
+                    ",",
+                    data
+                )
+            );
+    }
+
+    function _mintLegend(
+        address _recipient,
+        uint256 _newLegendId,
+        string memory _prefix,
+        string memory _postfix,
+        uint256[2] memory _parents,
+        string memory _uri,
+        bool _isLegendary,
+        bool _skipIncubation
+    ) private {
+        _mint(_recipient, _newLegendId);
+
+        address payable creator;
+
+        if (_parents[0] == 0) {
+            creator = payable(address(0));
+        } else {
+            ///@dev To accommodate matching, creator is legend's second parent creator(breeder address)
+            creator = payable(legendMetadata[_parents[1]].legendCreator);
+        }
+
+        LegendMetadata storage m = legendMetadata[_newLegendId];
+        m.id = _newLegendId;
+        m.season = lab.season();
+        m.prefix = _prefix;
+        m.postfix = _postfix;
+        m.parents = _parents;
+        m.birthDay = block.timestamp;
+        m.blendingCost = baseBlendingCost;
+        m.legendCreator = creator;
+        m.isLegendary = _isLegendary;
+
+        _noIncubation[_newLegendId] = _skipIncubation;
+
+        _setLegendURI(_newLegendId, _uri);
+
+        emit LegendCreated(_newLegendId);
+    }
+
+    function _setLegendURI(uint256 _legendId, string memory _ipfsHash) private {
+        _tokenURIs[_legendId] = _ipfsHash;
+    }
+
+    function _notSiblings(
+        uint256[2] memory _parents1,
+        uint256[2] memory _parents2
+    ) private pure returns (bool) {
+        if (_parents1[0] == 0 || _parents2[0] == 0) return true;
+
+        return
+            keccak256(abi.encodePacked(_parents1)) !=
+            keccak256(abi.encodePacked(_parents2)) &&
+            keccak256(abi.encodePacked(_parents2)) !=
+            keccak256(abi.encodePacked(_parents1));
+    }
+
+    function _notParent(uint256 _parent1, uint256 _parent2)
+        private
+        view
+        returns (bool)
+    {
+        if (parentOf[_parent1][_parent2]) return false;
+        if (parentOf[_parent2][_parent1]) return false;
+
+        return true;
     }
 
     function tokenURI(uint256 tokenId)
@@ -66,219 +281,57 @@ contract LegendsNFT is
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"
         );
-        string memory _tokenURI = _tokenURIs[tokenId];
-        return _tokenURI;
+        return _tokenURIs[tokenId];
     }
 
-    function tokenDATA(
-        uint256 tokenId // TODO: Clean this up, possibly not needed at all
-    ) public view virtual returns (LegendGenetics memory) {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        return legendGenetics[tokenId];
-    }
-
-    function tokenMeta(uint256 tokenId)
+    function fetchTokenMetadata(uint256 tokenId)
         public
         view
-        virtual
         returns (LegendMetadata memory)
     {
         require(
             _exists(tokenId),
             "ERC721Metadata: URI query for nonexistent token"
         );
-        return legendData[tokenId];
+        return legendMetadata[tokenId];
     }
 
-    function immolate(uint256 tokenId) public {
-        require(ownerOf(tokenId) == msg.sender);
+    function isHatchable(uint256 _legendId) public view returns (bool) {
+        require(!legendMetadata[_legendId].isHatched, "Not in incubator");
 
-        LegendMetadata storage legend = legendData[tokenId];
-        legend.isDestroyed = true;
-        _burn(tokenId);
+        if (_noIncubation[_legendId]) return true;
 
-        emit Burned(tokenId);
+        uint256 hatchableWhen = (legendMetadata[_legendId].birthDay +
+            incubationPeriod);
+
+        if (block.timestamp < hatchableWhen) return false;
+
+        return true;
     }
 
-    //TODO: fix in incubation rework
-    // function isHatchable(uint256 tokenId, bool testToggle)
-    //     public
-    //     view
-    //     returns (
-    //         bool,
-    //         uint256,
-    //         uint256
-    //     )
-    // {
-    //     bool hatchable;
-    //     uint256 hatchableWhen;
-    //     LegendMetadata memory l = legendData[tokenId];
-    //     if (!testToggle) {
-    //         hatchableWhen = l.incubationDuration + l.birthDay;
-    //     } else {
-    //         hatchableWhen = block.timestamp;
-    //     }
-    //     if (hatchableWhen <= block.timestamp) {
-    //         hatchable = true;
-    //     }
-
-    //     return (hatchable, hatchableWhen, block.timestamp);
-    // }
-
-    function hatch(uint256 tokenId, string memory _tokenURI) public {
-        // require(isHatchable(tokenId, false) === true); // can grab the struct elements before teh requie (nader dabit)
-        _setTokenURI(tokenId, _tokenURI);
-        // LegendMetadata memory legend = legendData[tokenId];
-        legendData[tokenId].isHatched = true;
-    }
-
-    //TODO: rework variable naming throughout
-    function mintTo(
-        address _recipient,
-        uint256 newItemId,
-        string memory prefix,
-        string memory postfix,
-        uint256[2] memory parents,
-        bool isLegendary,
-        bool skipIncubation
-    ) private {
-        uint256 _incubationDuration;
-        bool isHatched;
-
-        address payable _creator;
-
-        _mint(_recipient, newItemId);
-
-        if (skipIncubation == true) {
-            _incubationDuration = 0;
-            isHatched = true;
-        } else {
-            _incubationDuration = incubationDuration;
-            isHatched = false;
+    function setKinBlendingLevel(uint256 _kinBlendingLevel)
+        public
+        virtual
+        onlyLab
+    {
+        if (_kinBlendingLevel == 0) {
+            kinBlendingLevel == KinBlendingLevel.None;
+        } else if (_kinBlendingLevel == 1) {
+            kinBlendingLevel == KinBlendingLevel.Siblings;
+        } else if (_kinBlendingLevel == 2) {
+            kinBlendingLevel == KinBlendingLevel.Parents;
         }
-
-        if (parents[0] == 0) {
-            _creator = payable(address(0));
-        } else {
-            ///@dev To accommodate matching, creator is legend's second parent creator(breeder address)
-            _creator = payable(legendData[parents[1]].legendCreator);
-        }
-
-        // LegendMetadata memory m;
-        LegendMetadata storage m = legendData[newItemId];
-        m.id = newItemId;
-        m.legendCreator = _creator;
-        m.prefix = prefix;
-        m.postfix = postfix;
-        m.parents = parents;
-        m.birthDay = block.timestamp;
-        // m.incubationDuration = _incubationDuration;
-        m.breedingCooldown = breedingCooldown;
-        m.breedingCost = baseBreedingCost;
-        // m.offspringLimit = offspringLimit;
-        m.season = season;
-        m.isLegendary = isLegendary;
-        m.isHatched = isHatched;
-        m.isDestroyed = false;
-
-        // legendData[newItemId] = m;
-
-        // TODO: Generate "enumEgg" function ; randomize and send in from fe/be to save on gas
-
-        string
-            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
-
-        _setTokenURI(newItemId, enumEgg);
-
-        emit NewLegend(newItemId);
     }
 
-    function breed(
-        address recipient,
-        uint256 _parent1,
-        uint256 _parent2,
-        bool skipIncubation
-    ) public returns (uint256) {
-        require(
-            ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
-        );
-
-        LegendMetadata storage parent1 = legendData[_parent1];
-        LegendMetadata storage parent2 = legendData[_parent2];
-
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-        mixGenetics(parent1.id, parent2.id, newItemId);
-        // mixStats(parent1.id, parent2.id, newItemId);
-        // , baseHealth);
-
-        uint256[2] memory parents = [_parent1, _parent2];
-        bool mix = block.number % 2 == 0;
-        bool isLegendary = false; // only one of a kind handmade Legends can be "Legendary"
-
-        mintTo(
-            recipient,
-            newItemId,
-            mix ? parent1.prefix : parent2.prefix,
-            mix ? parent2.postfix : parent1.postfix,
-            parents,
-            isLegendary,
-            skipIncubation
-        );
-
-        emit Breed(parent1.id, parent2.id, newItemId);
-        return (newItemId);
+    function setBlendingLimit(uint256 _blendingLimit) public onlyLab {
+        blendingLimit = _blendingLimit;
     }
 
-    // TODO: restrict access control to lab
-    function mintPromo(
-        address recipient,
-        string memory prefix,
-        string memory postfix,
-        bool isLegendary,
-        bool skipIncubation
-    ) public {
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        createGenetics(newItemId);
-        // createStats(newItemId);
-        // , baseHealth);
-
-        uint256 promoParent = 0;
-        uint256[2] memory parents = [promoParent, promoParent]; // promotional Legends wont have parents
-
-        mintTo(
-            recipient,
-            newItemId,
-            prefix,
-            postfix,
-            parents,
-            isLegendary,
-            skipIncubation
-        );
+    function setBaseBlendingCost(uint256 _baseBlendingCost) public onlyLab {
+        baseBlendingCost = _baseBlendingCost;
     }
 
-    function setIncubationDuration(uint256 _incubationDuration) public onlyLab {
-        incubationDuration = (_incubationDuration);
-    }
-
-    function setBreedingCooldown(uint256 _breedingCooldown) public onlyLab {
-        breedingCooldown = _breedingCooldown;
-    }
-
-    function setOffspringLimit(uint256 _offspringLimit) public onlyLab {
-        offspringLimit = _offspringLimit;
-    }
-
-    function setBreedingCost(uint256 _baseBreedingCost) public onlyLab {
-        baseBreedingCost = _baseBreedingCost;
-    }
-
-    function setSeason(string memory _season) public onlyLab {
-        season = _season;
+    function setIncubationPeriod(uint256 _incubationPeriod) public onlyLab {
+        incubationPeriod = _incubationPeriod;
     }
 }

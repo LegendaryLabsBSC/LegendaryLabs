@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./escrow/LegendsAuctioneer.sol";
-import "../control/LegendsLaboratory.sol";
+import "../lab/LegendsLaboratory.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./listings/LegendAuction.sol";
 import "./listings/LegendOffer.sol";
@@ -46,6 +46,14 @@ contract LegendsMarketplace is
         ];
 
         return counts;
+    }
+
+    function fetchLegendListing(uint256 listingId)
+        public
+        view
+        returns (LegendListing memory)
+    {
+        return legendListing[listingId];
     }
 
     function createLegendSale(

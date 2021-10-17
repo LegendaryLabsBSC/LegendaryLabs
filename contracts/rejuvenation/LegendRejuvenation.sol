@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 import "./RejuvenationPool.sol";
-import "../control/LegendsLaboratory.sol";
+import "../lab/LegendsLaboratory.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../legend/LegendsNFT.sol";
@@ -65,7 +65,9 @@ contract LegendRejuvenation is IRejuvenationPool {
         r.visit.depositedBy = msg.sender;
         r.visit.depositBlock = block.number;
         // r.visit.offspringCount = lab.fetchOffspringCount(tokenId);
-        r.visit.offspringCount = nft.tokenMeta(tokenId).offspringCount;
+        r.visit.offspringCount = nft
+            .fetchTokenMetadata(tokenId)
+            .blendingInstancesUsed; //TODO: chnage logic to fit nft rework
         r.visit.multiplier = _calculateMultiplier(tokensToSecure);
 
         // make more secure, modifer-function in token contract ?
@@ -164,6 +166,7 @@ contract LegendRejuvenation is IRejuvenationPool {
     //TODO:FE: Alert user when max is reach rejuvenation will stop
     function fetchRejuvenationProgress(uint256 tokenId)
         public
+        view
         returns (
             uint256,
             uint256,
@@ -213,7 +216,9 @@ contract LegendRejuvenation is IRejuvenationPool {
         ) = _calculateRejuvenation(_tokenId);
 
         // uint256 currentOffspringCount = lab.fetchOffspringCount(_tokenId);
-        uint256 currentOffspringCount = nft.tokenMeta(_tokenId).offspringCount; // do for royalties ?
+        uint256 currentOffspringCount = nft
+            .fetchTokenMetadata(_tokenId)
+            .blendingInstancesUsed; // do for royalties ?
         uint256 newOffspringCount = currentOffspringCount - regainedSlots;
 
         // lab.restoreBreedingSlots(_tokenId) = newOffspringCount; // inside nft.sol ; only reju
