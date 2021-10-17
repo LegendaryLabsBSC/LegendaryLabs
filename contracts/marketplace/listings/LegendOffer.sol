@@ -9,8 +9,7 @@ abstract contract LegendOffer is LegendSale {
     event OfferMade(uint256 listingId, uint256 price);
     event OfferDecided(uint256 listingId, bool isAccepted);
 
-    // uint256 internal offerDuration; // commented out for testing
-    uint256 internal offerDuration = 432000; // 5 days
+    uint256 internal offerDuration = 432000; // 5 days // make private
 
     struct OfferDetails {
         uint256 expirationTime;
@@ -18,7 +17,7 @@ abstract contract LegendOffer is LegendSale {
         bool isAccepted; // make enum if theres space
     }
 
-    mapping(uint256 => OfferDetails) public offerDetails;
+    mapping(uint256 => OfferDetails) public offerDetails; // make private
 
     //TODO: offers placed
 

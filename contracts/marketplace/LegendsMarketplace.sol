@@ -3,19 +3,19 @@
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./escrow/LegendsMarketClerk.sol";
+// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../lab/LegendsLaboratory.sol";
+import "./escrow/LegendsMarketClerk.sol";
 import "./listings/LegendAuction.sol";
 import "./listings/LegendOffer.sol";
 
 contract LegendsMarketplace is
-    LegendsAuctioneer,
-    LegendAuction,
     LegendOffer,
+    LegendAuction,
+    LegendsMarketClerk,
     ReentrancyGuard
 {
-    using SafeMath for uint256; // try to get rid of
+    // using SafeMath for uint256; // try to get rid of
 
     // uint256 public _marketplaceFee; commented out for testing
     uint256 public _marketplaceFee = 2;

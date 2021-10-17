@@ -135,6 +135,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsMarketplace.setMarketplaceFee(newFee);
     }
 
+    function setMatchingBoardFee(uint256 newFee) public onlyOwner {
+        legendsMatchingBoard.setMatchingBoardFee(newFee);
+    }
+
     function fetchRoyaltyRecipient(uint256 _tokenId)
         public
         view

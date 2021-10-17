@@ -27,7 +27,7 @@ import "./LegendsEscrow.sol";
  * instead of Solidity's `transfer` function. Payees can query their due
  * payments with {payments}, and retrieve them with {withdrawPayments}.
  */
-abstract contract LegendsAuctioneer {
+abstract contract LegendsMarketClerk {
     LegendsEscrow private immutable _escrow;
 
     mapping(uint256 => mapping(address => bool)) internal _withdrawAllowed;
