@@ -25,8 +25,13 @@ abstract contract LegendSale is ILegendListing {
     uint256 internal offerDuration = 432000; // 5 days // make private
     //TODO: offers placed
 
+    /* listingId => listingDetails */
     mapping(uint256 => LegendListing) public legendListing;
+
+    /* listingId => buyerAddress => legendId */
     mapping(uint256 => mapping(address => uint256)) internal _legendOwed;
+
+    /* listingId => offerDetails */
     mapping(uint256 => OfferDetails) public offerDetails; // make private
 
     event OfferMade(uint256 listingId, uint256 price);
@@ -44,7 +49,7 @@ abstract contract LegendSale is ILegendListing {
         l.listingId = listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
-        l.tokenId = _tokenId;
+        l.legendId = _tokenId;
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
         l.price = _price;
@@ -59,7 +64,7 @@ abstract contract LegendSale is ILegendListing {
         l.buyer = payable(msg.sender);
         l.status = ListingStatus.Closed;
 
-        _legendOwed[_listingId][payable(msg.sender)] = l.tokenId;
+        _legendOwed[_listingId][payable(msg.sender)] = l.legendId;
 
         _listingsClosed.increment();
 
@@ -80,7 +85,7 @@ abstract contract LegendSale is ILegendListing {
         l.listingId = _listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
-        l.tokenId = _tokenId;
+        l.legendId = _tokenId;
         l.seller = payable(address(0));
         l.buyer = payable(msg.sender);
         l.price = _price;
@@ -104,7 +109,7 @@ abstract contract LegendSale is ILegendListing {
 
         offerDetails[_listingId].isAccepted = true;
 
-        _legendOwed[_listingId][l.buyer] = l.tokenId;
+        _legendOwed[_listingId][l.buyer] = l.legendId;
 
         _listingsClosed.increment();
 

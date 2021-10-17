@@ -1,18 +1,11 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
+
 import "./LegendSale.sol";
 
 abstract contract LegendAuction is LegendSale {
     using Counters for Counters.Counter;
-
-    event AuctionExpired(uint256 listingId, string); //TODO:
-    event AuctionExtended(uint256 listingId, uint256 newDuration);
-    event BidPlaced(
-        uint256 listingId,
-        address newHighestBidder,
-        uint256 newHighestBid
-    );
 
     struct AuctionDetails {
         uint256 duration;
@@ -23,15 +16,15 @@ abstract contract LegendAuction is LegendSale {
         bool instantBuy;
     }
 
-    mapping(uint256 => address[]) internal listBidders; // for debug
+    // mapping(uint256 => address[]) internal listBidders; // for debug
 
-    function fetchBidders(uint256 listingId)
-        public
-        view
-        returns (address[] memory)
-    {
-        return listBidders[listingId];
-    }
+    event AuctionExpired(uint256 listingId, string); //TODO:
+    event AuctionExtended(uint256 listingId, uint256 newDuration);
+    event BidPlaced(
+        uint256 listingId,
+        address newHighestBidder,
+        uint256 newHighestBid
+    );
 
     mapping(uint256 => uint256) public instantBuyPrice;
     mapping(uint256 => AuctionDetails) public auctionDetails;
@@ -40,9 +33,17 @@ abstract contract LegendAuction is LegendSale {
     mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
     mapping(uint256 => mapping(address => bool)) internal exists;
 
+    // function fetchBidders(uint256 listingId)
+    //     public
+    //     view
+    //     returns (address[] memory)
+    // {
+    //     return listBidders[listingId];
+    // }
+
     function _createLegendAuction(
         address _nftContract,
-        uint256 _tokenId,
+        uint256 _legendId,
         uint256 _duration,
         uint256 _startingPrice,
         uint256 _instantPrice
@@ -61,7 +62,7 @@ abstract contract LegendAuction is LegendSale {
         l.listingId = _listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
-        l.tokenId = _tokenId;
+        l.legendId = _legendId;
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
         l.isAuction = true;
@@ -82,7 +83,7 @@ abstract contract LegendAuction is LegendSale {
 
         if (!exists[_listingId][msg.sender]) {
             a.bidders.push(msg.sender);
-            listBidders[_listingId].push(msg.sender);
+            // listBidders[_listingId].push(msg.sender);
             exists[_listingId][msg.sender] = true;
 
             // TODO:
@@ -112,7 +113,7 @@ abstract contract LegendAuction is LegendSale {
         l.price = a.highestBid;
         l.status = ListingStatus.Closed;
 
-        _legendOwed[_listingId][a.highestBidder] = l.tokenId; // ? does this belong in this contract ; yes, until we get moved over to escrow
+        _legendOwed[_listingId][a.highestBidder] = l.legendId; // ? does this belong in this contract ; yes, until we get moved over to escrow
 
         _listingsClosed.increment();
 

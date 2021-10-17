@@ -36,6 +36,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         IERC721 legendsNFT = IERC721(_nftContract);
 
         require(legendsNFT.ownerOf(_legendId) == msg.sender);
+        require(lab.legendsNFT()._isHatched(_legendId), "Legend in incubator");
         require(lab.legendsNFT().isBlendable(_legendId));
         require(_price != 0, "Price can not be 0");
 
@@ -52,8 +53,9 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         IERC721 legendsNFT = IERC721(m.nftContract);
 
         require(m.status == MatchingStatus.Open);
-        require(legendsNFT.ownerOf(_legendId) == msg.sender);
         require(m.surrogate != msg.sender, "Seller not authorized");
+        require(legendsNFT.ownerOf(_legendId) == msg.sender);
+        require(lab.legendsNFT()._isHatched(_legendId), "Legend in incubator");
         require(lab.legendsNFT().isBlendable(_legendId)); // shouldnt be needed but double check
 
         uint256 matchingBoardFee = (m.price * _matchingBoardFee) / 100;

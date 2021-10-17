@@ -8,22 +8,11 @@ import "../lab/LegendsLaboratory.sol";
 import "./escrow/LegendsMarketClerk.sol";
 import "./listings/LegendAuction.sol";
 
-// import "./listings/LegendOffer.sol";
-
-// LegendOffer,
 contract LegendsMarketplace is
     LegendAuction,
     LegendsMarketClerk,
     ReentrancyGuard
 {
-    // using SafeMath for uint256; // try to get rid of
-
-    // uint256 public _marketplaceFee; commented out for testing
-    uint256 public _marketplaceFee = 2;
-
-    // uint256 public _royaltyFee; commented out for testing
-    uint256 public _royaltyFee = 2;
-
     LegendsLaboratory lab;
 
     modifier onlyLab() {
@@ -31,45 +20,29 @@ contract LegendsMarketplace is
         _;
     }
 
+    uint256 private _marketplaceFee = 2;
+    uint256 private _royaltyFee = 2;
+
     constructor() {
         lab = LegendsLaboratory(payable(msg.sender));
     }
 
-    function fetchListingCounts()
-        public
-        view
-        returns (Counters.Counter[3] memory)
-    {
-        Counters.Counter[3] memory counts = [
-            _listingIds,
-            _listingsClosed,
-            _listingsCancelled
-        ];
-
-        return counts;
-    }
-
-    function fetchLegendListing(uint256 listingId)
-        public
-        view
-        returns (LegendListing memory)
-    {
-        return legendListing[listingId];
-    }
-
     function createLegendSale(
-        address nftContract,
-        uint256 tokenId,
-        uint256 price
+        address _nftContract,
+        uint256 _legendId,
+        uint256 _price
     ) public payable nonReentrant {
-        IERC721 legendsNFT = IERC721(nftContract);
+        IERC721 legendsNFT = IERC721(_nftContract);
 
-        require(legendsNFT.ownerOf(tokenId) == msg.sender); // ? reworkable; to modifier?
-        require(price > 0, "Price can not be 0");
+        require(lab.legendsNFT().isListable(_legendId));
 
-        legendsNFT.transferFrom(msg.sender, address(this), tokenId);
+        // require(legendsNFT.ownerOf(_legendId) == msg.sender); // ? reworkable; to modifier?
+        // require(lab.legendsNFT()._isHatched(_legendId), "Legend in incubator");
+        require(_price != 0, "Price can not be 0");
 
-        _createLegendSale(nftContract, tokenId, price);
+        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
+
+        _createLegendSale(_nftContract, _legendId, _price);
     }
 
     function buyLegend(uint256 listingId) public payable nonReentrant {
@@ -99,25 +72,28 @@ contract LegendsMarketplace is
     }
 
     function createLegendAuction(
-        address nftContract,
-        uint256 tokenId,
-        uint256 duration,
-        uint256 startingPrice,
-        uint256 instantPrice
+        address _nftContract,
+        uint256 _legendId,
+        uint256 _duration,
+        uint256 _startingPrice,
+        uint256 _instantPrice
     ) public payable nonReentrant {
-        IERC721 legendsNFT = IERC721(nftContract);
+        IERC721 legendsNFT = IERC721(_nftContract);
 
-        require(legendsNFT.ownerOf(tokenId) == msg.sender);
-        require(startingPrice > 0, "Price can not be 0");
+        require(lab.legendsNFT().isListable(_legendId));
 
-        legendsNFT.transferFrom(msg.sender, address(this), tokenId);
+        // require(legendsNFT.ownerOf(_legendId) == msg.sender);
+        // require(lab.legendsNFT()._isHatched(_legendId), "Legend in incubator");
+        require(_startingPrice > 0, "Price can not be 0");
+
+        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
         _createLegendAuction(
-            nftContract,
-            tokenId,
-            duration,
-            startingPrice,
-            instantPrice
+            _nftContract,
+            _legendId,
+            _duration,
+            _startingPrice,
+            _instantPrice
         );
     }
 
@@ -169,19 +145,24 @@ contract LegendsMarketplace is
         _withdrawAllowed[listingId][msg.sender] = false;
     }
 
-    function makeLegendOffer(address nftContract, uint256 tokenId)
+    function makeLegendOffer(address _nftContract, uint256 _legendId)
         public
         payable
         nonReentrant
     {
-        IERC721 legendsNFT = IERC721(nftContract);
+        IERC721 legendsNFT = IERC721(_nftContract);
 
         //TODO:  owner cant be... make dynamic offer blacklist
+        require(lab.legendsNFT()._isHatched(_legendId), "Legend in incubator");
         require(msg.value > 0, "Price can not be 0");
 
-        address tokenOwner = legendsNFT.ownerOf(tokenId);
+        address tokenOwner = legendsNFT.ownerOf(_legendId);
 
-        uint256 listingId = _makeLegendOffer(nftContract, tokenOwner, tokenId);
+        uint256 listingId = _makeLegendOffer(
+            _nftContract,
+            tokenOwner,
+            _legendId
+        );
 
         _withdrawAllowed[listingId][msg.sender] = false;
 
@@ -195,18 +176,19 @@ contract LegendsMarketplace is
     {
         LegendListing memory l = legendListing[listingId];
         OfferDetails memory o = offerDetails[listingId];
+
         IERC721 legendsNFT = IERC721(l.nftContract);
 
         require(
-            legendsNFT.ownerOf(l.tokenId) == msg.sender &&
-                msg.sender == o.tokenOwner,
+            legendsNFT.ownerOf(l.legendId) == msg.sender &&
+                msg.sender == o.tokenOwner, // if token is traded before offer A/D ...
             "Not authorized"
         );
         require(block.timestamp < o.expirationTime, "Offer is expired");
         require(l.status == ListingStatus.Open);
 
         if (isAccepted) {
-            legendsNFT.transferFrom(msg.sender, address(this), l.tokenId);
+            legendsNFT.transferFrom(msg.sender, address(this), l.legendId);
             _acceptLegendOffer(listingId);
 
             (
@@ -260,7 +242,7 @@ contract LegendsMarketplace is
             IERC721(l.nftContract).transferFrom(
                 address(this),
                 l.seller,
-                l.tokenId
+                l.legendId
             );
         }
 
@@ -368,7 +350,7 @@ contract LegendsMarketplace is
         // _asyncTransfer(l.seller, _marketplaceFee);
 
         uint256 royaltyFee;
-        address legendCreator = lab.fetchRoyaltyRecipient(l.tokenId);
+        address legendCreator = lab.fetchRoyaltyRecipient(l.legendId);
 
         // ? no fees if buyer is creator ;; royalty blacklist probably needed
         if (legendCreator != address(0)) {
@@ -377,6 +359,42 @@ contract LegendsMarketplace is
         }
 
         return (marketFee, royaltyFee, legendCreator);
+    }
+
+    // function isListable(
+    //     // put in legend ?
+    //     address _nftContract,
+    //     uint256 _legendId
+    // ) public view returns (bool) {
+    //     IERC721 legendsNFT = IERC721(_nftContract);
+
+    //     if (legendsNFT.ownerOf(_legendId) != msg.sender) return false;
+    //     if (!lab.legendsNFT()._isHatched(_legendId)) return false;
+    //     // require(_price != 0, "Price can not be 0");
+
+    //     return true;
+    // }
+
+    function fetchListingCounts()
+        public
+        view
+        returns (Counters.Counter[3] memory)
+    {
+        Counters.Counter[3] memory counts = [
+            _listingIds,
+            _listingsClosed,
+            _listingsCancelled
+        ];
+
+        return counts;
+    }
+
+    function fetchLegendListing(uint256 listingId)
+        public
+        view
+        returns (LegendListing memory)
+    {
+        return legendListing[listingId];
     }
 
     function setMarketplaceFee(uint256 newFee) public onlyLab {

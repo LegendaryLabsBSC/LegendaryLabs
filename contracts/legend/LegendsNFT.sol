@@ -7,8 +7,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "../lab/LegendsLaboratory.sol";
 import "./LegendMetadata.sol";
 
-// import "./legend/LegendIncubation.sol";
-
 contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     using Counters for Counters.Counter;
     using Strings for uint256;
@@ -32,6 +30,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     uint256 private blendingLimit = 4; // will need visable/getter for matching&rpools
     uint256 private baseBlendingCost = 100;
+
     uint256 private incubationPeriod; // seconds
 
     /* legendId => ipfsHash */
@@ -120,11 +119,11 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
         for (uint256 i = 0; i < parents.length; i++) {
             // test thoroughly
-            LegendMetadata storage l = legendMetadata[parents[i]];
+            LegendMetadata storage m = legendMetadata[parents[i]];
 
-            l.totalOffspring += 1;
-            l.blendingInstancesUsed += 1;
-            l.blendingCost = (l.blendingCost * 2);
+            m.totalOffspring += 1;
+            m.blendingInstancesUsed += 1;
+            m.blendingCost = (m.blendingCost * 2);
 
             parentOf[parents[i]][newLegendId] = true;
         }
@@ -273,7 +272,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isHatchable(uint256 _legendId) public view returns (bool) {
-        require(!legendMetadata[_legendId].isHatched, "Not in incubator");
+        require(!_isHatched(_legendId), "Already hatched");
 
         if (_noIncubation[_legendId]) return true;
 
@@ -283,6 +282,17 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         if (block.timestamp < hatchableWhen) return false;
 
         return true;
+    }
+
+    function isListable(uint256 _legendId) public view returns (bool) {
+        if (ownerOf(_legendId) != msg.sender) return false;
+        if (!legendMetadata[_legendId].isHatched) return false;
+
+        return true;
+    }
+
+    function _isHatched(uint256 _legendId) public view returns (bool) {
+        return legendMetadata[_legendId].isHatched;
     }
 
     function tokenURI(uint256 tokenId)

@@ -14,7 +14,7 @@ interface ILegendListing {
         uint256 listingId;
         uint256 createdAt;
         address nftContract;
-        uint256 tokenId;
+        uint256 legendId;
         address payable seller;
         address payable buyer;
         uint256 price;
