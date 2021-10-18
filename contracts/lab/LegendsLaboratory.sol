@@ -139,13 +139,32 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsMatchingBoard.setMatchingBoardFee(newFee);
     }
 
-    function fetchRoyaltyRecipient(uint256 _tokenId)
+    function fetchRoyaltyRecipient(uint256 _legendId)
         public
         view
         returns (address payable)
     //onlyMarketplace //TODO: in access control rework
     {
-        return legendsNFT.fetchTokenMetadata(_tokenId).legendCreator;
+        return legendsNFT.fetchTokenMetadata(_legendId).legendCreator;
+    }
+
+    //TODO: change is-es to query
+    function fetchIsListable(uint256 _legendId)
+        public
+        view
+        returns (bool)
+    //onlyMarketplace //TODO: in access control rework
+    {
+        return legendsNFT.isListable(_legendId);
+    }
+
+    function fetchIsHatched(uint256 _legendId)
+        public
+        view
+        returns (bool)
+    //onlyMarketplace //TODO: in access control rework
+    {
+        return legendsNFT.isHatched(_legendId);
     }
 
     // function fetchOffspringCount(uint256 _tokenId)

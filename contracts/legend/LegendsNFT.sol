@@ -272,7 +272,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isHatchable(uint256 _legendId) public view returns (bool) {
-        require(!_isHatched(_legendId), "Already hatched");
+        require(!isHatched(_legendId), "Already hatched");
 
         if (_noIncubation[_legendId]) return true;
 
@@ -284,15 +284,15 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return true;
     }
 
-    function isListable(uint256 _legendId) public view returns (bool) {
-        if (ownerOf(_legendId) != msg.sender) return false;
-        if (!legendMetadata[_legendId].isHatched) return false;
-
-        return true;
+    function isHatched(uint256 _legendId) public view returns (bool) {
+        return legendMetadata[_legendId].isHatched;
     }
 
-    function _isHatched(uint256 _legendId) public view returns (bool) {
-        return legendMetadata[_legendId].isHatched;
+    function isListable(uint256 _legendId) public view returns (bool) {
+        if (ownerOf(_legendId) != msg.sender) return false;
+        if (!isHatched(_legendId)) return false;
+
+        return true;
     }
 
     function tokenURI(uint256 tokenId)

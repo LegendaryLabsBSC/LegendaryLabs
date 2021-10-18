@@ -39,7 +39,7 @@ abstract contract LegendSale is ILegendListing {
 
     function _createLegendSale(
         address _nftContract,
-        uint256 _tokenId,
+        uint256 _legendId,
         uint256 _price
     ) internal {
         _listingIds.increment();
@@ -49,13 +49,13 @@ abstract contract LegendSale is ILegendListing {
         l.listingId = listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
-        l.legendId = _tokenId;
+        l.legendId = _legendId;
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
         l.price = _price;
         l.status = ListingStatus.Open;
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Open);
+        emit ListingStatusChanged(listingId, ListingStatus.Open);
     }
 
     function _buyLegend(uint256 _listingId) internal {
@@ -68,13 +68,13 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsClosed.increment();
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Closed);
+        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
     }
 
     function _makeLegendOffer(
         address _nftContract,
         address _tokenOwner,
-        uint256 _tokenId
+        uint256 _legendId
     ) internal returns (uint256) {
         _listingIds.increment();
         uint256 _listingId = _listingIds.current();
@@ -85,7 +85,7 @@ abstract contract LegendSale is ILegendListing {
         l.listingId = _listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
-        l.legendId = _tokenId;
+        l.legendId = _legendId;
         l.seller = payable(address(0));
         l.buyer = payable(msg.sender);
         l.price = _price;
@@ -133,7 +133,7 @@ abstract contract LegendSale is ILegendListing {
 
         l.status = ListingStatus.Cancelled;
 
-        // _legendOwed[listingId][l.seller] = l.tokenId; // see parent comment
+        // _legendOwed[listingId][l.seller] = l.legendId; // see parent comment
 
         _listingsCancelled.increment();
 
