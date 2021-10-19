@@ -4,14 +4,10 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./LegendListing.sol";
 
-/**
- * @dev Outlines a Legend NFT market sale. Functions called by LegendsMarketplace contract.
- */
-
 abstract contract LegendSale is ILegendListing {
     using Counters for Counters.Counter;
 
-    /// @dev intialize counters, used for all three marketplace types (Sale, Auction, Offer)
+    /// @dev initialize counters, used for all three marketplace types (Sale, Auction, Offer)
     Counters.Counter internal _listingIds;
     Counters.Counter internal _listingsClosed;
     Counters.Counter internal _listingsCancelled;
@@ -25,14 +21,14 @@ abstract contract LegendSale is ILegendListing {
     uint256 internal offerDuration = 432000; // 5 days // make private
     //TODO: offers placed
 
+    /* listingId => offerDetails */
+    mapping(uint256 => OfferDetails) public offerDetails; // make private
+
     /* listingId => listingDetails */
     mapping(uint256 => LegendListing) public legendListing;
 
     /* listingId => buyerAddress => legendId */
     mapping(uint256 => mapping(address => uint256)) internal _legendOwed;
-
-    /* listingId => offerDetails */
-    mapping(uint256 => OfferDetails) public offerDetails; // make private
 
     event OfferMade(uint256 listingId, uint256 price);
     event OfferDecided(uint256 listingId, bool isAccepted);
@@ -101,19 +97,6 @@ abstract contract LegendSale is ILegendListing {
         return (listingId);
     }
 
-    // function _acceptLegendOffer(uint256 _listingId) internal {
-    //     LegendListing storage l = legendListing[_listingId];
-
-    //     l.seller = payable(msg.sender);
-    //     l.status = ListingStatus.Closed;
-
-    //     offerDetails[_listingId].isAccepted = true;
-
-    //     _legendOwed[_listingId][l.buyer] = l.legendId;
-
-    //     _listingsClosed.increment();
-    // }
-
     function _decideLegendOffer(uint256 _listingId, bool _isAccepted) internal {
         LegendListing storage l = legendListing[_listingId];
 
@@ -121,7 +104,7 @@ abstract contract LegendSale is ILegendListing {
 
         if (_isAccepted) {
             l.seller = payable(msg.sender);
-            
+
             offerDetails[_listingId].isAccepted = true;
 
             _legendOwed[_listingId][l.buyer] = l.legendId;
@@ -133,11 +116,7 @@ abstract contract LegendSale is ILegendListing {
     }
 
     function _cancelLegendListing(uint256 _listingId) internal {
-        LegendListing storage l = legendListing[_listingId];
-
-        l.status = ListingStatus.Cancelled;
-
-        // _legendOwed[listingId][l.seller] = l.legendId; // see parent comment
+        legendListing[_listingId].status = ListingStatus.Cancelled;
 
         _listingsCancelled.increment();
 

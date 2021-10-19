@@ -169,45 +169,27 @@ contract LegendsMarketplace is
         nonReentrant
     {
         LegendListing memory l = legendListing[_listingId];
-        OfferDetails memory o = offerDetails[_listingId];
 
         IERC721 legendsNFT = IERC721(l.nftContract);
 
         require(l.status == ListingStatus.Open);
-        require(block.timestamp < o.expirationTime, "Offer is expired");
+        require(
+            block.timestamp < offerDetails[_listingId].expirationTime,
+            "Offer is expired"
+        );
         require(
             legendsNFT.ownerOf(l.legendId) == msg.sender &&
-                msg.sender == o.legendOwner, // if token is traded before offer A/D ...
+                msg.sender == offerDetails[_listingId].legendOwner, // if token is traded before offer A/D ...
             "Not authorized"
         );
 
         if (_isAccepted) {
             legendsNFT.transferFrom(msg.sender, address(this), l.legendId);
-            // _acceptLegendOffer(_listingId);
-
-            // (
-            //     uint256 marketFee,
-            //     uint256 royaltyFee,
-            //     address legendCreator
-            // ) = _calculateFees(_listingId);
-
-            // _obligateBid(
-            //     _listingId,
-            //     l.buyer,
-            //     msg.sender,
-            //     marketFee,
-            //     royaltyFee,
-            //     legendCreator
-            // ); // ? move into closeListing
-
-            // _withdrawAllowed[_listingId][msg.sender] = true; // ? move into closeListing
         } else {
             /**
              * Token owner can also just let the offer expire
              * if they do not wish to pay gas to reject
              */
-
-            // _rejectLegendOffer(_listingId);
             _withdrawAllowed[_listingId][l.buyer] = true;
         }
 
@@ -216,8 +198,9 @@ contract LegendsMarketplace is
         emit OfferDecided(_listingId, _isAccepted);
     }
 
-    function cancelLegendListing(uint256 listingId) external nonReentrant {
-        LegendListing memory l = legendListing[listingId];
+    function cancelLegendListing(uint256 _listingId) external nonReentrant {
+        LegendListing memory l = legendListing[_listingId];
+
         require(l.status == ListingStatus.Open);
 
         if (l.isOffer) {
@@ -228,15 +211,15 @@ contract LegendsMarketplace is
 
         if (l.isAuction) {
             require(
-                auctionDetails[listingId].bidders.length == 0,
+                auctionDetails[_listingId].bidders.length == 0,
                 "Bids already placed"
             );
         }
 
+        // throuoghly test and check gas cost, due to not using withdraw pattern
         if (l.isOffer) {
-            _withdrawAllowed[listingId][msg.sender] = true;
+            _withdrawAllowed[_listingId][msg.sender] = true;
         } else {
-            // ! this must be reworked if we use ierc721 escrow
             IERC721(l.nftContract).transferFrom(
                 address(this),
                 l.seller,
@@ -244,7 +227,7 @@ contract LegendsMarketplace is
             );
         }
 
-        _cancelLegendListing(listingId);
+        _cancelLegendListing(_listingId);
     }
 
     function closeListing(uint256 _listingId) external payable {

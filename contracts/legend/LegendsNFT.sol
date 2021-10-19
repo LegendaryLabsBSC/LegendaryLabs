@@ -64,7 +64,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
-        // promotional Legends wont have parents
+        // origin Legends wont have parents
         uint256[2] memory parents = [uint256(0), uint256(0)];
 
         string memory uri = _formatURI(newLegendId, Strings.toString(_promoId));
