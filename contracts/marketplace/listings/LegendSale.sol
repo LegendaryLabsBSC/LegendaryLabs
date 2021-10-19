@@ -18,7 +18,7 @@ abstract contract LegendSale is ILegendListing {
 
     struct OfferDetails {
         uint256 expirationTime;
-        address payable tokenOwner;
+        address payable legendOwner;
         bool isAccepted; // make enum if theres space
     }
 
@@ -73,59 +73,63 @@ abstract contract LegendSale is ILegendListing {
 
     function _makeLegendOffer(
         address _nftContract,
-        address _tokenOwner,
+        address payable _legendOwner,
         uint256 _legendId
     ) internal returns (uint256) {
         _listingIds.increment();
-        uint256 _listingId = _listingIds.current();
+        uint256 listingId = _listingIds.current();
 
-        uint256 _price = msg.value;
+        uint256 price = msg.value;
 
-        LegendListing storage l = legendListing[_listingId];
-        l.listingId = _listingId;
+        LegendListing storage l = legendListing[listingId];
+        l.listingId = listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
         l.legendId = _legendId;
         l.seller = payable(address(0));
         l.buyer = payable(msg.sender);
-        l.price = _price;
+        l.price = price;
         l.isOffer = true;
         l.status = ListingStatus.Open;
 
-        OfferDetails storage o = offerDetails[_listingId];
+        OfferDetails storage o = offerDetails[listingId];
         o.expirationTime = block.timestamp + offerDuration;
-        o.tokenOwner = payable(_tokenOwner);
+        o.legendOwner = payable(_legendOwner);
 
-        // emit OfferMade(_listingId, _price);
+        emit OfferMade(listingId, price);
 
-        return (_listingId);
+        return (listingId);
     }
 
-    function _acceptLegendOffer(uint256 _listingId) internal {
+    // function _acceptLegendOffer(uint256 _listingId) internal {
+    //     LegendListing storage l = legendListing[_listingId];
+
+    //     l.seller = payable(msg.sender);
+    //     l.status = ListingStatus.Closed;
+
+    //     offerDetails[_listingId].isAccepted = true;
+
+    //     _legendOwed[_listingId][l.buyer] = l.legendId;
+
+    //     _listingsClosed.increment();
+    // }
+
+    function _decideLegendOffer(uint256 _listingId, bool _isAccepted) internal {
         LegendListing storage l = legendListing[_listingId];
 
-        l.seller = payable(msg.sender);
         l.status = ListingStatus.Closed;
 
-        offerDetails[_listingId].isAccepted = true;
+        if (_isAccepted) {
+            l.seller = payable(msg.sender);
+            
+            offerDetails[_listingId].isAccepted = true;
 
-        _legendOwed[_listingId][l.buyer] = l.legendId;
-
-        _listingsClosed.increment();
-
-        // emit OfferDecided(_listingId, true); // move to marketplace and remove one
-    }
-
-    function _rejectLegendOffer(uint256 _listingId) internal {
-        LegendListing storage l = legendListing[_listingId];
-
-        l.status = ListingStatus.Closed;
-
-        offerDetails[_listingId].isAccepted = false;
+            _legendOwed[_listingId][l.buyer] = l.legendId;
+        } else {
+            offerDetails[_listingId].isAccepted = false;
+        }
 
         _listingsClosed.increment();
-
-        // emit OfferDecided(_listingId, false);
     }
 
     function _cancelLegendListing(uint256 _listingId) internal {
@@ -137,6 +141,6 @@ abstract contract LegendSale is ILegendListing {
 
         _listingsCancelled.increment();
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
+        emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
     }
 }

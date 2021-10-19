@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -295,7 +295,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return true;
     }
 
-    function tokenURI(uint256 tokenId)
+    function tokenURI(uint256 _legendId)
         public
         view
         virtual
@@ -303,22 +303,22 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         returns (string memory)
     {
         require(
-            _exists(tokenId),
+            _exists(_legendId),
             "ERC721Metadata: URI query for nonexistent token"
         );
-        return _tokenURIs[tokenId];
+        return _tokenURIs[_legendId];
     }
 
-    function fetchTokenMetadata(uint256 tokenId)
+    function fetchTokenMetadata(uint256 _legendId)
         public
         view
         returns (LegendMetadata memory)
     {
         require(
-            _exists(tokenId),
+            _exists(_legendId),
             "ERC721Metadata: URI query for nonexistent token"
-        );
-        return legendMetadata[tokenId];
+        ); // really needed ??
+        return legendMetadata[_legendId];
     }
 
     function setKinBlendingLevel(uint256 _kinBlendingLevel)

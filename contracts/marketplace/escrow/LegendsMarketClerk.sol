@@ -6,7 +6,7 @@
  * These changes were made primarily to facilitate auctions
  */
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 import "./LegendsEscrow.sol";
 
 /**
