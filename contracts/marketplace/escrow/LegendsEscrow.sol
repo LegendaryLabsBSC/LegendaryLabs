@@ -35,7 +35,8 @@ contract LegendsEscrow is Ownable {
 
     mapping(address => uint256) private _paymentOwed;
     mapping(address => uint256) private _royaltiesOwed;
-    mapping(uint256 => mapping(address => uint256)) private _pendingBid;
+     mapping(address => uint256) public _pendingBid; // debug bid
+    // mapping(uint256 => mapping(address => uint256)) private _pendingBid;
 
     //TODO: change name; paymentsOwed ?
     function depositsOf(address payee) public view returns (uint256) {
@@ -75,7 +76,9 @@ contract LegendsEscrow is Ownable {
     {
         uint256 amount = msg.value;
 
-        _pendingBid[listingId][payer] = amount; // try without + for increase bid issue
+        // _pendingBid[listingId][payer] = amount; // try without + for increase bid issue
+        _pendingBid[payer] += amount; // try without + for increase bid issue
+
 
         // emit Deposited(payer, amount);
     }
@@ -96,7 +99,9 @@ contract LegendsEscrow is Ownable {
         uint256 royaltyFee,
         address payable tokenCreator
     ) public payable virtual onlyOwner {
-        uint256 amount = _pendingBid[listingId][buyer];
+        // uint256 amount = _pendingBid[listingId][buyer];
+        uint256 amount = _pendingBid[buyer];
+
 
         //marketplace fee
 
@@ -106,7 +111,9 @@ contract LegendsEscrow is Ownable {
 
         uint256 finalAmount = amount - (marketFee + royaltyFee);
 
-        _pendingBid[listingId][buyer] = 0;
+        // _pendingBid[listingId][buyer] = 0;
+        _pendingBid[buyer] = 0;
+
 
         _paymentOwed[seller] += finalAmount;
     }
@@ -117,9 +124,13 @@ contract LegendsEscrow is Ownable {
         virtual
         onlyOwner
     {
-        uint256 amount = _pendingBid[listingId][bidder];
+        // uint256 amount = _pendingBid[listingId][bidder];
+        uint256 amount = _pendingBid[bidder];
 
-        _pendingBid[listingId][bidder] = 0;
+
+        // _pendingBid[listingId][bidder] = 0;
+        _pendingBid[bidder] = 0;
+
 
         bidder.sendValue(amount);
 

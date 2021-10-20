@@ -26,11 +26,12 @@ abstract contract LegendAuction is LegendSale {
         uint256 newHighestBid
     );
 
-    mapping(uint256 => uint256) public instantBuyPrice;
+    mapping(uint256 => uint256) public instantBuyPrice; // needs to be internal
     mapping(uint256 => AuctionDetails) public auctionDetails;
 
     //TODO: ? change to bid
-    mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
+    mapping(address => uint256) public bids; // debug bid
+    // mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
     mapping(uint256 => mapping(address => bool)) internal exists;
 
     // function fetchBidders(uint256 listingId)
@@ -76,10 +77,12 @@ abstract contract LegendAuction is LegendSale {
         // emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
-    function _placeBid(uint256 _listingId, uint256 _newBid) internal {
+    // made public for debugging
+    function _placeBid(uint256 _listingId, uint256 _newBid) public payable {
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        bids[_listingId][msg.sender] = _newBid; //TODO: redundant LMplace.sol ~153
+        // bid should be handled in here ?
+        // bids[_listingId][msg.sender] = _newBid; //TODO: redundant LMplace.sol ~153
 
         if (!exists[_listingId][msg.sender]) {
             a.bidders.push(msg.sender);
@@ -94,13 +97,13 @@ abstract contract LegendAuction is LegendSale {
         a.highestBid = _newBid;
         a.highestBidder = payable(msg.sender);
 
-        if (_shouldExtend(_listingId)) {
-            if (_newBid != instantBuyPrice[_listingId]) {
-                a.duration = (a.duration + 600); // TODO: make extension a state variable
+        // if (_shouldExtend(_listingId)) {
+        //     if (_newBid != instantBuyPrice[_listingId]) {
+        //         a.duration = (a.duration + 600); // TODO: make extension a state variable
 
-                // emit AuctionExtended(_listingId, a.duration);
-            }
-        }
+        //         // emit AuctionExtended(_listingId, a.duration);
+        //     }
+        // }
 
         // emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
     }

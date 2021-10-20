@@ -3,7 +3,7 @@
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../lab/LegendsLaboratory.sol";
 import "./escrow/LegendsMarketClerk.sol";
 import "./listings/LegendAuction.sol";
@@ -13,6 +13,7 @@ contract LegendsMarketplace is
     LegendsMarketClerk,
     ReentrancyGuard
 {
+    using SafeMath for uint256;
     LegendsLaboratory lab;
 
     modifier onlyLab() {
@@ -45,9 +46,9 @@ contract LegendsMarketplace is
     function buyLegend(uint256 _listingId) external payable nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
-        require(l.status == ListingStatus.Open);
-        require(msg.sender != l.seller, "Seller can not buy");
-        require(msg.value == l.price, "Incorrect price submitted for item");
+        require(l.status == ListingStatus.Open); // commented out for debugging
+        require(msg.sender != l.seller, "Seller can not buy"); // commented out for debugging
+        require(msg.value == l.price, "Incorrect price submitted for item"); // commented out for debugging
 
         (
             uint256 marketFee,
@@ -66,77 +67,6 @@ contract LegendsMarketplace is
         _buyLegend(_listingId);
 
         _withdrawAllowed[_listingId][l.seller] = true;
-    }
-
-    function createLegendAuction(
-        address _nftContract,
-        uint256 _legendId,
-        uint256 _duration,
-        uint256 _startingPrice,
-        uint256 _instantPrice
-    ) public payable nonReentrant {
-        IERC721 legendsNFT = IERC721(_nftContract);
-
-        require(lab.fetchIsListable(_legendId), "Not eligible");
-        require(_startingPrice > 0, "Price can not be 0");
-
-        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
-
-        _createLegendAuction(
-            _nftContract,
-            _legendId,
-            _duration,
-            _startingPrice,
-            _instantPrice
-        );
-    }
-
-    //TODO: ? look at making more modular ;; needs non reentrant
-    function placeBid(uint256 listingId) public payable {
-        AuctionDetails storage a = auctionDetails[listingId];
-        LegendListing storage l = legendListing[listingId];
-
-        require(l.status == ListingStatus.Open);
-        require(!isExpired(listingId), "Auction has expired");
-        require(msg.sender != l.seller, "Seller can not bid");
-
-        if (a.bidders.length == 0) {
-            require(msg.value >= a.startingPrice, "Minimum price not met");
-        }
-
-        uint256 newBid = bids[listingId][msg.sender] += (msg.value);
-        require(newBid > a.highestBid, "Bid must be higher than current bid");
-
-        _withdrawAllowed[listingId][msg.sender] = false;
-
-        // bids[listingId][msg.sender] = newBid; // redundant LAuction.sol ~70
-        _asyncTransferBid(listingId, payable(msg.sender), newBid);
-
-        // Allow previous highest bidder to reclaim or increase their bid
-        _withdrawAllowed[listingId][a.highestBidder] = true; // ! does not allow for bid increase
-
-        _placeBid(listingId, newBid);
-
-        if (a.instantBuy) {
-            if (newBid >= instantBuyPrice[listingId]) {
-                //TODO: do not allow user input over IB-price on FE
-                _closeAuction(listingId);
-                _withdrawAllowed[listingId][l.seller] = true;
-            }
-        }
-    }
-
-    function withdrawBid(uint256 listingId) external payable {
-        LegendListing memory l = legendListing[listingId];
-        require(msg.sender != l.seller);
-
-        _withdrawBid(listingId, payable(msg.sender));
-
-        if (legendListing[listingId].isAuction) {
-            bids[listingId][msg.sender] = 0;
-        }
-
-        _withdrawAllowed[listingId][msg.sender] = false;
     }
 
     function makeLegendOffer(address _nftContract, uint256 _legendId)
@@ -198,6 +128,86 @@ contract LegendsMarketplace is
         emit OfferDecided(_listingId, _isAccepted);
     }
 
+    function createLegendAuction(
+        address _nftContract,
+        uint256 _legendId,
+        uint256 _duration,
+        uint256 _startingPrice,
+        uint256 _instantPrice
+    ) external payable nonReentrant {
+        IERC721 legendsNFT = IERC721(_nftContract);
+
+        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for debugging
+        require(_startingPrice > 0, "Price can not be 0");
+
+        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
+
+        _createLegendAuction(
+            _nftContract,
+            _legendId,
+            _duration,
+            _startingPrice,
+            _instantPrice
+        );
+    }
+
+    //TODO: ? look at making more modular ;; needs non reentrant
+    function placeBid(uint256 _listingId) public payable nonReentrant {
+        AuctionDetails storage a = auctionDetails[_listingId];
+        LegendListing storage l = legendListing[_listingId];
+
+        require(l.status == ListingStatus.Open);
+        require(!isExpired(_listingId), "Auction has expired");
+        require(msg.sender != l.seller, "Seller can not bid");
+
+        if (a.bidders.length == 0) {
+            require(
+                msg.value >= a.startingPrice //, "Minimum price not met"
+            );
+        }
+
+        uint256 newBid = bids[msg.sender].add((msg.value));
+        // bids[_listingId][msg.sender] += (msg.value);
+        require(
+            newBid > auctionDetails[_listingId].highestBid
+            //,            "Bid must be higher than current bid"
+        );
+
+        _withdrawAllowed[_listingId][msg.sender] = false;
+
+        // bids[_listingId][msg.sender] = newBid; // redundant LAuction.sol ~70
+        _asyncTransferBid(_listingId, payable(msg.sender), newBid);
+
+        // Allow previous highest bidder to reclaim or increase their bid
+        _withdrawAllowed[_listingId][
+            auctionDetails[_listingId].highestBidder
+        ] = true; // ! does not allow for bid increase
+
+        _placeBid(_listingId, newBid);
+
+        if (a.instantBuy) {
+            if (newBid >= instantBuyPrice[_listingId]) {
+                //TODO: do not allow user input over IB-price on FE
+                _closeAuction(_listingId);
+                _withdrawAllowed[_listingId][l.seller] = true;
+            }
+        }
+    }
+
+    function withdrawBid(uint256 listingId) external payable nonReentrant {
+        LegendListing memory l = legendListing[listingId];
+        require(msg.sender != l.seller);
+
+        _withdrawBid(listingId, payable(msg.sender));
+
+        if (legendListing[listingId].isAuction) {
+            // bids[listingId][msg.sender] = 0;
+            bids[msg.sender] = 0;
+        }
+
+        _withdrawAllowed[listingId][msg.sender] = false;
+    }
+
     function cancelLegendListing(uint256 _listingId) external nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
@@ -216,7 +226,7 @@ contract LegendsMarketplace is
             );
         }
 
-        // throuoghly test and check gas cost, due to not using withdraw pattern
+        // thoroughly test and check gas cost, due to not using withdraw pattern
         if (l.isOffer) {
             _withdrawAllowed[_listingId][msg.sender] = true;
         } else {
@@ -230,7 +240,7 @@ contract LegendsMarketplace is
         _cancelLegendListing(_listingId);
     }
 
-    function closeListing(uint256 _listingId) external payable {
+    function closeListing(uint256 _listingId) external payable nonReentrant {
         LegendListing storage l = legendListing[_listingId];
         AuctionDetails storage a = auctionDetails[_listingId];
 
@@ -285,7 +295,14 @@ contract LegendsMarketplace is
         emit PaymentClaimed(_listingId, msg.sender);
     }
 
-    function _claimLegend(uint256 listingId) internal {
+    function claimRoyalties() external nonReentrant {
+        uint256 amount = royalties(msg.sender);
+        require(amount != 0, "Royalties are 0");
+
+        _withdrawRoyalties(payable(msg.sender));
+    }
+
+    function _claimLegend(uint256 listingId) internal nonReentrant {
         LegendListing memory l = legendListing[listingId];
 
         require(msg.sender == l.buyer);
@@ -299,7 +316,7 @@ contract LegendsMarketplace is
         IERC721(l.nftContract).transferFrom(address(this), l.buyer, legendOwed);
     }
 
-    function _claimPayment(uint256 listingId) internal {
+    function _claimPayment(uint256 listingId) internal nonReentrant {
         LegendListing memory l = legendListing[listingId];
 
         require(msg.sender == l.seller);
@@ -317,13 +334,6 @@ contract LegendsMarketplace is
         require(amount != 0, "Address is owed 0");
 
         _withdrawPayments(listingId, l.seller);
-    }
-
-    function claimRoyalties() external {
-        uint256 amount = royalties(msg.sender);
-        require(amount != 0, "Royalties are 0");
-
-        _withdrawRoyalties(payable(msg.sender));
     }
 
     function _calculateFees(uint256 listingId)
@@ -373,6 +383,9 @@ contract LegendsMarketplace is
     {
         return legendListing[listingId];
     }
+
+    //royalty fee setter ; move royalty handling to lab?
+    //royalty on/off toggle / pauseable ?
 
     function setMarketplaceFee(uint256 newFee) public onlyLab {
         _marketplaceFee = newFee;
