@@ -3,7 +3,6 @@
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "../lab/LegendsLaboratory.sol";
 import "./escrow/LegendsMarketClerk.sol";
 import "./listings/LegendAuction.sol";
@@ -13,7 +12,6 @@ contract LegendsMarketplace is
     LegendsMarketClerk,
     ReentrancyGuard
 {
-    using SafeMath for uint256;
     LegendsLaboratory lab;
 
     modifier onlyLab() {
@@ -35,8 +33,14 @@ contract LegendsMarketplace is
     ) external payable nonReentrant {
         IERC721 legendsNFT = IERC721(_nftContract);
 
-        require(lab.fetchIsListable(_legendId), "Not eligible");
-        require(_price != 0, "Price can not be 0");
+        require(
+            lab.fetchIsListable(_legendId)
+            //, "Not eligible"
+        );
+        require(
+            _price != 0
+            //, "Price can not be 0"
+        );
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
@@ -47,8 +51,14 @@ contract LegendsMarketplace is
         LegendListing memory l = legendListing[_listingId];
 
         require(l.status == ListingStatus.Open); // commented out for debugging
-        require(msg.sender != l.seller, "Seller can not buy"); // commented out for debugging
-        require(msg.value == l.price, "Incorrect price submitted for item"); // commented out for debugging
+        require(
+            msg.sender != l.seller
+            //, "Seller can not buy"
+        ); // commented out for debugging
+        require(
+            msg.value == l.price
+            //, "Incorrect price submitted for item"
+        ); // commented out for debugging
 
         (
             uint256 marketFee,
@@ -151,43 +161,50 @@ contract LegendsMarketplace is
         );
     }
 
-    //TODO: ? look at making more modular ;; needs non reentrant
     function placeBid(uint256 _listingId) public payable nonReentrant {
-        AuctionDetails storage a = auctionDetails[_listingId];
         LegendListing storage l = legendListing[_listingId];
+        AuctionDetails storage a = auctionDetails[_listingId];
 
         require(l.status == ListingStatus.Open);
         require(!isExpired(_listingId), "Auction has expired");
-        require(msg.sender != l.seller, "Seller can not bid");
+
+        require(msg.sender != l.seller, "Can not bid");
+        require(msg.sender != a.highestBidder, "Can not bid");
+
+        // uint256 bidAmount = (bids[msg.sender] + msg.value); // this is the issue
+
+        // bids[_listingId][msg.sender] += msg.value;
+
+        // uint256 bidAmount = bids[_listingId][msg.sender];
+
+        uint256 bidAmount = msg.value;
+
+        bids[_listingId][msg.sender] += bidAmount;
 
         if (a.bidders.length == 0) {
             require(
-                msg.value >= a.startingPrice //, "Minimum price not met"
+                msg.value >= a.startingPrice //, "Minimum price not met" // test for >= flaws
+            );
+        } else {
+            require(
+                bids[_listingId][msg.sender] >
+                    auctionDetails[_listingId].highestBid,
+                "b"
+                //,            "Bid must be higher than current bid"
             );
         }
 
-        uint256 newBid = bids[msg.sender].add((msg.value));
-        // bids[_listingId][msg.sender] += (msg.value);
-        require(
-            newBid > auctionDetails[_listingId].highestBid
-            //,            "Bid must be higher than current bid"
-        );
-
         _withdrawAllowed[_listingId][msg.sender] = false;
 
-        // bids[_listingId][msg.sender] = newBid; // redundant LAuction.sol ~70
-        _asyncTransferBid(_listingId, payable(msg.sender), newBid);
+        _asyncTransferBid(_listingId, payable(msg.sender), bidAmount);
 
         // Allow previous highest bidder to reclaim or increase their bid
-        _withdrawAllowed[_listingId][
-            auctionDetails[_listingId].highestBidder
-        ] = true; // ! does not allow for bid increase
+        _withdrawAllowed[_listingId][a.highestBidder] = true;
 
-        _placeBid(_listingId, newBid);
+        _placeBid(_listingId, bids[_listingId][msg.sender]);
 
         if (a.instantBuy) {
-            if (newBid >= instantBuyPrice[_listingId]) {
-                //TODO: do not allow user input over IB-price on FE
+            if (bidAmount >= instantBuyPrice[_listingId]) {
                 _closeAuction(_listingId);
                 _withdrawAllowed[_listingId][l.seller] = true;
             }
@@ -202,7 +219,7 @@ contract LegendsMarketplace is
 
         if (legendListing[listingId].isAuction) {
             // bids[listingId][msg.sender] = 0;
-            bids[msg.sender] = 0;
+            bids[listingId][msg.sender] = 0;
         }
 
         _withdrawAllowed[listingId][msg.sender] = false;

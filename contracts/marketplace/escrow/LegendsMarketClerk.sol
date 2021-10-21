@@ -96,11 +96,11 @@ abstract contract LegendsMarketClerk {
     }
 
     function _asyncTransferBid(
-        uint256 listingId,
-        address payer,
-        uint256 amount
+        uint256 _listingId,
+        address _payer,
+        uint256 _amount
     ) internal virtual {
-        _escrow.depositBid{value: amount}(listingId, payer);
+        _escrow.depositBid{value: _amount}(_listingId, _payer);
     }
 
     function _asyncTransferRoyalty(address payee, uint256 amount)

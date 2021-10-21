@@ -12,7 +12,7 @@ abstract contract LegendAuction is LegendSale {
         uint256 startingPrice;
         uint256 highestBid;
         address payable highestBidder;
-        address[] bidders; // ? take array out (use mapping bid ?)
+        address[] bidders; // ? take array out (use mapping bid ?) ;; seperate so no risk of breaking rest of struct
         bool instantBuy;
     }
 
@@ -27,11 +27,11 @@ abstract contract LegendAuction is LegendSale {
     );
 
     mapping(uint256 => uint256) public instantBuyPrice; // needs to be internal
-    mapping(uint256 => AuctionDetails) public auctionDetails;
+    mapping(uint256 => AuctionDetails) public auctionDetails; // public for testing, needs internal
 
     //TODO: ? change to bid
-    mapping(address => uint256) public bids; // debug bid
-    // mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
+    // mapping(address => uint256) internal bids; // debug bid
+    mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
     mapping(uint256 => mapping(address => bool)) internal exists;
 
     // function fetchBidders(uint256 listingId)
@@ -78,32 +78,27 @@ abstract contract LegendAuction is LegendSale {
     }
 
     // made public for debugging
-    function _placeBid(uint256 _listingId, uint256 _newBid) public payable {
+    function _placeBid(uint256 _listingId, uint256 _bidAmount) public payable {
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        // bid should be handled in here ?
-        // bids[_listingId][msg.sender] = _newBid; //TODO: redundant LMplace.sol ~153
+        // bids[_listingId][msg.sender] += _bidAmount;
+        // bids[msg.sender] += _bidAmount;
 
         if (!exists[_listingId][msg.sender]) {
             a.bidders.push(msg.sender);
-            // listBidders[_listingId].push(msg.sender);
             exists[_listingId][msg.sender] = true;
-
-            // TODO:
-            // // Adds to the auctions where the user is participating
-            // auctionsParticipating[msg.sender].push(_auctionId);
         }
 
-        a.highestBid = _newBid;
+        a.highestBid = _bidAmount; // wrong
         a.highestBidder = payable(msg.sender);
 
-        // if (_shouldExtend(_listingId)) {
-        //     if (_newBid != instantBuyPrice[_listingId]) {
-        //         a.duration = (a.duration + 600); // TODO: make extension a state variable
+        if (_shouldExtend(_listingId)) {
+            if (_bidAmount >= instantBuyPrice[_listingId]) {
+                a.duration = (a.duration + 600); // TODO: make extension a state variable
 
-        //         // emit AuctionExtended(_listingId, a.duration);
-        //     }
-        // }
+                // emit AuctionExtended(_listingId, a.duration);
+            }
+        }
 
         // emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
     }
