@@ -81,7 +81,7 @@ abstract contract LegendAuction is LegendSale {
     function _placeBid(uint256 _listingId, uint256 _bidAmount) public payable {
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        // bids[_listingId][msg.sender] += _bidAmount;
+        bids[_listingId][msg.sender] += _bidAmount;
         // bids[msg.sender] += _bidAmount;
 
         if (!exists[_listingId][msg.sender]) {
@@ -92,6 +92,7 @@ abstract contract LegendAuction is LegendSale {
         a.highestBid = _bidAmount; // wrong
         a.highestBidder = payable(msg.sender);
 
+        // this should error when tested
         if (_shouldExtend(_listingId)) {
             if (_bidAmount >= instantBuyPrice[_listingId]) {
                 a.duration = (a.duration + 600); // TODO: make extension a state variable

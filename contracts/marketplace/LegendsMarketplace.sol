@@ -171,15 +171,13 @@ contract LegendsMarketplace is
         require(msg.sender != l.seller, "Can not bid");
         require(msg.sender != a.highestBidder, "Can not bid");
 
-        // uint256 bidAmount = (bids[msg.sender] + msg.value); // this is the issue
+        uint256 bidAmount = bids[_listingId][msg.sender] + msg.value;
+
+        // bids[_listingId][msg.sender] += bidAmount;
 
         // bids[_listingId][msg.sender] += msg.value;
 
         // uint256 bidAmount = bids[_listingId][msg.sender];
-
-        uint256 bidAmount = msg.value;
-
-        bids[_listingId][msg.sender] += bidAmount;
 
         if (a.bidders.length == 0) {
             require(
@@ -187,8 +185,7 @@ contract LegendsMarketplace is
             );
         } else {
             require(
-                bids[_listingId][msg.sender] >
-                    auctionDetails[_listingId].highestBid,
+                bidAmount > auctionDetails[_listingId].highestBid,
                 "b"
                 //,            "Bid must be higher than current bid"
             );
@@ -196,12 +193,12 @@ contract LegendsMarketplace is
 
         _withdrawAllowed[_listingId][msg.sender] = false;
 
-        _asyncTransferBid(_listingId, payable(msg.sender), bidAmount);
+        _asyncTransferBid(_listingId, payable(msg.sender), msg.value);
 
         // Allow previous highest bidder to reclaim or increase their bid
         _withdrawAllowed[_listingId][a.highestBidder] = true;
 
-        _placeBid(_listingId, bids[_listingId][msg.sender]);
+        _placeBid(_listingId, bidAmount);
 
         if (a.instantBuy) {
             if (bidAmount >= instantBuyPrice[_listingId]) {
