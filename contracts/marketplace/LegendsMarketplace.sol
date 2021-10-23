@@ -19,9 +19,11 @@ contract LegendsMarketplace is
         _;
     }
 
-    // reeval _
-    uint256 private _marketplaceFee = 2;
     uint256 private _royaltyFee = 2;
+    uint256 private _marketplaceFee = 2;
+
+    /* listingId => isPaymentTransferred */
+    mapping(uint256 => bool) private _paymentTransferred;
 
     constructor() {
         lab = LegendsLaboratory(payable(msg.sender));
@@ -61,28 +63,11 @@ contract LegendsMarketplace is
             //, "Incorrect price submitted for item"
         ); // commented out for debugging
 
-        // (
-        //     uint256 marketplaceFee,
-        //     uint256 royaltyFee,
-        //     address payable legendCreator
-        // ) = _calculateFees(_listingId);
-
-        // _asyncTransfer(
-        //     l.seller,
-        //     msg.value,
-        //     marketplaceFee,
-        //     royaltyFee,
-        //     legendCreator
-        // );
-
-        // bool sent =
-         _transferPayment(_listingId, l.seller);
-
-        // require(sent);
+        _transferPayment(_listingId, l.seller);
 
         _buyLegend(_listingId);
 
-        _withdrawAllowed[_listingId][l.seller] = true;
+        // _withdrawAllowed[_listingId][l.seller] = true;
     }
 
     function makeLegendOffer(address _nftContract, uint256 _legendId)
@@ -104,7 +89,7 @@ contract LegendsMarketplace is
             _legendId
         );
 
-        _withdrawAllowed[listingId][msg.sender] = false;
+        _canWithdrawBid[listingId][msg.sender] = false;
 
         _asyncTransferBid(listingId, msg.sender, msg.value);
     }
@@ -136,7 +121,7 @@ contract LegendsMarketplace is
              * Token owner can also just let the offer expire
              * if they do not wish to pay gas to reject
              */
-            _withdrawAllowed[_listingId][l.buyer] = true;
+            _canWithdrawBid[_listingId][l.buyer] = true;
         }
 
         _decideLegendOffer(_listingId, _isAccepted);
@@ -189,19 +174,19 @@ contract LegendsMarketplace is
             );
         }
 
-        _withdrawAllowed[_listingId][msg.sender] = false;
+        _canWithdrawBid[_listingId][msg.sender] = false;
 
         _asyncTransferBid(_listingId, payable(msg.sender), msg.value);
 
         // Allow previous highest bidder to reclaim or increase their bid
-        _withdrawAllowed[_listingId][a.highestBidder] = true;
+        _canWithdrawBid[_listingId][a.highestBidder] = true;
 
         _placeBid(_listingId, bidAmount);
 
         if (a.isInstantBuy) {
             if (bidAmount >= instantBuyPrice[_listingId]) {
                 _closeAuction(_listingId);
-                _withdrawAllowed[_listingId][l.seller] = true;
+                _canWithdrawBid[_listingId][l.seller] = true;
             }
         }
     }
@@ -215,7 +200,7 @@ contract LegendsMarketplace is
 
         _withdrawBid(_listingId, payable(msg.sender)); // test this being here
 
-        _withdrawAllowed[_listingId][msg.sender] = false;
+        _canWithdrawBid[_listingId][msg.sender] = false;
     }
 
     function cancelLegendListing(uint256 _listingId) external nonReentrant {
@@ -237,7 +222,7 @@ contract LegendsMarketplace is
         }
 
         if (l.isOffer) {
-            _withdrawAllowed[_listingId][msg.sender] = true;
+            _canWithdrawBid[_listingId][msg.sender] = true;
         } else {
             // thoroughly test and check gas cost, due to not using withdraw pattern
             IERC721(l.nftContract).transferFrom(
@@ -272,29 +257,14 @@ contract LegendsMarketplace is
         }
 
         if (l.isAuction || l.isOffer) {
-            if (_withdrawAllowed[_listingId][l.seller] == false) {
-                // cant be used ; after claim should be flipped back false
-
+            if (_paymentTransferred[_listingId] == false) {
                 _closeBid(_listingId, l.buyer); // make sure auction buyer set in time for call
-                // bool sent =
-                 _transferPayment(_listingId, l.seller);
 
-                // require(sent);
-                // (
-                //     uint256 marketplaceFee,
-                //     uint256 royaltyFee,
-                //     address payable legendCreator
-                // ) = _calculateFees(_listingId);
+                _paymentTransferred[_listingId] = true;
 
-                // _asyncTransfer(
-                //     l.seller,
-                //     l.price, // make sure price set in time for call
-                //     marketplaceFee,
-                //     royaltyFee,
-                //     legendCreator
-                // );
+                _transferPayment(_listingId, l.seller);
 
-                _withdrawAllowed[_listingId][l.seller] = true; // never flips false after claim
+                // _canWithdrawBid[_listingId][l.seller] = true; // never flips false after claim
             }
         }
 
@@ -343,7 +313,6 @@ contract LegendsMarketplace is
 
     function _transferPayment(uint256 _listingId, address payable _payee)
         internal
-        // returns (bool)
     {
         (
             uint256 marketplaceFee,
@@ -358,8 +327,6 @@ contract LegendsMarketplace is
             royaltyFee,
             legendCreator
         );
-
-        // return true;
     }
 
     function _claimLegend(uint256 listingId) internal nonReentrant {
@@ -376,23 +343,17 @@ contract LegendsMarketplace is
         IERC721(l.nftContract).transferFrom(address(this), l.buyer, legendOwed);
     }
 
-    function _claimPayment(uint256 listingId) internal nonReentrant {
-        LegendListing memory l = legendListing[listingId];
+    function _claimPayment(uint256 _listingId) internal nonReentrant {
+        LegendListing memory l = legendListing[_listingId];
 
         require(msg.sender == l.seller);
         require(l.status == ListingStatus.Closed);
 
-        // uint256 amount;
-
-        // if (l.isAuction) {
-        //     amount = payments(l.buyer);
-        // } else if (!l.isAuction) {
         uint256 amount = payments(l.seller); // these getters could be cut and fetched directly if more space is needed in contract
-        // }
 
         require(amount != 0, "Address is owed 0");
 
-        _withdrawPayments(listingId, l.seller);
+        _withdrawPayments(_listingId, l.seller);
     }
 
     function fetchListingCounts()

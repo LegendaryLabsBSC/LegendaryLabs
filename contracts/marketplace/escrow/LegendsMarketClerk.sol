@@ -30,7 +30,8 @@ import "./LegendsEscrow.sol";
 abstract contract LegendsMarketClerk {
     LegendsEscrow private immutable _escrow;
 
-    mapping(uint256 => mapping(address => bool)) internal _withdrawAllowed;
+    /* listingId => bidderAddress => canWithdrawBid? */
+    mapping(uint256 => mapping(address => bool)) internal _canWithdrawBid;
 
     constructor() {
         _escrow = new LegendsEscrow();
@@ -55,7 +56,7 @@ abstract contract LegendsMarketClerk {
         internal
         virtual
     {
-        require(_withdrawAllowed[listingId][payee], "Not authorized");
+        // require(_withdrawAllowed[listingId][payee], "Not authorized");
         _escrow.withdraw(payee);
     }
 
@@ -63,7 +64,7 @@ abstract contract LegendsMarketClerk {
         internal
         virtual
     {
-        require(_withdrawAllowed[listingId][payee], "Not authorized");
+        require(_canWithdrawBid[listingId][payee], "Not authorized");
         _escrow.refundBid(listingId, payee);
     }
 
