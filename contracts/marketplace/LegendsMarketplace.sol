@@ -61,25 +61,24 @@ contract LegendsMarketplace is
             //, "Incorrect price submitted for item"
         ); // commented out for debugging
 
-        (
-            uint256 marketplaceFee,
-            uint256 royaltyFee,
-            address payable legendCreator
-        ) = _calculateFees(_listingId); // put in withdraw to reduce duplication?
+        // (
+        //     uint256 marketplaceFee,
+        //     uint256 royaltyFee,
+        //     address payable legendCreator
+        // ) = _calculateFees(_listingId);
 
-        // if (royaltyFee != 0) {
-        //     _asyncTransferRoyalty(legendCreator, royaltyFee); // put in withdraw to reduce duplication?
-        // }
+        // _asyncTransfer(
+        //     l.seller,
+        //     msg.value,
+        //     marketplaceFee,
+        //     royaltyFee,
+        //     legendCreator
+        // );
 
-        // address(this).call{value: marketplaceFee}; // test !!
+        // bool sent =
+         _transferPayment(_listingId, l.seller);
 
-        _asyncTransfer(
-            l.seller,
-            msg.value,
-            marketplaceFee,
-            royaltyFee,
-            legendCreator
-        );
+        // require(sent);
 
         _buyLegend(_listingId);
 
@@ -275,35 +274,21 @@ contract LegendsMarketplace is
         if (l.isAuction || l.isOffer) {
             if (_withdrawAllowed[_listingId][l.seller] == false) {
                 // cant be used ; after claim should be flipped back false
-                (
-                    uint256 marketplaceFee,
-                    uint256 royaltyFee,
-                    address payable legendCreator
-                ) = _calculateFees(_listingId);
 
-                // address payable payer;
+                _closeBid(_listingId, l.buyer); // make sure auction buyer set in time for call
+                // bool sent =
+                 _transferPayment(_listingId, l.seller);
 
-                // if (l.isAuction) {
-                //     payer = a.highestBidder;
-                // } else if (l.isOffer) {
-                //     payer = l.buyer;
-                // }
+                // require(sent);
+                // (
+                //     uint256 marketplaceFee,
+                //     uint256 royaltyFee,
+                //     address payable legendCreator
+                // ) = _calculateFees(_listingId);
 
-                _closeBid(_listingId, l.buyer);  // make sure auction buyer set in time for call
-
-                _asyncTransfer(
-                    l.seller,
-                    l.price, // make sure price set in time for call
-                    marketplaceFee,
-                    royaltyFee,
-                    legendCreator
-                );
-
-                // change name
-                // _transferBidToSeller(
-                //     _listingId,
-                //     payer,
+                // _asyncTransfer(
                 //     l.seller,
+                //     l.price, // make sure price set in time for call
                 //     marketplaceFee,
                 //     royaltyFee,
                 //     legendCreator
@@ -354,6 +339,27 @@ contract LegendsMarketplace is
         }
 
         return (marketplaceFee, royaltyFee, legendCreator);
+    }
+
+    function _transferPayment(uint256 _listingId, address payable _payee)
+        internal
+        // returns (bool)
+    {
+        (
+            uint256 marketplaceFee,
+            uint256 royaltyFee,
+            address payable legendCreator
+        ) = _calculateFees(_listingId);
+
+        _asyncTransfer(
+            _payee,
+            msg.value,
+            marketplaceFee,
+            royaltyFee,
+            legendCreator
+        );
+
+        // return true;
     }
 
     function _claimLegend(uint256 listingId) internal nonReentrant {

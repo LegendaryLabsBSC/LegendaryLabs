@@ -121,29 +121,6 @@ contract LegendsEscrow is Ownable {
         // emit Deposited(payee, amount);
     }
 
-    // function transferBidToSeller(
-    //     uint256 _listingId,
-    //     address _buyer, // make sure highest bidder is buyer at these calls
-    //     address payable _seller,
-    //     uint256 _marketplaceFee,
-    //     uint256 _royaltyFee,
-    //     address payable _legendCreator
-    // ) public payable virtual onlyOwner {
-    //     uint256 amount = _pendingBid[_listingId][_buyer];
-
-    //     marketplace.call{value: _marketplaceFee};
-
-    //     if (_royaltyFee != 0) {
-    //         _royaltiesOwed[_legendCreator] += _royaltyFee;
-    //     }
-
-    //     uint256 payment = amount - (_marketplaceFee + _royaltyFee);
-
-    //     _pendingBid[_listingId][_buyer] = 0;
-
-    //     _paymentOwed[_seller] += payment;
-    // }
-
     function refundBid(uint256 listingId, address payable bidder)
         public
         payable

@@ -129,21 +129,4 @@ abstract contract LegendsMarketClerk {
     //     _escrow.depositRoyalty{value: amount}(payee);
     // }
 
-    // function _transferBidToSeller(
-    //     uint256 listingId,
-    //     address buyer,
-    //     address seller,
-    //     uint256 marketplaceFee,
-    //     uint256 royaltyFee,
-    //     address legendCreator
-    // ) internal virtual {
-    //     _escrow.transferBidToSeller(
-    //         listingId,
-    //         buyer,
-    //         payable(seller),
-    //         marketplaceFee,
-    //         royaltyFee,
-    //         payable(legendCreator)
-    //     );
-    // }
 }
