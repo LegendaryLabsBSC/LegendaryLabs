@@ -131,6 +131,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //     legendsNFT.mintPromo(receiver, prefix, postfix, dna);
     // }
 
+    function setRoyaltyFee(uint256 _newFee) public onlyOwner {
+        legendsMarketplace.setRoyaltyFee(_newFee);
+    }
+
     function setMarketplaceFee(uint256 newFee) public onlyOwner {
         legendsMarketplace.setMarketplaceFee(newFee);
     }

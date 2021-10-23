@@ -100,19 +100,24 @@ abstract contract LegendSale is ILegendListing {
     function _decideLegendOffer(uint256 _listingId, bool _isAccepted) internal {
         LegendListing storage l = legendListing[_listingId];
 
-        l.status = ListingStatus.Closed;
-
         if (_isAccepted) {
             l.seller = payable(msg.sender);
+            l.status = ListingStatus.Closed;
 
             offerDetails[_listingId].isAccepted = true;
 
             _legendOwed[_listingId][l.buyer] = l.legendId;
+
+            _listingsClosed.increment();
         } else {
+            l.status = ListingStatus.Cancelled;
+
             offerDetails[_listingId].isAccepted = false;
+
+            _listingsCancelled.increment();
         }
 
-        _listingsClosed.increment();
+        emit OfferDecided(_listingId, _isAccepted);
     }
 
     function _cancelLegendListing(uint256 _listingId) internal {

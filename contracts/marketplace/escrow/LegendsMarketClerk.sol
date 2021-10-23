@@ -52,11 +52,7 @@ abstract contract LegendsMarketClerk {
      * @param payee Whose payments will be withdrawn.
      */
 
-    function _withdrawPayments(uint256 listingId, address payable payee)
-        internal
-        virtual
-    {
-        // require(_withdrawAllowed[listingId][payee], "Not authorized");
+    function _withdrawPayments(address payable payee) internal virtual {
         _escrow.withdraw(payee);
     }
 
@@ -76,13 +72,14 @@ abstract contract LegendsMarketClerk {
      * @dev Returns the payments owed to an address.
      * @param dest The creditor's address.
      */
-    
-    function payments(address dest) public view returns (uint256) { // these getters could be cut and fetched directly if more space is needed in contract
+
+    function payments(address dest) public view returns (uint256) {
+        // these getters could be cut and fetched directly if more space is needed in contract
         return _escrow.depositsOf(dest);
     }
 
-    function royalties(address payee) public view returns (uint256) {
-        return _escrow.royaltiesOf(payee);
+    function accruedRoyalties(address _payee) public view returns (uint256) {
+        return _escrow.royaltiesOf(_payee);
     }
 
     /*/*
@@ -116,10 +113,7 @@ abstract contract LegendsMarketClerk {
         _escrow.depositBid{value: _amount}(_listingId, _payer);
     }
 
-        function _closeBid(
-        uint256 _listingId,
-        address _payer
-    ) internal virtual {
+    function _closeBid(uint256 _listingId, address _payer) internal virtual {
         _escrow.closeBid(_listingId, _payer);
     }
 
@@ -129,5 +123,4 @@ abstract contract LegendsMarketClerk {
     // {
     //     _escrow.depositRoyalty{value: amount}(payee);
     // }
-
 }

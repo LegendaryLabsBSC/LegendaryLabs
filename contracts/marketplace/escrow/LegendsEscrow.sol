@@ -62,8 +62,8 @@ contract LegendsEscrow is Ownable {
         return _pendingBid[_listingId][_payee];
     }
 
-    function royaltiesOf(address payee) public view returns (uint256) {
-        return _royaltiesOwed[payee];
+    function royaltiesOf(address _payee) public view returns (uint256) {
+        return _royaltiesOwed[_payee];
     }
 
     /**

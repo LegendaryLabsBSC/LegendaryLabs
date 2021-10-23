@@ -53,21 +53,13 @@ contract LegendsMarketplace is
     function buyLegend(uint256 _listingId) external payable nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
-        require(l.status == ListingStatus.Open); // commented out for debugging
-        require(
-            msg.sender != l.seller
-            //, "Seller can not buy"
-        ); // commented out for debugging
-        require(
-            msg.value == l.price
-            //, "Incorrect price submitted for item"
-        ); // commented out for debugging
+        require(l.status == ListingStatus.Open);
+        require(msg.sender != l.seller, "Seller can not buy");
+        require(msg.value == l.price, "Incorrect price submitted for item");
 
         _transferPayment(_listingId, l.seller);
 
         _buyLegend(_listingId);
-
-        // _withdrawAllowed[_listingId][l.seller] = true;
     }
 
     function makeLegendOffer(address _nftContract, uint256 _legendId)
@@ -125,8 +117,6 @@ contract LegendsMarketplace is
         }
 
         _decideLegendOffer(_listingId, _isAccepted);
-
-        emit OfferDecided(_listingId, _isAccepted);
     }
 
     function createLegendAuction(
@@ -239,8 +229,6 @@ contract LegendsMarketplace is
         LegendListing storage l = legendListing[_listingId];
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        // no checks for if sale or offer are closed. What happens when seller tries to close before true close
-
         require(
             msg.sender == l.seller ||
                 msg.sender == l.buyer ||
@@ -254,6 +242,8 @@ contract LegendsMarketplace is
 
                 _closeAuction(_listingId);
             }
+        } else {
+            require(l.status == ListingStatus.Closed);
         }
 
         if (l.isAuction || l.isOffer) {
@@ -263,8 +253,6 @@ contract LegendsMarketplace is
                 _paymentTransferred[_listingId] = true;
 
                 _transferPayment(_listingId, l.seller);
-
-                // _canWithdrawBid[_listingId][l.seller] = true; // never flips false after claim
             }
         }
 
@@ -277,11 +265,55 @@ contract LegendsMarketplace is
         emit PaymentClaimed(_listingId, msg.sender);
     }
 
-    function claimRoyalties() external nonReentrant {
-        uint256 amount = royalties(msg.sender);
+    function collectRoyalties() external payable nonReentrant {
+        uint256 amount = accruedRoyalties(msg.sender);
         require(amount != 0, "Royalties are 0");
 
         _withdrawRoyalties(payable(msg.sender));
+    }
+
+    function _transferPayment(uint256 _listingId, address payable _payee)
+        internal
+    {
+        (
+            uint256 marketplaceFee,
+            address payable legendCreator,
+            uint256 royaltyFee
+        ) = _calculateFees(_listingId);
+
+        _asyncTransfer(
+            _payee,
+            msg.value,
+            marketplaceFee,
+            royaltyFee,
+            legendCreator
+        );
+    }
+
+    function _claimLegend(uint256 _listingId) internal nonReentrant {
+        LegendListing memory l = legendListing[_listingId];
+
+        // require(msg.sender == l.buyer);
+        // require(l.status == ListingStatus.Closed);
+
+        uint256 legendOwed = _legendOwed[_listingId][l.buyer];
+        require(legendOwed != 0, "No Legend Owed"); // make sure can not do again without paying gas to see error
+
+        _legendOwed[_listingId][l.buyer] = 0;
+
+        IERC721(l.nftContract).transferFrom(address(this), l.buyer, legendOwed);
+    }
+
+    function _claimPayment(uint256 _listingId) internal nonReentrant {
+        LegendListing memory l = legendListing[_listingId];
+
+        // require(msg.sender == l.seller);
+        // require(l.status == ListingStatus.Closed);
+
+        uint256 amount = payments(l.seller);
+        require(amount != 0, "Address is owed 0"); // make sure can not do again without paying gas to see error
+
+        _withdrawPayments(l.seller);
     }
 
     function _calculateFees(uint256 _listingId)
@@ -289,8 +321,8 @@ contract LegendsMarketplace is
         view
         returns (
             uint256,
-            uint256,
-            address payable
+            address payable,
+            uint256
         )
     {
         LegendListing memory l = legendListing[_listingId];
@@ -304,84 +336,52 @@ contract LegendsMarketplace is
             if (legendCreator != l.seller)
                 if (legendCreator != l.buyer) {
                     // make sure this works with auction/highestBidder ; create a legend, sell, the win an auction for it ; should not receive royalties
-                    royaltyFee = (l.price * _royaltyFee) / 100;
+                    royaltyFee = (l.price * _royaltyFee) / 100; // this probably needs adjusting for eth price 0000s
                 }
         }
 
-        return (marketplaceFee, royaltyFee, legendCreator);
+        return (marketplaceFee, legendCreator, royaltyFee);
     }
 
-    function _transferPayment(uint256 _listingId, address payable _payee)
-        internal
-    {
-        (
-            uint256 marketplaceFee,
-            uint256 royaltyFee,
-            address payable legendCreator
-        ) = _calculateFees(_listingId);
+    // function fetchListingCounts()
+    //     public
+    //     view
+    //     returns (Counters.Counter[3] memory)
+    // {
+    //     Counters.Counter[3] memory counts = [
+    //         _listingIds,
+    //         _listingsClosed,
+    //         _listingsCancelled
+    //     ];
 
-        _asyncTransfer(
-            _payee,
-            msg.value,
-            marketplaceFee,
-            royaltyFee,
-            legendCreator
-        );
-    }
-
-    function _claimLegend(uint256 listingId) internal nonReentrant {
-        LegendListing memory l = legendListing[listingId];
-
-        require(msg.sender == l.buyer);
-        require(l.status == ListingStatus.Closed);
-
-        uint256 legendOwed = _legendOwed[listingId][l.buyer];
-        require(legendOwed != 0);
-
-        _legendOwed[listingId][l.buyer] = 0;
-
-        IERC721(l.nftContract).transferFrom(address(this), l.buyer, legendOwed);
-    }
-
-    function _claimPayment(uint256 _listingId) internal nonReentrant {
-        LegendListing memory l = legendListing[_listingId];
-
-        require(msg.sender == l.seller);
-        require(l.status == ListingStatus.Closed);
-
-        uint256 amount = payments(l.seller); // these getters could be cut and fetched directly if more space is needed in contract
-
-        require(amount != 0, "Address is owed 0");
-
-        _withdrawPayments(_listingId, l.seller);
-    }
+    //     return counts;
+    // }
 
     function fetchListingCounts()
         public
         view
-        returns (Counters.Counter[3] memory)
+        returns (
+            Counters.Counter memory,
+            Counters.Counter memory,
+            Counters.Counter memory
+        )
     {
-        Counters.Counter[3] memory counts = [
-            _listingIds,
-            _listingsClosed,
-            _listingsCancelled
-        ];
-
-        return counts;
+        return (_listingIds, _listingsClosed, _listingsCancelled);
     }
 
-    function fetchLegendListing(uint256 listingId)
+    function fetchLegendListing(uint256 _listingId)
         public
         view
         returns (LegendListing memory)
     {
-        return legendListing[listingId];
+        return legendListing[_listingId];
     }
 
-    //royalty fee setter ; move royalty handling to lab?
-    //royalty on/off toggle / pauseable ?
+    function setRoyaltyFee(uint256 _newFee) public onlyLab {
+        _royaltyFee = _newFee;
+    }
 
-    function setMarketplaceFee(uint256 newFee) public onlyLab {
-        _marketplaceFee = newFee;
+    function setMarketplaceFee(uint256 _newFee) public onlyLab {
+        _marketplaceFee = _newFee;
     }
 }
