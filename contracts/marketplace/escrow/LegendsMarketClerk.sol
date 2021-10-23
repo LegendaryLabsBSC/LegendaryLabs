@@ -75,7 +75,8 @@ abstract contract LegendsMarketClerk {
      * @dev Returns the payments owed to an address.
      * @param dest The creditor's address.
      */
-    function payments(address dest) public view returns (uint256) {
+    
+    function payments(address dest) public view returns (uint256) { // these getters could be cut and fetched directly if more space is needed in contract
         return _escrow.depositsOf(dest);
     }
 
@@ -91,8 +92,19 @@ abstract contract LegendsMarketClerk {
      * @param dest The destination address of the funds.
      * @param amount The amount to transfer.
      */
-    function _asyncTransfer(address payee, uint256 amount) internal virtual {
-        _escrow.deposit{value: amount}(payee);
+    function _asyncTransfer(
+        address payable _payee, // change to seller ?
+        uint256 _amount,
+        uint256 _marketplaceFee,
+        uint256 _royaltyFee,
+        address payable _legendCreator
+    ) internal virtual {
+        _escrow.deposit{value: _amount}(
+            _payee,
+            _marketplaceFee,
+            _royaltyFee,
+            _legendCreator
+        );
     }
 
     function _asyncTransferBid(
@@ -103,28 +115,35 @@ abstract contract LegendsMarketClerk {
         _escrow.depositBid{value: _amount}(_listingId, _payer);
     }
 
-    function _asyncTransferRoyalty(address payee, uint256 amount)
-        internal
-        virtual
-    {
-        _escrow.depositRoyalty{value: amount}(payee);
+        function _closeBid(
+        uint256 _listingId,
+        address _payer
+    ) internal virtual {
+        _escrow.closeBid(_listingId, _payer);
     }
 
-    function _obligateBid(
-        uint256 listingId,
-        address buyer,
-        address seller,
-        uint256 marketFee,
-        uint256 royaltyFee,
-        address legendCreator
-    ) internal virtual {
-        _escrow.obligateBid(
-            listingId,
-            buyer,
-            payable(seller),
-            marketFee,
-            royaltyFee,
-            payable(legendCreator)
-        );
-    }
+    // function _asyncTransferRoyalty(address payee, uint256 amount)
+    //     internal
+    //     virtual
+    // {
+    //     _escrow.depositRoyalty{value: amount}(payee);
+    // }
+
+    // function _transferBidToSeller(
+    //     uint256 listingId,
+    //     address buyer,
+    //     address seller,
+    //     uint256 marketplaceFee,
+    //     uint256 royaltyFee,
+    //     address legendCreator
+    // ) internal virtual {
+    //     _escrow.transferBidToSeller(
+    //         listingId,
+    //         buyer,
+    //         payable(seller),
+    //         marketplaceFee,
+    //         royaltyFee,
+    //         payable(legendCreator)
+    //     );
+    // }
 }

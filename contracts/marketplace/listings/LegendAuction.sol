@@ -13,7 +13,7 @@ abstract contract LegendAuction is LegendSale {
         uint256 highestBid;
         address payable highestBidder;
         address[] bidders; // ? take array out (use mapping bid ?) ;; seperate so no risk of breaking rest of struct
-        bool instantBuy;
+        bool isInstantBuy;
     }
 
     // mapping(uint256 => address[]) internal listBidders; // for debug
@@ -52,10 +52,10 @@ abstract contract LegendAuction is LegendSale {
         _listingIds.increment();
         uint256 _listingId = _listingIds.current();
 
-        bool instantBuy;
+        bool isInstantBuy;
 
         if (_instantPrice != 0) {
-            instantBuy = true;
+            isInstantBuy = true;
             instantBuyPrice[_listingId] = _instantPrice;
         }
 
@@ -72,24 +72,22 @@ abstract contract LegendAuction is LegendSale {
         AuctionDetails storage a = auctionDetails[_listingId];
         a.duration = _duration;
         a.startingPrice = _startingPrice;
-        a.instantBuy = instantBuy;
+        a.isInstantBuy = isInstantBuy;
 
         // emit ListingStatusChanged(_listingId, ListingStatus.Open);
     }
 
-    // made public for debugging
-    function _placeBid(uint256 _listingId, uint256 _bidAmount) public payable {
+    function _placeBid(uint256 _listingId, uint256 _bidAmount) internal {
         AuctionDetails storage a = auctionDetails[_listingId];
 
         bids[_listingId][msg.sender] += _bidAmount;
-        // bids[msg.sender] += _bidAmount;
 
         if (!exists[_listingId][msg.sender]) {
             a.bidders.push(msg.sender);
             exists[_listingId][msg.sender] = true;
         }
 
-        a.highestBid = _bidAmount; // wrong
+        a.highestBid = _bidAmount;
         a.highestBidder = payable(msg.sender);
 
         // this should error when tested
@@ -97,10 +95,9 @@ abstract contract LegendAuction is LegendSale {
             if (_bidAmount >= instantBuyPrice[_listingId]) {
                 a.duration = (a.duration + 600); // TODO: make extension a state variable
 
-                // emit AuctionExtended(_listingId, a.duration);
+                emit AuctionExtended(_listingId, a.duration);
             }
         }
-
         // emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
     }
 
@@ -112,7 +109,7 @@ abstract contract LegendAuction is LegendSale {
         l.price = a.highestBid;
         l.status = ListingStatus.Closed;
 
-        _legendOwed[_listingId][a.highestBidder] = l.legendId; // ? does this belong in this contract ; yes, until we get moved over to escrow
+        _legendOwed[_listingId][a.highestBidder] = l.legendId; 
 
         _listingsClosed.increment();
 
@@ -120,16 +117,16 @@ abstract contract LegendAuction is LegendSale {
     }
 
     function isExpired(uint256 _listingId) public view returns (bool) {
-        bool _isExpired;
+        bool expired;
 
         uint256 expirationTime = legendListing[_listingId].createdAt +
             auctionDetails[_listingId].duration;
 
-        if (block.timestamp >= expirationTime) {
-            _isExpired = true;
+        if (block.timestamp > expirationTime) {
+            expired = true;
         }
 
-        return _isExpired;
+        return expired;
     }
 
     function _shouldExtend(uint256 _listingId) internal view returns (bool) {
