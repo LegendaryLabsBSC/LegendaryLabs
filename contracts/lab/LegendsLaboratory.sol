@@ -21,8 +21,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
 
-    // secure ?
-    string public season;
+    string private season = "Phoenix";
 
     constructor() {}
 
@@ -168,6 +167,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //onlyMarketplace //TODO: in access control rework
     {
         return legendsNFT.isHatched(_legendId);
+    }
+
+    function fetchSeason() public view returns (string memory) {
+        return season;
     }
 
     // function fetchOffspringCount(uint256 _tokenId)

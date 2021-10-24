@@ -10,9 +10,10 @@ interface ILegendMetadata {
         string postfix;
         uint256[2] parents;
         uint256 birthDay;
-        uint256 blendingCost;
-        uint256 totalOffspring;
+        // uint256 blendingCost; // does not lower after reju
         uint256 blendingInstancesUsed; //TODO: take into account if number is lowed and token is over new limir
+        uint256 lastBlend;
+        uint256 totalOffspring;
         address payable legendCreator;
         bool isLegendary; // Legendary concept will need to be reevaluated
         bool isHatched;

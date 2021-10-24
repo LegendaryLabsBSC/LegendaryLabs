@@ -3,7 +3,6 @@ import { ethers } from 'ethers'
 import axios from 'axios'
 import styled from 'styled-components'
 import { AddressZero } from 'ethers/constants'
-import { uniqueNamesGenerator, Config, adjectives, animals } from 'unique-names-generator'
 import {
   legendsLaboratory,
   legendsNFT,
@@ -42,18 +41,6 @@ const contract = {
   matchingBoard: {
     read: new ethers.Contract(legendsMatchingBoard, LegendsMatchingBoard.abi, provider),
     write: new ethers.Contract(legendsMatchingBoard, LegendsMatchingBoard.abi, signer),
-  },
-}
-
-const name = {
-  prefix: {
-    dictionaries: [adjectives],
-    length: 1,
-  },
-
-  postfix: {
-    dictionaries: [animals],
-    length: 1,
   },
 }
 
@@ -117,9 +104,7 @@ function App() {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.lab.write.redeemPromoTicket(
         id,
-        account,
-        uniqueNamesGenerator(name.prefix),
-        uniqueNamesGenerator(name.postfix),
+        account
       )
     }
   }
@@ -193,49 +178,42 @@ function App() {
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
       // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
-      const legendMeta = await contract.nft.read.tokenMeta(id)
-      const legendGenetics = await contract.nft.read.legendGenetics(id)
-      const legendStats = await contract.nft.read.legendStats(id)
+      const legendMeta = await contract.nft.read.fetchTokenMetadata(id)
+      // const legendGenetics = await contract.nft.read.legendGenetics(id)
+      // const legendStats = await contract.nft.read.legendStats(id)
       console.log('META:')
       console.log(`id: ${legendMeta.id}`)
+      console.log(`season: ${legendMeta.season}`)
       console.log(`prefix: ${legendMeta.prefix}`)
       console.log(`postfix: ${legendMeta.postfix}`)
       console.log(`parents: ${legendMeta.parents}`)
       console.log(`birthday: ${legendMeta.birthDay}`)
-      console.log(`incubation duration: ${legendMeta.incubationDuration}`)
+      console.log(`blending cost: ${legendMeta.blendingCost}`)
+      console.log(`blending instances used: ${legendMeta.blendingInstancesUsed}`)
+      console.log(`total offspring: ${legendMeta.offspringLimit}`)
+      console.log(`legend creator: ${legendMeta.legendCreator}`)
       console.log(`breeding cooldown: ${legendMeta.breedingCooldown}`)
-      console.log(`breeding cost: ${legendMeta.breedingCost}`)
-      console.log(`offspring limit: ${legendMeta.offspringLimit}`)
-      console.log(`season: ${legendMeta.season}`)
       console.log(`is legendary: ${legendMeta.isLegendary}`)
       console.log(`is hatched: ${legendMeta.isHatched}`)
-      console.log(`is destroyed: ${legendMeta.isDestroyed}`)
-      console.log('GENES:')
-      console.log(`CdR1: ${legendGenetics.CdR1}`)
-      console.log(`CdG1: ${legendGenetics.CdG1}`)
-      console.log(`CdB1: ${legendGenetics.CdB1}`)
-      console.log(`CdR2: ${legendGenetics.CdR2}`)
-      console.log(`CdG2: ${legendGenetics.CdG2}`)
-      console.log(`CdB2: ${legendGenetics.CdB2}`)
-      console.log(`CdR3: ${legendGenetics.CdR3}`)
-      console.log(`CdG3: ${legendGenetics.CdG3}`)
-      console.log(`CdB3: ${legendGenetics.CdB3}`)
-      console.log('STATS:')
-      console.log(`level: ${legendStats.level}`)
-      console.log(`health: ${legendStats.health}`)
-      console.log(`strength: ${legendStats.strength}`)
-      console.log(`defense: ${legendStats.defense}`)
-      console.log(`agility: ${legendStats.agility}`)
-      console.log(`speed: ${legendStats.speed}`)
-      console.log(`accuracy: ${legendStats.accuracy}`)
-      console.log(`destruction: ${legendStats.destruction}`)
-    }
-  }
-  async function fetchMeta() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
-      const legendMeta = await contract.nft.read.tokenMeta(id)
-      console.log(`Meta: ${legendMeta}`)
+      // console.log('GENES:')
+      // console.log(`CdR1: ${legendGenetics.CdR1}`)
+      // console.log(`CdG1: ${legendGenetics.CdG1}`)
+      // console.log(`CdB1: ${legendGenetics.CdB1}`)
+      // console.log(`CdR2: ${legendGenetics.CdR2}`)
+      // console.log(`CdG2: ${legendGenetics.CdG2}`)
+      // console.log(`CdB2: ${legendGenetics.CdB2}`)
+      // console.log(`CdR3: ${legendGenetics.CdR3}`)
+      // console.log(`CdG3: ${legendGenetics.CdG3}`)
+      // console.log(`CdB3: ${legendGenetics.CdB3}`)
+      // console.log('STATS:')
+      // console.log(`level: ${legendStats.level}`)
+      // console.log(`health: ${legendStats.health}`)
+      // console.log(`strength: ${legendStats.strength}`)
+      // console.log(`defense: ${legendStats.defense}`)
+      // console.log(`agility: ${legendStats.agility}`)
+      // console.log(`speed: ${legendStats.speed}`)
+      // console.log(`accuracy: ${legendStats.accuracy}`)
+      // console.log(`destruction: ${legendStats.destruction}`)
     }
   }
   async function fetchGenetics() {
@@ -366,21 +344,19 @@ function App() {
   }
   async function destroy() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.nft.write.immolate(id)
+      await contract.nft.write.destroyLegend(id)
     }
   }
   // Mints Legend with "random" Genetics
   async function mintPromo() {
     if (typeof window.ethereum !== 'undefined') {
-      const prefix = uniqueNamesGenerator(name.prefix) // for testing
-      const postfix = uniqueNamesGenerator(name.postfix) // for testing
       // const level = 1 // for testing
       const isLegendary = false // for testing
       const skipIncubation = false // for testing
 
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       // await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
-      await contract.nft.write.mintPromo(account, prefix, postfix, id, isLegendary)
+      await contract.nft.write.mintPromo(account, id, isLegendary)
       // .then(
       //   // ! receiving multiple responses ?
       //   // ? is .then even needed
@@ -822,9 +798,6 @@ function App() {
           </button>
           <button type="submit" onClick={fetchLegendComposition}>
             Fetch Legend Composition
-          </button>
-          <button type="submit" onClick={fetchMeta}>
-            Fetch Legend Metadata
           </button>
           <button type="submit" onClick={fetchGenetics}>
             Fetch IPFS Genetics

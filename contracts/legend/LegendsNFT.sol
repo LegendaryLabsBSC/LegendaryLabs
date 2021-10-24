@@ -28,8 +28,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     KinBlendingLevel private kinBlendingLevel;
 
-    uint256 private blendingLimit = 4; // will need visable/getter for matching&rpools
     uint256 private baseBlendingCost = 100;
+
+    uint256 private blendingLimit = 5; // will need visable/getter for matching&rpools
+    uint256 private blendingCooldown = 86400; // seconds
 
     uint256 private incubationPeriod; // seconds
 
@@ -98,10 +100,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             }
         }
 
-        lab.legendToken().blendingBurn(
-            msg.sender, // make sure corect party has fee applied in matching
-            ((p1.blendingCost + p2.blendingCost) / 2)
-        ); // may become liqlock
+        uint256 blendingCost = (fetchBlendingCost(_parent1) +
+            fetchBlendingCost(_parent2)) / 2;
+
+        lab.legendToken().blendingBurn(msg.sender, blendingCost); // may become liqlock
 
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
@@ -114,7 +116,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
             m.totalOffspring += 1;
             m.blendingInstancesUsed += 1;
-            m.blendingCost = (m.blendingCost * 2);
+            // m.blendingCost = (m.blendingCost * 2);
 
             parentOf[parents[i]][newLegendId] = true;
         }
@@ -171,8 +173,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     function destroyLegend(uint256 _legendId) public {
         require(ownerOf(_legendId) == msg.sender);
 
-        legendMetadata[_legendId].isDestroyed = true;
-
         _burn(_legendId);
 
         emit LegendDestroyed(_legendId);
@@ -220,10 +220,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
         LegendMetadata storage m = legendMetadata[_newLegendId];
         m.id = _newLegendId;
-        m.season = lab.season();
+        m.season = lab.fetchSeason();
         m.parents = _parents;
         m.birthDay = block.timestamp;
-        m.blendingCost = baseBlendingCost;
+        // m.blendingCost = baseBlendingCost;
         m.legendCreator = creator;
         m.isLegendary = _isLegendary;
 
@@ -310,12 +310,29 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         view
         returns (LegendMetadata memory)
     {
-        require(
-            _exists(_legendId),
-            "ERC721Metadata: URI query for nonexistent token"
-        ); // really needed ??
         return legendMetadata[_legendId];
     }
+
+    function fetchBlendingCost(uint256 _legendId)
+        public
+        view
+        returns (uint256)
+    {
+        // handle blended 0 times
+        // return
+        //     (baseBlendingCost * legendMetadata[_parent1].totalOffspring) +
+        //     (baseBlendingCost * legendMetadata[_parent2].totalOffspring) /
+        //     2;
+
+        if (legendMetadata[_legendId].totalOffspring != 0) {
+            return (baseBlendingCost *
+                legendMetadata[_legendId].totalOffspring);
+        } else {
+            return baseBlendingCost;
+        }
+    }
+
+    // fetchindivblencost
 
     function setKinBlendingLevel(uint256 _kinBlendingLevel)
         public

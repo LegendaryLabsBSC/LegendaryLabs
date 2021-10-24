@@ -169,7 +169,6 @@ contract LegendsMarketplace is
         if (a.isInstantBuy) {
             if (bidAmount >= instantBuyPrice[_listingId]) {
                 _closeAuction(_listingId);
-                _canWithdrawBid[_listingId][l.seller] = true;
             }
         }
     }
@@ -233,7 +232,7 @@ contract LegendsMarketplace is
                 _closeAuction(_listingId);
             }
         } else {
-            require(l.status == ListingStatus.Closed);
+            require(l.status == ListingStatus.Closed, "Listing Open");
         }
 
         if (l.isAuction || l.isOffer) {
