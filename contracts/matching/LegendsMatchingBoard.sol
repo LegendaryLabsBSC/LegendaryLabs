@@ -53,14 +53,19 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
 
         require(m.status == MatchingStatus.Open);
         require(m.surrogate != msg.sender, "Seller not authorized");
+        // make sure blender has to have enough LGND tokens for payment + blendingCost
 
         require(lab.fetchIsListable(_legendId), "Not Eligible");
-        require(lab.legendsNFT().isBlendable(_legendId)); // shouldnt be needed but double check
+        require(lab.fetchIsBlendable(_legendId)); // shouldnt be needed but double check
 
-        uint256 matchingBoardFee = (m.price * _matchingBoardFee) / 100;
-        lab.legendToken().matchingBurn(msg.sender, matchingBoardFee); // may become liqlock
+        // uint256 blendingCost = (lab.fetchBlendingCost(m.surrogateToken) +
+        //     lab.fetchBlendingCost(_legendId)) / 2;
 
-        uint256 matchingPayment = m.price - matchingBoardFee;
+        // uint256 matchingBoardFee = (m.price * _matchingBoardFee) / 100; // ?? should there be a fee here theres already payment and blendburn
+        // lab.legendToken().matchingBurn(msg.sender, matchingBoardFee); // may become liqlock
+
+        // uint256 matchingPayment = m.price + blendingCost;
+        uint256 matchingPayment = m.price; // blending function should still pull tokens from msg.sender/blender
         lab.legendToken().transferFrom(
             msg.sender,
             address(this),

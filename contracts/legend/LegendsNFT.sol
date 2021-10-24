@@ -31,7 +31,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     uint256 private baseBlendingCost = 100;
 
     uint256 private blendingLimit = 5; // will need visable/getter for matching&rpools
-    uint256 private blendingCooldown = 86400; // seconds
+    // uint256 private blendingCooldown = 86400; // seconds // hold off until discuss relisting in matching
 
     uint256 private incubationPeriod; // seconds
 
@@ -116,7 +116,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
             m.totalOffspring += 1;
             m.blendingInstancesUsed += 1;
-            // m.blendingCost = (m.blendingCost * 2);
 
             parentOf[parents[i]][newLegendId] = true;
         }
@@ -223,7 +222,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         m.season = lab.fetchSeason();
         m.parents = _parents;
         m.birthDay = block.timestamp;
-        // m.blendingCost = baseBlendingCost;
         m.legendCreator = creator;
         m.isLegendary = _isLegendary;
 
@@ -318,12 +316,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         view
         returns (uint256)
     {
-        // handle blended 0 times
-        // return
-        //     (baseBlendingCost * legendMetadata[_parent1].totalOffspring) +
-        //     (baseBlendingCost * legendMetadata[_parent2].totalOffspring) /
-        //     2;
-
         if (legendMetadata[_legendId].totalOffspring != 0) {
             return (baseBlendingCost *
                 legendMetadata[_legendId].totalOffspring);
@@ -331,8 +323,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             return baseBlendingCost;
         }
     }
-
-    // fetchindivblencost
 
     function setKinBlendingLevel(uint256 _kinBlendingLevel)
         public

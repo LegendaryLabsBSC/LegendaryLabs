@@ -169,6 +169,18 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         return legendsNFT.isHatched(_legendId);
     }
 
+    function fetchIsBlendable(uint256 _legendId) public view returns (bool) {
+        return legendsNFT.isBlendable(_legendId);
+    }
+
+    function fetchBlendingCost(uint256 _legendId)
+        public
+        view
+        returns (uint256)
+    {
+        return legendsNFT.fetchBlendingCost(_legendId);
+    }
+
     function fetchSeason() public view returns (string memory) {
         return season;
     }
