@@ -4,10 +4,10 @@ pragma solidity 0.8.4;
 
 interface IRejuvenationPod {
     enum PodStatus {
-        Uninitialized,
-        Occupied,
-        Unoccupied
-    }
+        // Uninitialized,
+        Unoccupied,
+        Occupied
+    } // make bool
 
     struct PodVisit {
         address depositedBy;
@@ -16,14 +16,12 @@ interface IRejuvenationPod {
         uint256 tokenAmountSecured;
         uint256 multiplier;
         // uint256 earnedReJu;
-    }
+    } // combine v ?
 
     struct RejuvenationPod {
-        // uint256 initializedAt;
         address nftContract;
-        // uint256 legendId;
-        uint256 remainderReJu; // needs to transfer over after pivkup/remove/increase
-        uint256 previousRemovalTime;
+        // uint256 remainderReJu; // needs to transfer over after pivkup/remove/increase
+        uint256 previousRemovalTime; // visit removal time ? ^^
         PodVisit visit;
         PodStatus status;
     }

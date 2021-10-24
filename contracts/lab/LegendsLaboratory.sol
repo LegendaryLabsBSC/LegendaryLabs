@@ -23,6 +23,11 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     string private season = "Phoenix";
 
+    // modifier onlyPod() {
+    //     require(msg.sender == address(legendRejuvenation), "Not Pod");
+    //     _;
+    // }
+
     constructor() {}
 
     // for testing
@@ -141,6 +146,14 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsMatchingBoard.setMatchingBoardFee(newFee);
     }
 
+    function restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+        public
+    {
+        require(msg.sender == address(legendRejuvenation), "Not Pod");
+
+        legendsNFT.restoreBlendingSlots(_legendId, _regainedSlots);
+    }
+
     function fetchRoyaltyRecipient(uint256 _legendId)
         public
         view
@@ -191,6 +204,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     function fetchSeason() public view returns (string memory) {
         return season;
+    }
+
+    function fetchBlendingLimit() public view returns (uint256) {
+        return legendsNFT.fetchBlendingLimit();
     }
 
     // function fetchOffspringCount(uint256 _tokenId)

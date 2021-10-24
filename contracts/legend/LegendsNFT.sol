@@ -324,6 +324,17 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         }
     }
 
+    function fetchBlendingLimit() external view returns (uint256) {
+        return blendingLimit;
+    }
+
+    function restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+        public
+        onlyLab
+    {
+        legendMetadata[_legendId].blendingInstancesUsed -= _regainedSlots;
+    }
+
     function setKinBlendingLevel(uint256 _kinBlendingLevel)
         public
         virtual

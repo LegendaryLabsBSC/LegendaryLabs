@@ -4,7 +4,6 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../lab/LegendsLaboratory.sol";
-// import "../legend/LegendsNFT.sol";
 import "./RejuvenationPod.sol";
 
 pragma solidity 0.8.4;
@@ -13,7 +12,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     using Counters for Counters.Counter;
 
     LegendsLaboratory lab;
-    // LegendsNFT nft;
 
     modifier onlyLab() {
         require(msg.sender == address(lab));
@@ -33,8 +31,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     uint256 private multiplyEvery = 1000; // will be same var as minimum ?
 
     uint256 private maxMultiplier = 5;
-
-    uint256 private maxBlendingSlots = 4; // testing variable
 
     mapping(uint256 => RejuvenationPod) public rejuvenationPod;
 
@@ -61,25 +57,19 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
-        // if (r.status == PodStatus.Uninitialized) {
-        //     _initializePod(_legendId, _nftContract);
-        // }
+        lab.legendToken().transferFrom( // can make getters for LGND token transfers in rework
+            msg.sender,
+            address(this),
+            _tokensToSecure
+        );
 
         r.nftContract = _nftContract;
 
         r.visit.depositedBy = msg.sender;
         r.visit.depositBlock = block.number;
         r.visit.offspringCount = lab.fetchBlendingCount(_legendId);
-        // r.visit.offspringCount = nft
-        //     .fetchLegendMetadata(_legendId)
-        //     .blendingInstancesUsed;
         r.visit.multiplier = _calculateMultiplier(_tokensToSecure);
 
-        lab.legendToken().transferFrom(
-            msg.sender,
-            address(this),
-            _tokensToSecure
-        );
         r.visit.tokenAmountSecured = _tokensToSecure;
 
         r.status = PodStatus.Occupied;
@@ -87,19 +77,17 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         // emit
     }
 
-    function leaveRejuvenationPod(uint256 _legendId) public {
+    function leaveRejuvenationPod(uint256 _legendId) external {
         RejuvenationPod storage r = rejuvenationPod[_legendId];
 
-        require(r.visit.depositedBy == msg.sender);
+        require(msg.sender == r.visit.depositedBy, "Not Authorized");
         require(r.status == PodStatus.Occupied, "Legend not in pod");
 
-        r.previousRemovalTime = block.timestamp;
         r.status = PodStatus.Unoccupied;
+        r.previousRemovalTime = block.timestamp;
 
-        // return tokens
         removeSecuredTokens(_legendId, r.visit.tokenAmountSecured);
 
-        // return legend
         IERC721(r.nftContract).transferFrom(
             address(this),
             r.visit.depositedBy,
@@ -107,21 +95,22 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         );
     }
 
-    // needs reentrancy ?
-    function removeSecuredTokens(uint256 tokenId, uint256 amountToRemove)
+    function removeSecuredTokens(uint256 _legendId, uint256 _amountToRemove)
         public
+        nonReentrant
     {
-        RejuvenationPod storage r = rejuvenationPod[tokenId];
+        RejuvenationPod storage r = rejuvenationPod[_legendId];
 
         require(msg.sender == r.visit.depositedBy, "Not authorized");
         require(
-            amountToRemove != 0 && amountToRemove <= r.visit.tokenAmountSecured,
+            _amountToRemove != 0 &&
+                _amountToRemove <= r.visit.tokenAmountSecured,
             "Invalid amount"
         );
 
-        _restoreBlendingSlots(tokenId);
+        _restoreBlendingSlots(_legendId);
 
-        uint256 newAmount = r.visit.tokenAmountSecured - amountToRemove;
+        uint256 newAmount = r.visit.tokenAmountSecured - _amountToRemove;
 
         r.visit.tokenAmountSecured = newAmount;
         r.visit.multiplier = _calculateMultiplier(newAmount);
@@ -129,19 +118,19 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         lab.legendToken().transferFrom(
             address(this),
             msg.sender,
-            amountToRemove
+            _amountToRemove
         );
     }
 
-    function increaseSecuredTokens(uint256 tokenId, uint256 amountToSecure)
+    function increaseSecuredTokens(uint256 legendId, uint256 amountToSecure)
         external
     {
-        RejuvenationPod storage r = rejuvenationPod[tokenId];
+        RejuvenationPod storage r = rejuvenationPod[legendId];
 
         require(msg.sender == r.visit.depositedBy, "Not authorized");
         require(r.status == PodStatus.Occupied);
 
-        _restoreBlendingSlots(tokenId);
+        _restoreBlendingSlots(legendId);
 
         lab.legendToken().transferFrom( // ? lab or this contract
             msg.sender,
@@ -155,20 +144,13 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         r.visit.multiplier = _calculateMultiplier(newAmount);
     }
 
-    // function _initializePod(uint256 _legendId, address _nftContract) internal {
-    //     RejuvenationPod storage r = rejuvenationPod[_legendId];
-
-    //     r.initializedAt = block.timestamp;
-    //     r.nftContract = _nftContract;
-    //     r.legendId = _legendId;
-    // }
-
-    function _calculateMultiplier(uint256 amount)
+    function _calculateMultiplier(uint256 _amount)
         private
         view
         returns (uint256)
     {
-        uint256 multiplier = amount / multiplyEvery;
+        uint256 multiplier = _amount / multiplyEvery;
+
         if (multiplier > maxMultiplier) {
             multiplier = maxMultiplier;
         }
@@ -176,67 +158,65 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         return (multiplier);
     }
 
-    function _calculateRejuvenation(uint256 tokenId)
+    function _calculateRejuvenation(uint256 _legendId)
         private
         view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
+        returns (uint256, uint256)
+    // uint256
     {
-        RejuvenationPod storage r = rejuvenationPod[tokenId]; // remove if no other logic added requires
+        RejuvenationPod memory r = rejuvenationPod[_legendId];
 
-        uint256 maxReJu = (reJuNeededPerSlot * maxBlendingSlots);
+        uint256 blendingLimit = lab.fetchBlendingLimit();
+        uint256 maxReJu = (reJuNeededPerSlot * blendingLimit);
 
         uint256 earnedReJu = ((reJuPerBlock * r.visit.multiplier) *
-            (block.number - r.visit.depositBlock)) + r.remainderReJu;
+            (block.number - r.visit.depositBlock));
+        //  + r.remainderReJu;
 
+        // uint256 usableReJu;
         if (earnedReJu > maxReJu) {
             earnedReJu = maxReJu;
         }
+        //  else {
+        //     usableReJu = earnedReJu;
+        // }
 
-        uint256 regainedSlots = earnedReJu / reJuNeededPerSlot;
+        uint256 regainedSlots = earnedReJu / reJuNeededPerSlot; // make sure rounds down
 
-        // ReJu carries over if nft withdrawn before max rejuvenation
-        uint256 remainderReJu = earnedReJu -
-            (regainedSlots * reJuNeededPerSlot);
+        // // ReJu carries over if nft withdrawn before max rejuvenation
+        // uint256 remainderReJu = earnedReJu -
+        //     (regainedSlots * reJuNeededPerSlot);
 
-        return (earnedReJu, regainedSlots, remainderReJu);
+        return (earnedReJu, regainedSlots);
+        // , remainderReJu);
     }
 
-    function _restoreBlendingSlots(uint256 _tokenId)
-        private
-    //only LRejuvenation
-    {
+    function _restoreBlendingSlots(uint256 _legendId) private {
         (
             uint256 earnedReJu, // needed to return ?
-            uint256 regainedSlots,
-            uint256 remainderReJu
-        ) = _calculateRejuvenation(_tokenId);
+            uint256 regainedSlots // uint256 remainderReJu
+        ) = _calculateRejuvenation(_legendId);
 
-        uint256 currentOffspringCount = lab.fetchBlendingCount(_tokenId);
+        uint256 currentOffspringCount = lab.fetchBlendingCount(_legendId);
         // uint256 currentOffspringCount = nft
-        //     .fetchLegendMetadata(_tokenId)
+        //     .fetchLegendMetadata(_legendId)
         //     .blendingInstancesUsed;
         uint256 newOffspringCount = currentOffspringCount - regainedSlots;
 
-        // lab.restoreBreedingSlots(_tokenId) = newOffspringCount; // inside nft.sol ; only reju
+        lab.restoreBlendingSlots(_legendId, regainedSlots);
+        //  = newOffspringCount; // inside nft.sol ; only reju
 
-        rejuvenationPod[_tokenId].remainderReJu = remainderReJu;
+        // rejuvenationPod[_legendId].remainderReJu = remainderReJu;
     }
 
     //TODO:FE: Alert user when max is reach rejuvenation will stop
-    function fetchRejuvenationProgress(uint256 tokenId)
+    function fetchRejuvenationProgress(uint256 legendId)
         public
         view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
+        returns (uint256, uint256)
+    // unt256
     {
-        return (_calculateRejuvenation(tokenId));
+        return (_calculateRejuvenation(legendId));
     }
 
     //TODO: setters
