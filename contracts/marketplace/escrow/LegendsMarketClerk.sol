@@ -6,7 +6,7 @@
  * These changes were made primarily to facilitate auctions
  */
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 import "./LegendsEscrow.sol";
 
 /**
@@ -37,51 +37,6 @@ abstract contract LegendsMarketClerk {
         _escrow = new LegendsEscrow();
     }
 
-    /**
-     * @dev Withdraw accumulated payments, forwarding all gas to the recipient.
-     *
-     * Note that _any_ account can call this function, not just the `payee`.
-     * This means that contracts unaware of the `PullPayment` protocol can still
-     * receive funds this way, by having a separate account call
-     * {withdrawPayments}.
-     *
-     * WARNING: Forwarding all gas opens the door to reentrancy vulnerabilities.
-     * Make sure you trust the recipient, or are either following the
-     * checks-effects-interactions pattern or using {ReentrancyGuard}.
-     *
-     * @param payee Whose payments will be withdrawn.
-     */
-
-    function _withdrawPayments(address payable payee) internal virtual {
-        _escrow.withdraw(payee);
-    }
-
-    function _withdrawBid(uint256 listingId, address payable payee)
-        internal
-        virtual
-    {
-        require(_canWithdrawBid[listingId][payee], "Not authorized");
-        _escrow.refundBid(listingId, payee);
-    }
-
-    function _withdrawRoyalties(address payable payee) internal virtual {
-        _escrow.withdrawRoyalties(payee);
-    }
-
-    /**
-     * @dev Returns the payments owed to an address.
-     * @param dest The creditor's address.
-     */
-
-    function payments(address dest) public view returns (uint256) {
-        // these getters could be cut and fetched directly if more space is needed in contract
-        return _escrow.depositsOf(dest);
-    }
-
-    function accruedRoyalties(address _payee) public view returns (uint256) {
-        return _escrow.royaltiesOf(_payee);
-    }
-
     /*/*
      * @dev Called by the payer to store the sent amount as credit to be pulled.
      * Funds sent in this way are stored in an intermediate {Escrow} contract, so
@@ -105,6 +60,25 @@ abstract contract LegendsMarketClerk {
         );
     }
 
+    /**
+     * @dev Withdraw accumulated payments, forwarding all gas to the recipient.
+     *
+     * Note that _any_ account can call this function, not just the `payee`.
+     * This means that contracts unaware of the `PullPayment` protocol can still
+     * receive funds this way, by having a separate account call
+     * {withdrawPayments}.
+     *
+     * WARNING: Forwarding all gas opens the door to reentrancy vulnerabilities.
+     * Make sure you trust the recipient, or are either following the
+     * checks-effects-interactions pattern or using {ReentrancyGuard}.
+     *
+     * @param payee Whose payments will be withdrawn.
+     */
+
+    function _withdrawPayments(address payable payee) internal virtual {
+        _escrow.withdraw(payee);
+    }
+
     function _asyncTransferBid(
         uint256 _listingId,
         address _payer,
@@ -113,8 +87,20 @@ abstract contract LegendsMarketClerk {
         _escrow.depositBid{value: _amount}(_listingId, _payer);
     }
 
+    function _withdrawBid(uint256 listingId, address payable payee)
+        internal
+        virtual
+    {
+        require(_canWithdrawBid[listingId][payee], "Not authorized");
+        _escrow.refundBid(listingId, payee);
+    }
+
     function _closeBid(uint256 _listingId, address _payer) internal virtual {
         _escrow.closeBid(_listingId, _payer);
+    }
+
+    function _withdrawRoyalties(address payable payee) internal virtual {
+        _escrow.withdrawRoyalties(payee);
     }
 
     // function _asyncTransferRoyalty(address payee, uint256 amount)
@@ -123,4 +109,18 @@ abstract contract LegendsMarketClerk {
     // {
     //     _escrow.depositRoyalty{value: amount}(payee);
     // }
+
+    /**
+     * @dev Returns the payments owed to an address.
+     * @param dest The creditor's address.
+     */
+
+    function payments(address dest) public view returns (uint256) {
+        // these getters could be cut and fetched directly if more space is needed in contract
+        return _escrow.depositsOf(dest);
+    }
+
+    function accruedRoyalties(address _payee) public view returns (uint256) {
+        return _escrow.royaltiesOf(_payee);
+    }
 }

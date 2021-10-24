@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "./LegendSale.sol";
 
@@ -12,11 +12,26 @@ abstract contract LegendAuction is LegendSale {
         uint256 startingPrice;
         uint256 highestBid;
         address payable highestBidder;
-        address[] bidders; // ? take array out (use mapping bid ?) ;; seperate so no risk of breaking rest of struct
+        // address[] bidders; // ? take array out (use mapping bid ?) ;; seperate so no risk of breaking rest of struct
         bool isInstantBuy;
     }
 
-    // mapping(uint256 => address[]) internal listBidders; // for debug
+    uint256 internal _auctionExtension = 600;
+
+    /* listingId => auctionDetails*/
+    mapping(uint256 => AuctionDetails) internal auctionDetails; //TODO: make getter, possibly with all below details
+
+    /* listingId => instantBuyPrice */
+    mapping(uint256 => uint256) internal instantBuyPrice;
+
+    /* listingId => bidderAddresses */
+    mapping(uint256 => address[]) internal bidders;
+
+    /* listingId => bidderAddress => previouslyPlacedBid */
+    mapping(uint256 => mapping(address => bool)) internal exists;
+
+    /* listingId => bidderAddress => bidAmount*/
+    mapping(uint256 => mapping(address => uint256)) internal bidPlaced; //TODO: make getter
 
     event AuctionExpired(uint256 listingId, string); //TODO:
     event AuctionExtended(uint256 listingId, uint256 newDuration);
@@ -26,22 +41,6 @@ abstract contract LegendAuction is LegendSale {
         uint256 newHighestBid
     );
 
-    mapping(uint256 => uint256) public instantBuyPrice; // needs to be internal
-    mapping(uint256 => AuctionDetails) public auctionDetails; // public for testing, needs internal
-
-    //TODO: ? change to bid
-    // mapping(address => uint256) internal bids; // debug bid
-    mapping(uint256 => mapping(address => uint256)) internal bids; //TODO: make getter
-    mapping(uint256 => mapping(address => bool)) internal exists;
-
-    // function fetchBidders(uint256 listingId)
-    //     public
-    //     view
-    //     returns (address[] memory)
-    // {
-    //     return listBidders[listingId];
-    // }
-
     function _createLegendAuction(
         address _nftContract,
         uint256 _legendId,
@@ -50,17 +49,16 @@ abstract contract LegendAuction is LegendSale {
         uint256 _instantPrice
     ) internal {
         _listingIds.increment();
-        uint256 _listingId = _listingIds.current();
+        uint256 listingId = _listingIds.current();
 
         bool isInstantBuy;
-
         if (_instantPrice != 0) {
             isInstantBuy = true;
-            instantBuyPrice[_listingId] = _instantPrice;
+            instantBuyPrice[listingId] = _instantPrice;
         }
 
-        LegendListing storage l = legendListing[_listingId];
-        l.listingId = _listingId;
+        LegendListing storage l = legendListing[listingId];
+        l.listingId = listingId;
         l.createdAt = block.timestamp;
         l.nftContract = _nftContract;
         l.legendId = _legendId;
@@ -69,36 +67,35 @@ abstract contract LegendAuction is LegendSale {
         l.isAuction = true;
         l.status = ListingStatus.Open;
 
-        AuctionDetails storage a = auctionDetails[_listingId];
+        AuctionDetails storage a = auctionDetails[listingId];
         a.duration = _duration;
         a.startingPrice = _startingPrice;
         a.isInstantBuy = isInstantBuy;
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Open);
+        emit ListingStatusChanged(listingId, ListingStatus.Open);
     }
 
     function _placeBid(uint256 _listingId, uint256 _bidAmount) internal {
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        bids[_listingId][msg.sender] += _bidAmount;
+        bidPlaced[_listingId][msg.sender] += _bidAmount;
 
         if (!exists[_listingId][msg.sender]) {
-            a.bidders.push(msg.sender);
+            bidders[_listingId].push(msg.sender);
             exists[_listingId][msg.sender] = true;
         }
 
         a.highestBid = _bidAmount;
         a.highestBidder = payable(msg.sender);
 
-        // this should error when tested
         if (_shouldExtend(_listingId)) {
             if (_bidAmount >= instantBuyPrice[_listingId]) {
-                a.duration = (a.duration + 600); // TODO: make extension a state variable
+                a.duration = (a.duration + _auctionExtension);
 
-                emit AuctionExtended(_listingId, a.duration);
+                emit AuctionExtended(_listingId, a.duration); // event shows old duration or new? should event only emit listingId?
             }
         }
-        // emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
+        emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
     }
 
     function _closeAuction(uint256 _listingId) internal {
@@ -109,11 +106,11 @@ abstract contract LegendAuction is LegendSale {
         l.price = a.highestBid;
         l.status = ListingStatus.Closed;
 
-        _legendOwed[_listingId][a.highestBidder] = l.legendId; 
+        _legendOwed[_listingId][a.highestBidder] = l.legendId;
 
         _listingsClosed.increment();
 
-        // emit ListingStatusChanged(_listingId, ListingStatus.Closed);
+        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
     }
 
     function isExpired(uint256 _listingId) public view returns (bool) {
@@ -135,10 +132,9 @@ abstract contract LegendAuction is LegendSale {
         uint256 expirationTime = legendListing[_listingId].createdAt +
             auctionDetails[_listingId].duration;
 
-        uint256 extensionTime = 600; // 10 minute window ; TODO: make state variable
         if (
             block.timestamp < expirationTime &&
-            block.timestamp >= (expirationTime - extensionTime)
+            block.timestamp > (expirationTime - _auctionExtension)
         ) {
             shouldExtend = true;
         }

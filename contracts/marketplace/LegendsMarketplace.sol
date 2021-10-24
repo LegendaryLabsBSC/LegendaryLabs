@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../lab/LegendsLaboratory.sol";
@@ -33,17 +33,11 @@ contract LegendsMarketplace is
         address _nftContract,
         uint256 _legendId,
         uint256 _price
-    ) external payable nonReentrant {
+    ) external nonReentrant {
         IERC721 legendsNFT = IERC721(_nftContract);
 
-        require(
-            lab.fetchIsListable(_legendId)
-            //, "Not eligible"
-        );
-        require(
-            _price != 0
-            //, "Price can not be 0"
-        );
+        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for testing
+        require(_price != 0, "Price can not be 0");
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
@@ -53,7 +47,7 @@ contract LegendsMarketplace is
     function buyLegend(uint256 _listingId) external payable nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
-        require(l.status == ListingStatus.Open);
+        require(l.status == ListingStatus.Open, "Listing Closed");
         require(msg.sender != l.seller, "Seller can not buy");
         require(msg.value == l.price, "Incorrect price submitted for item");
 
@@ -71,8 +65,8 @@ contract LegendsMarketplace is
 
         address legendOwner = legendsNFT.ownerOf(_legendId);
 
-        require(msg.sender != legendOwner); // use if room
-        require(lab.fetchIsHatched(_legendId), "Not eligible");
+        require(msg.sender != legendOwner, "Already Owned");
+        // require(lab.fetchIsHatched(_legendId), "Not eligible"); // commented out for testing
         require(msg.value > 0, "Price can not be 0");
 
         uint256 listingId = _makeLegendOffer(
@@ -88,21 +82,21 @@ contract LegendsMarketplace is
 
     function decideLegendOffer(uint256 _listingId, bool _isAccepted)
         external
-        payable
         nonReentrant
     {
+        // test owner with multiple offers for same legend ; make sure cant accept both
         LegendListing memory l = legendListing[_listingId];
 
         IERC721 legendsNFT = IERC721(l.nftContract);
 
-        require(l.status == ListingStatus.Open);
+        require(l.status == ListingStatus.Open, "Listing Closed");
         require(
             block.timestamp < offerDetails[_listingId].expirationTime,
             "Offer is expired"
         );
         require(
-            legendsNFT.ownerOf(l.legendId) == msg.sender &&
-                msg.sender == offerDetails[_listingId].legendOwner, // if token is traded before offer A/D ...
+            msg.sender == legendsNFT.ownerOf(l.legendId) &&
+                msg.sender == offerDetails[_listingId].legendOwner, // If token is traded before offer A/D ...
             "Not authorized"
         );
 
@@ -125,10 +119,10 @@ contract LegendsMarketplace is
         uint256 _duration,
         uint256 _startingPrice,
         uint256 _instantPrice
-    ) external payable nonReentrant {
+    ) external nonReentrant {
         IERC721 legendsNFT = IERC721(_nftContract);
 
-        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for debugging
+        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for testing
         require(_startingPrice > 0, "Price can not be 0");
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
@@ -146,13 +140,13 @@ contract LegendsMarketplace is
         LegendListing storage l = legendListing[_listingId];
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        require(l.status == ListingStatus.Open);
+        require(l.status == ListingStatus.Open, "Listing Closed");
         require(!isExpired(_listingId), "Auction has expired");
         require(msg.sender != l.seller, "Can not bid");
 
-        uint256 bidAmount = bids[_listingId][msg.sender] + msg.value;
+        uint256 bidAmount = bidPlaced[_listingId][msg.sender] + msg.value;
 
-        if (a.bidders.length == 0) {
+        if (bidders[_listingId].length == 0) {
             require(
                 msg.value >= a.startingPrice,
                 "Minimum price not met" // test for >= flaws
@@ -168,7 +162,6 @@ contract LegendsMarketplace is
 
         _asyncTransferBid(_listingId, payable(msg.sender), msg.value);
 
-        // Allow previous highest bidder to reclaim or increase their bid
         _canWithdrawBid[_listingId][a.highestBidder] = true;
 
         _placeBid(_listingId, bidAmount);
@@ -185,7 +178,7 @@ contract LegendsMarketplace is
         // require(msg.sender != legendListing[_listingId].seller); // make sure not needed
 
         if (legendListing[_listingId].isAuction) {
-            bids[_listingId][msg.sender] = 0;
+            bidPlaced[_listingId][msg.sender] = 0;
         }
 
         _withdrawBid(_listingId, payable(msg.sender)); // test this being here
@@ -205,10 +198,7 @@ contract LegendsMarketplace is
         }
 
         if (l.isAuction) {
-            require(
-                auctionDetails[_listingId].bidders.length == 0,
-                "Bids already placed"
-            );
+            require(bidders[_listingId].length == 0, "Bids already placed");
         }
 
         if (l.isOffer) {
@@ -293,9 +283,6 @@ contract LegendsMarketplace is
     function _claimLegend(uint256 _listingId) internal nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
-        // require(msg.sender == l.buyer);
-        // require(l.status == ListingStatus.Closed);
-
         uint256 legendOwed = _legendOwed[_listingId][l.buyer];
         require(legendOwed != 0, "No Legend Owed"); // make sure can not do again without paying gas to see error
 
@@ -306,9 +293,6 @@ contract LegendsMarketplace is
 
     function _claimPayment(uint256 _listingId) internal nonReentrant {
         LegendListing memory l = legendListing[_listingId];
-
-        // require(msg.sender == l.seller);
-        // require(l.status == ListingStatus.Closed);
 
         uint256 amount = payments(l.seller);
         require(amount != 0, "Address is owed 0"); // make sure can not do again without paying gas to see error
@@ -343,20 +327,6 @@ contract LegendsMarketplace is
         return (marketplaceFee, legendCreator, royaltyFee);
     }
 
-    // function fetchListingCounts()
-    //     public
-    //     view
-    //     returns (Counters.Counter[3] memory)
-    // {
-    //     Counters.Counter[3] memory counts = [
-    //         _listingIds,
-    //         _listingsClosed,
-    //         _listingsCancelled
-    //     ];
-
-    //     return counts;
-    // }
-
     function fetchListingCounts()
         public
         view
@@ -383,5 +353,13 @@ contract LegendsMarketplace is
 
     function setMarketplaceFee(uint256 _newFee) public onlyLab {
         _marketplaceFee = _newFee;
+    }
+
+    function setOfferDuration(uint256 _newDuration) public onlyLab {
+        offerDuration = _newDuration;
+    }
+
+    function setAuctionExtension(uint256 _newDuration) public onlyLab {
+        _auctionExtension = _newDuration;
     }
 }

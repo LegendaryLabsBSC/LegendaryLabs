@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./LegendListing.sol";
 
@@ -57,8 +57,8 @@ abstract contract LegendSale is ILegendListing {
     function _buyLegend(uint256 _listingId) internal {
         LegendListing storage l = legendListing[_listingId];
 
-        l.buyer = payable(msg.sender);
         l.status = ListingStatus.Closed;
+        l.buyer = payable(msg.sender);
 
         _legendOwed[_listingId][payable(msg.sender)] = l.legendId;
 
@@ -101,8 +101,8 @@ abstract contract LegendSale is ILegendListing {
         LegendListing storage l = legendListing[_listingId];
 
         if (_isAccepted) {
-            l.seller = payable(msg.sender);
             l.status = ListingStatus.Closed;
+            l.seller = payable(msg.sender);
 
             offerDetails[_listingId].isAccepted = true;
 

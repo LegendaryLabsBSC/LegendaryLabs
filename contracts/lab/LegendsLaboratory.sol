@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../legend/LegendsNFT.sol";
@@ -137,6 +137,14 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     function setMarketplaceFee(uint256 newFee) public onlyOwner {
         legendsMarketplace.setMarketplaceFee(newFee);
+    }
+
+    function setOfferDuration(uint256 _newDuration) public onlyOwner {
+        legendsMarketplace.setOfferDuration(_newDuration);
+    }
+
+    function setAuctionExtension(uint256 _newDuration) public onlyOwner {
+        legendsMarketplace.setAuctionExtension(_newDuration);
     }
 
     function setMatchingBoardFee(uint256 newFee) public onlyOwner {
