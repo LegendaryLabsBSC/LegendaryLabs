@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../legend/LegendsNFT.sol";
@@ -131,17 +131,52 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //     legendsNFT.mintPromo(receiver, prefix, postfix, dna);
     // }
 
+    function setRoyaltyFee(uint256 _newFee) public onlyOwner {
+        legendsMarketplace.setRoyaltyFee(_newFee);
+    }
+
     function setMarketplaceFee(uint256 newFee) public onlyOwner {
         legendsMarketplace.setMarketplaceFee(newFee);
     }
 
-    function fetchRoyaltyRecipient(uint256 _tokenId)
+    function setOfferDuration(uint256 _newDuration) public onlyOwner {
+        legendsMarketplace.setOfferDuration(_newDuration);
+    }
+
+    function setAuctionExtension(uint256 _newDuration) public onlyOwner {
+        legendsMarketplace.setAuctionExtension(_newDuration);
+    }
+
+    function setMatchingBoardFee(uint256 newFee) public onlyOwner {
+        legendsMatchingBoard.setMatchingBoardFee(newFee);
+    }
+
+    function fetchRoyaltyRecipient(uint256 _legendId)
         public
         view
         returns (address payable)
     //onlyMarketplace //TODO: in access control rework
     {
-        return legendsNFT.fetchTokenMetadata(_tokenId).legendCreator;
+        return legendsNFT.fetchTokenMetadata(_legendId).legendCreator;
+    }
+
+    //TODO: change is-es to query
+    function fetchIsListable(uint256 _legendId)
+        public
+        view
+        returns (bool)
+    //onlyMarketplace //TODO: in access control rework
+    {
+        return legendsNFT.isListable(_legendId);
+    }
+
+    function fetchIsHatched(uint256 _legendId)
+        public
+        view
+        returns (bool)
+    //onlyMarketplace //TODO: in access control rework
+    {
+        return legendsNFT.isHatched(_legendId);
     }
 
     // function fetchOffspringCount(uint256 _tokenId)

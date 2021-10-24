@@ -190,14 +190,6 @@ function App() {
       console.log('IPFS URI: ', legendURI)
     }
   }
-
-  async function fetget() {
-    if (typeof window.ethereum !== 'undefined') {
-      const legendURI = await contract.nft.read.legendGenetics(id)
-      console.log(legendURI.toString())
-    }
-  }
-
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
       // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
@@ -456,8 +448,9 @@ function App() {
       const o = await contract.marketplace.read.offerDetails(id)
 
       console.log(`Listing ID: ${l.listingId}`)
+      console.log(`Created At: ${l.createdAt}`)
       console.log(`Contract: ${l.nftContract}`)
-      console.log(`Token ID: ${l.tokenId}`)
+      console.log(`Legend ID: ${l.legendId}`)
       console.log(`Seller: ${l.seller}`)
       console.log(`Buyer: ${l.buyer}`)
       console.log(`Price: ${l.price}`)
@@ -474,45 +467,17 @@ function App() {
       }
       console.log('')
       if (l.isAuction) {
-        console.log(`Created At: ${a.createdAt}`)
         console.log(`Duration: ${a.duration}`)
         console.log(`Starting Price: ${a.startingPrice}`)
         console.log(`Highest Bid: ${a.highestBid}`)
         console.log(`Highest Bidder: ${a.highestBidder}`)
-        console.log('Bidders:', a.bidders)
-
-        // const newArr = []
-        // contract.marketplace.read.auctionDetails(id).then((auction) => {
-        //   const bidder = auction.bidders
-        //   loadBidders(bidder).then((res) => {
-        //     newArr.push(res)
-        //   })
-        // })
-        // setBidders(newArr)
-        // console.log(bidders)
-
-        // // const newArr = []
-        // // await contract.marketplace.read.auctionDetails(id).then((res) => {
-        // //   newArr.push(res.bidders)
-        // // })
-
-        // // console.log(newArr)
-
-        // // const newArr = []
-        // // a.map((i) => newArr.push(i))
-        // // console.log(newArr)
-
-        // // const biddys = await a.bidders
-        // // a.bidders.map((i) => newArr.push(i))
-        // // console.log(a)
-
+        console.log(`Bidders: ${a.bidders}`)
         console.log(`Instant Buy: ${a.instantBuy}`)
         console.log('')
       }
       if (l.isOffer) {
-        console.log(`Place At: ${o.placedAt}`)
         console.log(`Expiration Time: ${o.expirationTime}`)
-        console.log(`Token Owner: ${o.tokenOwner}`)
+        console.log(`Legend Owner: ${o.legendOwner}`)
         console.log(`Is Accepted: ${o.isAccepted}`)
         console.log('')
       }
@@ -549,9 +514,14 @@ function App() {
   /**
    * Auction Start
    */
+
+  const approveTransaction = async () => {
+    await contract.nft.write.approve(legendsMarketplace, id)
+  }
+
   async function createLegendAuction() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.nft.write.approve(legendsMarketplace, id)
+      // await contract.nft.write.approve(legendsMarketplace, id)
 
       // const duration = _duration * 86400
       const testDuration = 650 // seconds
@@ -674,9 +644,9 @@ function App() {
   /**
    * Matching Start
    */
-  const approve = async () => {
-    await contract.nft.write.approve(legendsMatchingBoard, id)
-  }
+  // const approveTransaction = async () => {
+  //   await contract.nft.write.approve(legendsMatchingBoard, id)
+  // }
 
   async function createLegendMatching() {
     if (typeof window.ethereum !== 'undefined') {
@@ -686,7 +656,7 @@ function App() {
         await transaction.wait
       }
 
-      approve().then(() => {
+      approveTransaction().then(() => {
         create()
       })
     }
@@ -832,9 +802,6 @@ function App() {
           <button type="submit" onClick={fetchRedeemableTickets}>
             Fetch Redeemable Tickets
           </button>
-          <button type="submit" onClick={fetget}>
-            Fetget
-          </button>
         </div>
         <br />
         <div>
@@ -939,9 +906,9 @@ function App() {
           <button type="submit" onClick={rejectLegendOffer}>
             Reject Offer
           </button>
-          {/* <button type="submit" onClick={approveTransaction}>
+          <button type="submit" onClick={approveTransaction}>
             Approve Transaction
-          </button> */}
+          </button>
           <br />
           <input type="number" placeholder="Listing ID" onChange={(e) => setID(e.target.value)} />
           <input type="number" placeholder="Bid Amount(BSC)" onChange={(e) => setBid(e.target.value)} />

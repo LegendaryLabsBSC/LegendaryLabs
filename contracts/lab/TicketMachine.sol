@@ -26,7 +26,7 @@ abstract contract TicketMachine {
         uint256 expireTime;
         bool isUnrestricted; // if unrestricted then one per
         bool promoClosed; // ticket can be redeemed after expire but not after close
-        Counters.Counter ticketsClaimed;
+        Counters.Counter ticketsClaimed; // makes these just uint256 and assign from a counter
         Counters.Counter ticketsRedeemed;
     }
 

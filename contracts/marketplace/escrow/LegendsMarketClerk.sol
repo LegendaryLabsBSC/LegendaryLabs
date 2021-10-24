@@ -6,7 +6,7 @@
  * These changes were made primarily to facilitate auctions
  */
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 import "./LegendsEscrow.sol";
 
 /**
@@ -27,13 +27,37 @@ import "./LegendsEscrow.sol";
  * instead of Solidity's `transfer` function. Payees can query their due
  * payments with {payments}, and retrieve them with {withdrawPayments}.
  */
-abstract contract LegendsAuctioneer {
+abstract contract LegendsMarketClerk {
     LegendsEscrow private immutable _escrow;
 
-    mapping(uint256 => mapping(address => bool)) internal _withdrawAllowed;
+    /* listingId => bidderAddress => canWithdrawBid? */
+    mapping(uint256 => mapping(address => bool)) internal _canWithdrawBid;
 
     constructor() {
         _escrow = new LegendsEscrow();
+    }
+
+    /*/*
+     * @dev Called by the payer to store the sent amount as credit to be pulled.
+     * Funds sent in this way are stored in an intermediate {Escrow} contract, so
+     * there is no danger of them being spent before withdrawal.
+     *
+     * @param dest The destination address of the funds.
+     * @param amount The amount to transfer.
+     */
+    function _asyncTransfer(
+        address payable _payee, // change to seller ?
+        uint256 _amount,
+        uint256 _marketplaceFee,
+        uint256 _royaltyFee,
+        address payable _legendCreator
+    ) internal virtual {
+        _escrow.deposit{value: _amount}(
+            _payee,
+            _marketplaceFee,
+            _royaltyFee,
+            _legendCreator
+        );
     }
 
     /**
@@ -51,80 +75,52 @@ abstract contract LegendsAuctioneer {
      * @param payee Whose payments will be withdrawn.
      */
 
-    function _withdrawPayments(uint256 listingId, address payable payee)
-        internal
-        virtual
-    {
-        require(_withdrawAllowed[listingId][payee], "Not authorized");
+    function _withdrawPayments(address payable payee) internal virtual {
         _escrow.withdraw(payee);
+    }
+
+    function _asyncTransferBid(
+        uint256 _listingId,
+        address _payer,
+        uint256 _amount
+    ) internal virtual {
+        _escrow.depositBid{value: _amount}(_listingId, _payer);
     }
 
     function _withdrawBid(uint256 listingId, address payable payee)
         internal
         virtual
     {
-        require(_withdrawAllowed[listingId][payee], "Not authorized");
+        require(_canWithdrawBid[listingId][payee], "Not authorized");
         _escrow.refundBid(listingId, payee);
+    }
+
+    function _closeBid(uint256 _listingId, address _payer) internal virtual {
+        _escrow.closeBid(_listingId, _payer);
     }
 
     function _withdrawRoyalties(address payable payee) internal virtual {
         _escrow.withdrawRoyalties(payee);
     }
 
+    // function _asyncTransferRoyalty(address payee, uint256 amount)
+    //     internal
+    //     virtual
+    // {
+    //     _escrow.depositRoyalty{value: amount}(payee);
+    // }
+
     /**
      * @dev Returns the payments owed to an address.
      * @param dest The creditor's address.
      */
+
     function payments(address dest) public view returns (uint256) {
+        // these getters could be cut and fetched directly if more space is needed in contract
         return _escrow.depositsOf(dest);
     }
 
-    function royalties(address payee) public view returns (uint256) {
-        return _escrow.royaltiesOf(payee);
-    }
-
-    /*/*
-     * @dev Called by the payer to store the sent amount as credit to be pulled.
-     * Funds sent in this way are stored in an intermediate {Escrow} contract, so
-     * there is no danger of them being spent before withdrawal.
-     *
-     * @param dest The destination address of the funds.
-     * @param amount The amount to transfer.
-     */
-    function _asyncTransfer(address payee, uint256 amount) internal virtual {
-        _escrow.deposit{value: amount}(payee);
-    }
-
-    function _asyncTransferBid(
-        uint256 listingId,
-        address payer,
-        uint256 amount
-    ) internal virtual {
-        _escrow.depositBid{value: amount}(listingId, payer);
-    }
-
-    function _asyncTransferRoyalty(address payee, uint256 amount)
-        internal
-        virtual
-    {
-        _escrow.depositRoyalty{value: amount}(payee);
-    }
-
-    function _obligateBid(
-        uint256 listingId,
-        address buyer,
-        address seller,
-        uint256 marketFee,
-        uint256 royaltyFee,
-        address legendCreator
-    ) internal virtual {
-        _escrow.obligateBid(
-            listingId,
-            buyer,
-            payable(seller),
-            marketFee,
-            royaltyFee,
-            payable(legendCreator)
-        );
+    function accruedRoyalties(address _payee) public view returns (uint256) {
+        return _escrow.royaltiesOf(_payee);
     }
 }

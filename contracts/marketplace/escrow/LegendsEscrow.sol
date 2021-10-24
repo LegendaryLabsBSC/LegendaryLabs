@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
@@ -29,101 +29,49 @@ import "@openzeppelin/contracts/utils/Address.sol";
 contract LegendsEscrow is Ownable {
     using Address for address payable;
 
+    address payable marketplace;
+
+    /* payeeAddress => paymentsOwed */
+    mapping(address => uint256) private _paymentOwed;
+
+    /* legendCreator => royaltiesOwed */
+    mapping(address => uint256) private _royaltiesOwed;
+
+    /* listingId => bidderAddress => bidAmount  */
+    mapping(uint256 => mapping(address => uint256)) private _pendingBid;
+
+    //TODO: reeval events
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
     event BidRefunded(uint256 listingId, address bidder, uint256 bidAmount);
 
-    mapping(address => uint256) private _paymentOwed;
-    mapping(address => uint256) private _royaltiesOwed;
-    mapping(uint256 => mapping(address => uint256)) private _pendingBid;
-
-    //TODO: change name; paymentsOwed ?
-    function depositsOf(address payee) public view returns (uint256) {
-        return _paymentOwed[payee];
-    }
-
-    //TODO:
-    // function bidsOf(uint256 listingId, address payee)
-    //     public
-    //     view
-    //     returns (uint256)
-    // {
-    //     return _paymentOwed[payee];
-    // }
-
-    function royaltiesOf(address payee) public view returns (uint256) {
-        return _royaltiesOwed[payee];
+    constructor() {
+        marketplace = payable(msg.sender);
     }
 
     /**
      * @dev Stores the sent amount as credit to be withdrawn.
-     * @param payee The destination address of the funds.
+     * @param _payee The destination address of the funds.
      */
-    function deposit(address payee) public payable virtual onlyOwner {
-        uint256 amount = msg.value;
-
-        _paymentOwed[payee] += amount;
-
-        // emit Deposited(payee, amount);
-    }
-
-    function depositBid(uint256 listingId, address payer)
-        public
-        payable
-        virtual
-        onlyOwner
-    {
-        uint256 amount = msg.value;
-
-        _pendingBid[listingId][payer] = amount; // try without + for increase bid issue
-
-        // emit Deposited(payer, amount);
-    }
-
-    function depositRoyalty(address payee) public payable virtual onlyOwner {
-        uint256 amount = msg.value;
-
-        _royaltiesOwed[payee] += amount;
-
-        // emit Deposited(payee, amount);
-    }
-
-    function obligateBid(
-        uint256 listingId,
-        address buyer,
-        address payable seller,
-        uint256 marketFee,
-        uint256 royaltyFee,
-        address payable tokenCreator
+    function deposit(
+        address payable _payee,
+        uint256 _marketplaceFee,
+        uint256 _royaltyFee,
+        address payable _legendCreator
     ) public payable virtual onlyOwner {
-        uint256 amount = _pendingBid[listingId][buyer];
+        // uint256 amount = msg.value;
 
-        //marketplace fee
+        marketplace.call{value: _marketplaceFee};
 
-        if (royaltyFee != 0) {
-            _royaltiesOwed[tokenCreator] += royaltyFee;
+        if (_royaltyFee != 0) {
+            _royaltiesOwed[_legendCreator] += _royaltyFee;
         }
 
-        uint256 finalAmount = amount - (marketFee + royaltyFee);
+        uint256 payment = msg.value - (_marketplaceFee + _royaltyFee);
 
-        _pendingBid[listingId][buyer] = 0;
+        _paymentOwed[_payee] += payment;
 
-        _paymentOwed[seller] += finalAmount;
-    }
-
-    function refundBid(uint256 listingId, address payable bidder)
-        public
-        payable
-        virtual
-        onlyOwner
-    {
-        uint256 amount = _pendingBid[listingId][bidder];
-
-        _pendingBid[listingId][bidder] = 0;
-
-        bidder.sendValue(amount);
-
-        emit BidRefunded(listingId, msg.sender, amount); // ! will show 0 payments not set up for bidders
+        // emit Deposited(_payee, amount);
     }
 
     /**
@@ -146,6 +94,50 @@ contract LegendsEscrow is Ownable {
         // emit Withdrawn(payee, payment);
     }
 
+    function depositBid(uint256 _listingId, address _payer)
+        public
+        payable
+        virtual
+        onlyOwner
+    {
+        uint256 amount = msg.value;
+
+        _pendingBid[_listingId][_payer] += amount;
+
+        emit Deposited(_payer, amount);
+    }
+
+    function refundBid(uint256 listingId, address payable bidder)
+        public
+        payable
+        virtual
+        onlyOwner
+    {
+        uint256 amount = _pendingBid[listingId][bidder];
+
+        _pendingBid[listingId][bidder] = 0;
+
+        bidder.sendValue(amount);
+
+        emit BidRefunded(listingId, msg.sender, amount); // ! will show 0 payments not set up for bidders
+    }
+
+    function closeBid(uint256 _listingId, address _buyer)
+        public
+        virtual
+        onlyOwner
+    {
+        _pendingBid[_listingId][_buyer] = 0;
+    }
+
+    function depositRoyalty(address payee) public payable virtual onlyOwner {
+        uint256 amount = msg.value;
+
+        _royaltiesOwed[payee] += amount;
+
+        // emit Deposited(payee, amount);
+    }
+
     function withdrawRoyalties(address payable payee) external onlyOwner {
         uint256 payment = _royaltiesOwed[payee];
 
@@ -154,5 +146,23 @@ contract LegendsEscrow is Ownable {
         payee.sendValue(payment);
 
         // emit Withdrawn(payee, payment);
+    }
+
+    //TODO: change name; paymentsOwed ?
+    function depositsOf(address _payee) public view returns (uint256) {
+        return _paymentOwed[_payee];
+    }
+
+    //TODO:
+    function bidOf(uint256 _listingId, address _payee)
+        public
+        view
+        returns (uint256)
+    {
+        return _pendingBid[_listingId][_payee];
+    }
+
+    function royaltiesOf(address _payee) public view returns (uint256) {
+        return _royaltiesOwed[_payee];
     }
 }
