@@ -23,6 +23,11 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     string private season = "Phoenix";
 
+    // modifier onlyPod() {
+    //     require(msg.sender == address(legendRejuvenation), "Not Pod");
+    //     _;
+    // }
+
     constructor() {}
 
     // for testing
@@ -141,13 +146,37 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsMatchingBoard.setMatchingBoardFee(newFee);
     }
 
+    function setMinimumSecure(uint256 _newMinimum) public onlyOwner {
+        legendRejuvenation.setMinimumSecure(_newMinimum);
+    }
+
+    function setMaxMultiplier(uint256 _newMax) public onlyOwner {
+        legendRejuvenation.setMaxMultiplier(_newMax);
+    }
+
+    function setReJuPerBlock(uint256 _newEmissionRate) public onlyOwner {
+        legendRejuvenation.setReJuPerBlock(_newEmissionRate);
+    }
+
+    function setReJuNeededPerSlot(uint256 _newAmount) public onlyOwner {
+        legendRejuvenation.setReJuNeededPerSlot(_newAmount);
+    }
+
+    function restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+        public
+    {
+        require(msg.sender == address(legendRejuvenation), "Not Pod");
+
+        legendsNFT.restoreBlendingSlots(_legendId, _regainedSlots);
+    }
+
     function fetchRoyaltyRecipient(uint256 _legendId)
         public
         view
         returns (address payable)
     //onlyMarketplace //TODO: in access control rework
     {
-        return legendsNFT.fetchTokenMetadata(_legendId).legendCreator;
+        return legendsNFT.fetchLegendMetadata(_legendId).legendCreator;
     }
 
     //TODO: change is-es to query
@@ -158,6 +187,14 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //onlyMarketplace //TODO: in access control rework
     {
         return legendsNFT.isListable(_legendId);
+    }
+
+    function fetchBlendingCount(uint256 _legendId)
+        public
+        view
+        returns (uint256)
+    {
+        return legendsNFT.fetchLegendMetadata(_legendId).blendingInstancesUsed;
     }
 
     function fetchIsHatched(uint256 _legendId)
@@ -184,6 +221,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     function fetchSeason() public view returns (string memory) {
         return season;
     }
+
+    // function fetchBlendingLimit() public view returns (uint256) {
+    //     return legendsNFT.fetchBlendingLimit();
+    // }
 
     // function fetchOffspringCount(uint256 _tokenId)
     //     public

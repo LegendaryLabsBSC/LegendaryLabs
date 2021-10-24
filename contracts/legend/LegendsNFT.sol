@@ -303,7 +303,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return _tokenURIs[_legendId];
     }
 
-    function fetchTokenMetadata(uint256 _legendId)
+    function fetchLegendMetadata(uint256 _legendId)
         public
         view
         returns (LegendMetadata memory)
@@ -322,6 +322,17 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         } else {
             return baseBlendingCost;
         }
+    }
+
+    // function fetchBlendingLimit() external view returns (uint256) {
+    //     return blendingLimit;
+    // }
+
+    function restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+        public
+        onlyLab
+    {
+        legendMetadata[_legendId].blendingInstancesUsed -= _regainedSlots;
     }
 
     function setKinBlendingLevel(uint256 _kinBlendingLevel)

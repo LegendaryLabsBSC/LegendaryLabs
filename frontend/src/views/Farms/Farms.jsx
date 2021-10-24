@@ -178,7 +178,7 @@ function App() {
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
       // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
-      const legendMeta = await contract.nft.read.fetchTokenMetadata(id)
+      const legendMeta = await contract.nft.read.fetchLegendMetadata(id)
       // const legendGenetics = await contract.nft.read.legendGenetics(id)
       // const legendStats = await contract.nft.read.legendStats(id)
       console.log('META:')
