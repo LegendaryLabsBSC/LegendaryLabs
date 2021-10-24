@@ -146,6 +146,22 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsMatchingBoard.setMatchingBoardFee(newFee);
     }
 
+    function setMinimumSecure(uint256 _newMinimum) public onlyOwner {
+        legendRejuvenation.setMinimumSecure(_newMinimum);
+    }
+
+    function setMaxMultiplier(uint256 _newMax) public onlyOwner {
+        legendRejuvenation.setMaxMultiplier(_newMax);
+    }
+
+    function setReJuPerBlock(uint256 _newEmissionRate) public onlyOwner {
+        legendRejuvenation.setReJuPerBlock(_newEmissionRate);
+    }
+
+    function setReJuNeededPerSlot(uint256 _newAmount) public onlyOwner {
+        legendRejuvenation.setReJuNeededPerSlot(_newAmount);
+    }
+
     function restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
         public
     {
@@ -206,9 +222,9 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         return season;
     }
 
-    function fetchBlendingLimit() public view returns (uint256) {
-        return legendsNFT.fetchBlendingLimit();
-    }
+    // function fetchBlendingLimit() public view returns (uint256) {
+    //     return legendsNFT.fetchBlendingLimit();
+    // }
 
     // function fetchOffspringCount(uint256 _tokenId)
     //     public
