@@ -303,7 +303,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return _tokenURIs[_legendId];
     }
 
-    function fetchTokenMetadata(uint256 _legendId)
+    function fetchLegendMetadata(uint256 _legendId)
         public
         view
         returns (LegendMetadata memory)

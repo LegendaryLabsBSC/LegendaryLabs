@@ -147,7 +147,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         returns (address payable)
     //onlyMarketplace //TODO: in access control rework
     {
-        return legendsNFT.fetchTokenMetadata(_legendId).legendCreator;
+        return legendsNFT.fetchLegendMetadata(_legendId).legendCreator;
     }
 
     //TODO: change is-es to query
@@ -158,6 +158,14 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //onlyMarketplace //TODO: in access control rework
     {
         return legendsNFT.isListable(_legendId);
+    }
+
+    function fetchBlendingCount(uint256 _legendId)
+        public
+        view
+        returns (uint256)
+    {
+        return legendsNFT.fetchLegendMetadata(_legendId).blendingInstancesUsed;
     }
 
     function fetchIsHatched(uint256 _legendId)
