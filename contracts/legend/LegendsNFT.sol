@@ -45,19 +45,12 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     /* parentId => childId => isParent? */
     mapping(uint256 => mapping(uint256 => bool)) private parentOf;
 
-    event LegendCreated(uint256 legendId);
-    event LegendsBlended(uint256 parent1, uint256 parent2, uint256 childId);
-    event LegendHatched(uint256 legendId);
-    event LegendDestroyed(uint256 legendId);
-
     constructor() ERC721("Legend", "LEGEND") {
         lab = LegendsLaboratory(msg.sender);
     }
 
     function createLegend(
         address _recipient,
-        string memory _prefix,
-        string memory _postfix,
         uint256 _promoId,
         bool _isLegendary
     ) external onlyLab {
@@ -74,8 +67,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _mintLegend(
             _recipient,
             newLegendId,
-            _prefix,
-            _postfix,
             parents,
             uri,
             _isLegendary,
@@ -128,8 +119,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             parentOf[parents[i]][newLegendId] = true;
         }
 
-        bool mix = block.number % 2 == 0;
-
         string memory uri = _formatURI(
             newLegendId,
             string(
@@ -144,8 +133,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _mintLegend(
             _recipient,
             newLegendId,
-            mix ? p1.prefix : p2.prefix,
-            mix ? p2.postfix : p1.postfix,
             parents,
             uri,
             false,
@@ -166,6 +153,19 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         legendMetadata[_legendId].isHatched = true;
 
         emit LegendHatched(_legendId);
+    }
+
+    function nameLegend(
+        uint256 _legendId,
+        string memory _prefix,
+        string memory _postfix
+    ) external {
+        require(isListable(_legendId), "Not Authorized");
+
+        legendMetadata[_legendId].prefix = _prefix;
+        legendMetadata[_legendId].postfix = _postfix;
+
+        emit LegendNamed(_legendId, _prefix, _postfix);
     }
 
     function destroyLegend(uint256 _legendId) public {
@@ -202,8 +202,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     function _mintLegend(
         address _recipient,
         uint256 _newLegendId,
-        string memory _prefix,
-        string memory _postfix,
         uint256[2] memory _parents,
         string memory _uri,
         bool _isLegendary,
@@ -223,8 +221,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         LegendMetadata storage m = legendMetadata[_newLegendId];
         m.id = _newLegendId;
         m.season = lab.season();
-        m.prefix = _prefix;
-        m.postfix = _postfix;
         m.parents = _parents;
         m.birthDay = block.timestamp;
         m.blendingCost = baseBlendingCost;

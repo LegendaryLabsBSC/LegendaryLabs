@@ -103,13 +103,6 @@ abstract contract LegendsMarketClerk {
         _escrow.withdrawRoyalties(payee);
     }
 
-    // function _asyncTransferRoyalty(address payee, uint256 amount)
-    //     internal
-    //     virtual
-    // {
-    //     _escrow.depositRoyalty{value: amount}(payee);
-    // }
-
     /**
      * @dev Returns the payments owed to an address.
      * @param dest The creditor's address.

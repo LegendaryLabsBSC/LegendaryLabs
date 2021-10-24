@@ -82,16 +82,11 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         _dispensePromoTicket(promoId, recipient, ticketAmount);
     }
 
-    function redeemPromoTicket(
-        uint256 promoId,
-        address recipient,
-        string memory prefix,
-        string memory postfix
-    ) public {
+    function redeemPromoTicket(uint256 promoId, address recipient) public {
         _redeemPromoTicket(promoId, recipient);
 
         // approval lock needed ?
-        legendsNFT.createLegend(recipient, prefix, postfix, promoId, false);
+        legendsNFT.createLegend(recipient, promoId, false);
     }
 
     function closePromoEvent(uint256 promoId) public onlyOwner {
@@ -122,10 +117,6 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     function setSeason(string memory _newSeason) public onlyOwner {
         season = _newSeason;
     }
-
-    // function setBaseHealth(uint256 baseHealth) public onlyOwner {
-    //     legendsNFT.setBaseHealth(baseHealth);
-    // } // TODO: fix in stats removal
 
     // function mintPromotion(address receiver, string memory prefix, string memory postfix, uint dna) public onlyOwner {
     //     legendsNFT.mintPromo(receiver, prefix, postfix, dna);

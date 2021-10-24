@@ -18,4 +18,10 @@ interface ILegendMetadata {
         bool isHatched;
         bool isDestroyed;
     }
+
+    event LegendCreated(uint256 legendId);
+    event LegendHatched(uint256 legendId);
+    event LegendsBlended(uint256 parent1, uint256 parent2, uint256 childId);
+    event LegendNamed(uint256 legendId, string prefix, string postfix);
+    event LegendDestroyed(uint256 legendId);
 }
