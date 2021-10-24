@@ -12,7 +12,7 @@ interface IRejuvenationPod {
     struct PodVisit {
         address depositedBy;
         uint256 depositBlock;
-        uint256 offspringCount; // currentOffspringCount?
+        uint256 blendingInstancesUsed;
         uint256 tokenAmountSecured;
         uint256 multiplier;
         // uint256 earnedReJu;
@@ -20,7 +20,6 @@ interface IRejuvenationPod {
 
     struct RejuvenationPod {
         address nftContract;
-        // uint256 remainderReJu; // needs to transfer over after pivkup/remove/increase
         uint256 previousRemovalTime; // visit removal time ? ^^
         PodVisit visit;
         PodStatus status;

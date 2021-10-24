@@ -67,7 +67,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
 
         r.visit.depositedBy = msg.sender;
         r.visit.depositBlock = block.number;
-        r.visit.offspringCount = lab.fetchBlendingCount(_legendId);
+        r.visit.blendingInstancesUsed = lab.fetchBlendingCount(_legendId);
         r.visit.multiplier = _calculateMultiplier(_tokensToSecure);
 
         r.visit.tokenAmountSecured = _tokensToSecure;
@@ -167,46 +167,39 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         RejuvenationPod memory r = rejuvenationPod[_legendId];
 
         uint256 blendingLimit = lab.fetchBlendingLimit();
-        uint256 maxReJu = (reJuNeededPerSlot * blendingLimit);
+        uint256 maxRestorableSlots = blendingLimit -
+            r.visit.blendingInstancesUsed;
+
+        uint256 maxEarnableReJu = (reJuNeededPerSlot * maxRestorableSlots);
 
         uint256 earnedReJu = ((reJuPerBlock * r.visit.multiplier) *
             (block.number - r.visit.depositBlock));
-        //  + r.remainderReJu;
 
-        // uint256 usableReJu;
-        if (earnedReJu > maxReJu) {
-            earnedReJu = maxReJu;
+        if (earnedReJu > maxEarnableReJu) {
+            earnedReJu = maxEarnableReJu;
         }
-        //  else {
-        //     usableReJu = earnedReJu;
-        // }
 
         uint256 regainedSlots = earnedReJu / reJuNeededPerSlot; // make sure rounds down
 
-        // // ReJu carries over if nft withdrawn before max rejuvenation
-        // uint256 remainderReJu = earnedReJu -
-        //     (regainedSlots * reJuNeededPerSlot);
-
         return (earnedReJu, regainedSlots);
-        // , remainderReJu);
     }
 
     function _restoreBlendingSlots(uint256 _legendId) private {
+        // handle if nft has 0 instances used
+
         (
             uint256 earnedReJu, // needed to return ?
             uint256 regainedSlots // uint256 remainderReJu
         ) = _calculateRejuvenation(_legendId);
 
-        uint256 currentOffspringCount = lab.fetchBlendingCount(_legendId);
-        // uint256 currentOffspringCount = nft
-        //     .fetchLegendMetadata(_legendId)
+        // uint256 blendingInstancesUsed = rejuvenationPod[_legendId]
+        //     .visit
         //     .blendingInstancesUsed;
-        uint256 newOffspringCount = currentOffspringCount - regainedSlots;
+        // uint256 newCount = blendingInstancesUsed - regainedSlots;
 
         lab.restoreBlendingSlots(_legendId, regainedSlots);
-        //  = newOffspringCount; // inside nft.sol ; only reju
 
-        // rejuvenationPod[_legendId].remainderReJu = remainderReJu;
+        rejuvenationPod[_legendId].visit.blendingInstancesUsed -= regainedSlots;
     }
 
     //TODO:FE: Alert user when max is reach rejuvenation will stop
