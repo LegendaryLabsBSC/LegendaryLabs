@@ -178,7 +178,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         return _tokensOwed[msg.sender];
     }
 
-    function setMatchingBoardFee(uint256 newFee) public onlyLab {
-        _matchingBoardFee = newFee;
-    }
+    // function setMatchingBoardFee(uint256 newFee) public onlyLab {
+    //     _matchingBoardFee = newFee;
+    // }
 }

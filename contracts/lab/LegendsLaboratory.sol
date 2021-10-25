@@ -110,8 +110,8 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         return season;
     }
 
-    function fetchPromoIncubation(uint256 promoId) public view returns (bool) {
-        return _promoIncubation[promoId];
+    function fetchPromoIncubation(uint256 _promoId) public view returns (bool) {
+        return _promoIncubation[_promoId];
     }
 
     function fetchIsHatched(uint256 _legendId) public view returns (bool) {
@@ -154,31 +154,31 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         season = _newSeason;
     }
 
-    function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyOwner {
-        legendsNFT.setKinBlendingLevel(newKinBlendingLevel);
+    function setKinBlendingLevel(uint256 _newLevel) public onlyOwner {
+        legendsNFT.setKinBlendingLevel(_newLevel);
     }
 
-    function setIncubationPeriod(uint256 newIncubationPeriod) public onlyOwner {
-        legendsNFT.setIncubationPeriod(newIncubationPeriod);
+    function setBlendingLimit(uint256 _newLimit) public onlyOwner {
+        legendsNFT.setBlendingLimit(_newLimit);
     }
 
-    function setBlendingLimit(uint256 _newBlendingLimit) public onlyOwner {
-        legendsNFT.setBlendingLimit(_newBlendingLimit);
-    }
-
-    function setBaseBlendingCost(uint256 _newBaseBlendingCost)
+    function setBaseBlendingCost(uint256 _newAmount)
         public
         onlyOwner
     {
-        legendsNFT.setBaseBlendingCost(_newBaseBlendingCost);
+        legendsNFT.setBaseBlendingCost(_newAmount);
+    }
+
+    function setIncubationPeriod(uint256 newDuration) public onlyOwner {
+        legendsNFT.setIncubationPeriod(newDuration);
     }
 
     function setRoyaltyFee(uint256 _newFee) public onlyOwner {
         legendsMarketplace.setRoyaltyFee(_newFee);
     }
 
-    function setMarketplaceFee(uint256 newFee) public onlyOwner {
-        legendsMarketplace.setMarketplaceFee(newFee);
+    function setMarketplaceFee(uint256 _newFee) public onlyOwner {
+        legendsMarketplace.setMarketplaceFee(_newFee);
     }
 
     function setOfferDuration(uint256 _newDuration) public onlyOwner {
@@ -189,9 +189,9 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsMarketplace.setAuctionExtension(_newDuration);
     }
 
-    function setMatchingBoardFee(uint256 newFee) public onlyOwner {
-        legendsMatchingBoard.setMatchingBoardFee(newFee);
-    }
+    // function setMatchingBoardFee(uint256 newFee) public onlyOwner {
+    //     legendsMatchingBoard.setMatchingBoardFee(newFee);
+    // }
 
     function setMinimumSecure(uint256 _newMinimum) public onlyOwner {
         legendRejuvenation.setMinimumSecure(_newMinimum);
@@ -201,8 +201,8 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendRejuvenation.setMaxMultiplier(_newMax);
     }
 
-    function setReJuPerBlock(uint256 _newEmissionRate) public onlyOwner {
-        legendRejuvenation.setReJuPerBlock(_newEmissionRate);
+    function setReJuPerBlock(uint256 _newRate) public onlyOwner {
+        legendRejuvenation.setReJuPerBlock(_newRate);
     }
 
     function setReJuNeededPerSlot(uint256 _newAmount) public onlyOwner {

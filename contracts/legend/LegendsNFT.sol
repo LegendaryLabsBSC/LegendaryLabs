@@ -331,29 +331,25 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         legendMetadata[_legendId].blendingInstancesUsed -= _regainedSlots;
     }
 
-    function setKinBlendingLevel(uint256 _kinBlendingLevel)
-        public
-        virtual
-        onlyLab
-    {
-        if (_kinBlendingLevel == 0) {
+    function setKinBlendingLevel(uint256 _newLevel) public virtual onlyLab {
+        if (_newLevel == 0) {
             kinBlendingLevel == KinBlendingLevel.None;
-        } else if (_kinBlendingLevel == 1) {
+        } else if (_newLevel == 1) {
             kinBlendingLevel == KinBlendingLevel.Siblings;
-        } else if (_kinBlendingLevel == 2) {
+        } else if (_newLevel == 2) {
             kinBlendingLevel == KinBlendingLevel.Parents;
         }
     }
 
-    function setBlendingLimit(uint256 _blendingLimit) public onlyLab {
-        blendingLimit = _blendingLimit;
+    function setBlendingLimit(uint256 _newLimit) public onlyLab {
+        blendingLimit = _newLimit;
     }
 
-    function setBaseBlendingCost(uint256 _baseBlendingCost) public onlyLab {
-        baseBlendingCost = _baseBlendingCost;
+    function setBaseBlendingCost(uint256 _newAmount) public onlyLab {
+        baseBlendingCost = _newAmount;
     }
 
-    function setIncubationPeriod(uint256 _incubationPeriod) public onlyLab {
-        incubationPeriod = _incubationPeriod;
+    function setIncubationPeriod(uint256 _newDuration) public onlyLab {
+        incubationPeriod = _newDuration;
     }
 }

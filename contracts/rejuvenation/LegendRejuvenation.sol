@@ -228,8 +228,8 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         maxMultiplier = _newMax;
     }
 
-    function setReJuPerBlock(uint256 _newEmissionRate) public onlyLab {
-        reJuPerBlock = _newEmissionRate;
+    function setReJuPerBlock(uint256 _newRate) public onlyLab {
+        reJuPerBlock = _newRate;
     }
 
     function setReJuNeededPerSlot(uint256 _newAmount) public onlyLab {
