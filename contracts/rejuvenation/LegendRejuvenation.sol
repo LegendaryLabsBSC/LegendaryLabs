@@ -30,9 +30,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     /* legendId => podDetails */
     mapping(uint256 => RejuvenationPod) public rejuvenationPod;
 
-    // uint256 private multiplyEvery = 1000; // will be same var as minimum ?
-    //TODO: 'must be initialized' modifier
-
     constructor() {
         lab = LegendsLaboratory(msg.sender);
     }
@@ -54,7 +51,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
-        lab.legendToken().transferFrom( // can make getters for LGND token transfers in rework
+        lab.legendToken().transferFrom(
             msg.sender,
             address(this),
             _tokensToSecure
@@ -79,7 +76,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         require(msg.sender == r.depositedBy, "Not Authorized");
 
         r.occupied = false;
-        // r.previousRemovalTime = block.timestamp;
 
         removeSecuredTokens(_legendId, r.tokenAmountSecured);
 
@@ -135,7 +131,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             _restoreBlendingSlots(_legendId);
         }
 
-        lab.legendToken().transferFrom( // ? lab or this contract
+        lab.legendToken().transferFrom(
             msg.sender,
             address(this),
             _amountToSecure
@@ -150,7 +146,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     }
 
     function _restoreBlendingSlots(uint256 _legendId) private {
-        // uint256 earnedReJu, // needed to return ?
         uint256 restoredSlots = _calculateRestoredSlots(_legendId);
 
         lab.restoreBlendingSlots(_legendId, restoredSlots);
@@ -178,28 +173,12 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         private
         view
         returns (uint256)
-    // , uint256
     {
-        // RejuvenationPod memory r = rejuvenationPod[_legendId];
-
-        // uint256 blendingLimit = lab.fetchBlendingLimit();
-        // uint256 maxRestorableSlots = blendingLimit -
-        //     r.visit.blendingInstancesUsed;
-
-        // uint256 maxEarnableReJu = (reJuNeededPerSlot * r.blendingInstancesUsed);
-
-        // uint256 earnedReJu = ((reJuPerBlock * r.multiplier) *
-        //     (block.number - r.depositBlock));
-
-        // if (earnedReJu > maxEarnableReJu) {
-        //     earnedReJu = maxEarnableReJu;
-        // }
 
         uint256 earnedReJu = _fetchEarnedReju(_legendId);
 
         uint256 restoredSlots = earnedReJu / reJuNeededPerSlot; // make sure rounds down
 
-        // return (earnedReJu, restoredSlots);
         return restoredSlots;
     }
 

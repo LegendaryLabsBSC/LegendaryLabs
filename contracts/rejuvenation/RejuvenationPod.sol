@@ -3,21 +3,6 @@
 pragma solidity 0.8.4;
 
 interface IRejuvenationPod {
-    // enum PodStatus {
-    //     // Uninitialized,
-    //     Unoccupied,
-    //     Occupied
-    // } // make bool
-
-    // struct PodVisit {
-    //     address depositedBy;
-    //     uint256 depositBlock;
-    //     uint256 blendingInstancesUsed;
-    //     uint256 tokenAmountSecured;
-    //     uint256 multiplier;
-    //     // uint256 earnedReJu;
-    // } // combine v ?
-
     struct RejuvenationPod {
         address nftContract;
         address depositedBy;
@@ -25,7 +10,6 @@ interface IRejuvenationPod {
         uint256 blendingInstancesUsed;
         uint256 tokenAmountSecured;
         uint256 multiplier;
-        // uint256 previousRemovalTime;
         bool occupied;
     }
 
