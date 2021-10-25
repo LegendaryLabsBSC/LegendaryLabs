@@ -2,7 +2,7 @@
 
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 //TODO: look into openZeppelin Access Control docs more ; OZ Governor
 

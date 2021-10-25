@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 
@@ -9,6 +9,31 @@ abstract contract TicketMachine {
 
     Counters.Counter private _promoIds;
     Counters.Counter private _closedPromos;
+
+    //TODO: work in promo id # and ticket max, can pick either or both when making event
+    struct PromoEvent {
+        string promoName;
+        uint256 promoId;
+        uint256 startTime;
+        uint256 expireTime;
+        bool isUnrestricted; // if unrestricted then one per
+        bool ticketLimit;
+        bool promoClosed; // ticket can be redeemed after expire but not after close
+        Counters.Counter ticketsClaimed;
+        Counters.Counter ticketsRedeemed;
+    }
+
+    /* promoId => PromoEvent */
+    mapping(uint256 => PromoEvent) internal promoEvent;
+
+    /* promoId => maxTicketAmount */
+    mapping(uint256 => uint256) internal maxTicketsDispensable;
+
+    /* promoId => recipient => isClaimed */
+    mapping(uint256 => mapping(address => bool)) private claimedPromo;
+
+    /* promoId => recipient => ticketCount */
+    mapping(uint256 => mapping(address => uint256)) private promoTickets;
 
     event PromoCreated(uint256 promoId, string promoName, uint256 expireTime);
     event TicketDispensed(uint256 promoId, uint256 currentDispensed);
@@ -19,66 +44,11 @@ abstract contract TicketMachine {
         uint256 totalRedeemed
     );
 
-    //TODO: work in promo id and ticket max, can pick either or both when making event
-    struct PromoEvent {
-        string promoName;
-        uint256 startTime;
-        uint256 expireTime;
-        bool isUnrestricted; // if unrestricted then one per
-        bool promoClosed; // ticket can be redeemed after expire but not after close
-        Counters.Counter ticketsClaimed; // makes these just uint256 and assign from a counter
-        Counters.Counter ticketsRedeemed;
-    }
-
-    /* promoId => PromoEvent */
-    mapping(uint256 => PromoEvent) internal promoEvent;
-
-    /* promoId => recipient => isClaimed */
-    mapping(uint256 => mapping(address => bool)) private claimedPromo;
-
-    /* promoId => recipient => ticketCount */
-    mapping(uint256 => mapping(address => uint256)) private promoTicket;
-
-    function fetchTotalPromoCount()
-        public
-        view
-        virtual
-        returns (Counters.Counter memory)
-    {
-        return _promoIds;
-    }
-
-    function fetchPromoEvent(uint256 promoId)
-        public
-        view
-        virtual
-        returns (PromoEvent memory)
-    {
-        return promoEvent[promoId];
-    }
-
-    function fetchRedeemableTickets(uint256 _promoId, address _recipient)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        return promoTicket[_promoId][_recipient];
-    }
-
-    function queryIfClaimed(uint256 promoId, address recipient)
-        public
-        view
-        virtual
-        returns (bool)
-    {
-        return claimedPromo[promoId][recipient];
-    }
-
     function _createPromoEvent(
         string memory _name,
         uint256 _duration,
-        bool _isUnrestricted
+        bool _isUnrestricted,
+        uint256 _maxTickets
     ) internal returns (uint256) {
         _promoIds.increment();
         uint256 promoId = _promoIds.current();
@@ -87,13 +57,17 @@ abstract contract TicketMachine {
 
         PromoEvent storage p = promoEvent[promoId];
         p.promoName = _name;
+        p.promoId = promoId;
         p.startTime = block.timestamp;
         p.expireTime = expireTime;
         p.isUnrestricted = _isUnrestricted;
 
-        if (_isUnrestricted) {
-            emit PromoCreated(promoId, _name, expireTime);
+        if (_maxTickets != 0) {
+            p.ticketLimit = true;
+            maxTicketsDispensable[promoId] = _maxTickets;
         }
+
+        emit PromoCreated(promoId, _name, expireTime);
 
         return (promoId);
     }
@@ -108,15 +82,20 @@ abstract contract TicketMachine {
 
         if (p.isUnrestricted) {
             require(
-                queryIfClaimed(_promoId, _recipient) == false,
+                queryIsClaimed(_promoId, _recipient) == false,
                 "Promo already claimed"
             );
             require(_ticketAmount == 1, "One ticket per address");
         }
 
+        if (p.ticketLimit) {
+            uint256 currentTicketCount = p.ticketsClaimed.current();
+            require(currentTicketCount < maxTicketsDispensable[_promoId]);
+        }
+
         claimedPromo[_promoId][_recipient] = true;
 
-        promoTicket[_promoId][_recipient] += _ticketAmount;
+        promoTickets[_promoId][_recipient] += _ticketAmount;
 
         p.ticketsClaimed.increment();
 
@@ -134,7 +113,7 @@ abstract contract TicketMachine {
         );
         require(redeemableTickets != 0, "No tickets to redeem");
 
-        promoTicket[_promoId][_recipient] -= 1;
+        promoTickets[_promoId][_recipient] -= 1;
 
         p.ticketsRedeemed.increment();
 
@@ -149,12 +128,46 @@ abstract contract TicketMachine {
 
         p.promoClosed = true;
 
-        if (p.isUnrestricted) {
-            emit PromoClosed(
-                _promoId,
-                p.ticketsClaimed.current(),
-                p.ticketsRedeemed.current()
-            );
-        }
+        emit PromoClosed(
+            _promoId,
+            p.ticketsClaimed.current(),
+            p.ticketsRedeemed.current()
+        );
+    }
+
+    function queryIsClaimed(uint256 _promoId, address _recipient)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        return claimedPromo[_promoId][_recipient];
+    }
+
+    function fetchTotalPromoCount()
+        public
+        view
+        virtual
+        returns (Counters.Counter memory, Counters.Counter memory)
+    {
+        return (_promoIds, _closedPromos);
+    }
+
+    function fetchPromoEvent(uint256 _promoId)
+        public
+        view
+        virtual
+        returns (PromoEvent memory)
+    {
+        return promoEvent[_promoId];
+    }
+
+    function fetchRedeemableTickets(uint256 _promoId, address _recipient)
+        public
+        view
+        virtual
+        returns (uint256)
+    {
+        return promoTickets[_promoId][_recipient];
     }
 }
