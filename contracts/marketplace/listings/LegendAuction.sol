@@ -15,6 +15,8 @@ abstract contract LegendAuction is LegendSale {
         bool isInstantBuy;
     }
 
+    uint256[3] internal auctionDurations = [259200, 432000, 604800];
+
     uint256 internal _auctionExtension = 600;
 
     /* listingId => auctionDetails*/
@@ -138,6 +140,13 @@ abstract contract LegendAuction is LegendSale {
 
         return shouldExtend;
     }
+
+    function fetchAuctionDurations()
+        public
+        view
+        virtual
+        returns (uint256[3] memory)
+    {}
 
     function fetchAuctionDetails(uint256 _listingId)
         public

@@ -108,15 +108,17 @@ contract LegendsMarketplace is
 
         IERC721 legendsNFT = IERC721(l.nftContract);
 
-        require(l.status == ListingStatus.Open, "Listing Closed");
+        require(l.status == ListingStatus.Open
+        // , "Listing Closed"
+        );
         require(
-            block.timestamp < offerDetails[_listingId].expirationTime,
-            "Offer is expired"
+            block.timestamp < offerDetails[_listingId].expirationTime
+            // "Offer is expired"
         );
         require(
             msg.sender == legendsNFT.ownerOf(l.legendId) &&
-                msg.sender == offerDetails[_listingId].legendOwner, // If token is traded before offer A/D ...
-            "Not authorized"
+                msg.sender == offerDetails[_listingId].legendOwner // If token is traded before offer A/D ...
+            // "Not authorized"
         );
 
         _decideLegendOffer(_listingId, _isAccepted);
@@ -142,7 +144,9 @@ contract LegendsMarketplace is
         IERC721 legendsNFT = IERC721(_nftContract);
 
         // require(lab.isListable(_legendId), "Not eligible"); // commented out for testing
-        require(_startingPrice > 0, "Price can not be 0");
+        require(_startingPrice > 0
+        // , "Price can not be 0"
+        );
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
@@ -159,9 +163,15 @@ contract LegendsMarketplace is
         LegendListing storage l = legendListing[_listingId]; // memory uses significant more contract space; check gas usage between memory vs storage
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        require(l.status == ListingStatus.Open, "Listing Closed");
-        require(!isExpired(_listingId), "Auction has expired");
-        require(msg.sender != l.seller, "Can not bid");
+        require(l.status == ListingStatus.Open
+        // , "Listing Closed"
+        );
+        require(!isExpired(_listingId)
+        // , "Auction has expired"
+        );
+        require(msg.sender != l.seller
+        // , "Can not bid"
+        );
 
         uint256 bidAmount = bidPlaced[_listingId][msg.sender] + msg.value;
 
@@ -382,6 +392,16 @@ contract LegendsMarketplace is
         return offerDetails[_listingId];
     }
 
+    function fetchAuctionDurations()
+        public
+        view
+        virtual
+        override
+        returns (uint256[3] memory)
+    {
+        return auctionDurations;
+    }
+
     function fetchAuctionDetails(uint256 _listingId)
         public
         view
@@ -453,6 +473,13 @@ contract LegendsMarketplace is
 
     function setOfferDuration(uint256 _newDuration) public onlyLab {
         offerDuration = _newDuration;
+    }
+
+    function setAuctionDurations(uint256[3] calldata _newDurations)
+        public
+        onlyLab
+    {
+        auctionDurations = _newDurations;
     }
 
     function setAuctionExtension(uint256 _newDuration) public onlyLab {

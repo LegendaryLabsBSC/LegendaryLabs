@@ -12,6 +12,7 @@ abstract contract LegendSale is ILegendListing {
     Counters.Counter internal _listingsClosed;
     Counters.Counter internal _listingsCancelled;
 
+
     struct OfferDetails {
         uint256 expirationTime;
         address payable legendOwner;

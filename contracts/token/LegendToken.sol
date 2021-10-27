@@ -33,7 +33,14 @@ contract LegendToken is ERC20 {
         _mint(owner, 100 * 1e24);
     }
 
-    function blendingBurn(address _account, uint256 _amount) public onlyBlending {
+    function labBurn(uint256 _amount) public onlyLab {
+        _burn(address(lab), _amount);
+    }
+
+    function blendingBurn(address _account, uint256 _amount)
+        public
+        onlyBlending
+    {
         _burn(_account, _amount);
     }
 
