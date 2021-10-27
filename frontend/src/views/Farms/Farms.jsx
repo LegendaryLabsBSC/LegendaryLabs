@@ -358,8 +358,8 @@ function App() {
       // await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
       await contract.nft.write.mintPromo(account, id, isLegendary)
       // .then(
-      //   // ! receiving multiple responses ?
-      //   // ? is .then even needed
+        // // ! receiving multiple responses ?
+       // // ? is .then even needed
       //   contract.nft.write.once('NewLegend', (data, event) => {
       //     console.log('New Token Created:', data.toString()) // return token id instead of watching for event
       //     const newItemId = data.toString()

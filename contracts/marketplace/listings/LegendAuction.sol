@@ -12,15 +12,13 @@ abstract contract LegendAuction is LegendSale {
         uint256 startingPrice;
         uint256 highestBid;
         address payable highestBidder;
-        // address[] bidders; // ? take array out (use mapping bid ?) ;; seperate so no risk of breaking rest of struct
         bool isInstantBuy;
     }
 
     uint256 internal _auctionExtension = 600;
 
     /* listingId => auctionDetails*/
-    mapping(uint256 => AuctionDetails) internal auctionDetails; //TODO: make getter, possibly with all below details
-
+    mapping(uint256 => AuctionDetails) internal auctionDetails;
     /* listingId => instantBuyPrice */
     mapping(uint256 => uint256) internal instantBuyPrice;
 
@@ -28,15 +26,14 @@ abstract contract LegendAuction is LegendSale {
     mapping(uint256 => address[]) internal bidders;
 
     /* listingId => bidderAddress => previouslyPlacedBid */
-    mapping(uint256 => mapping(address => bool)) internal exists;
+    mapping(uint256 => mapping(address => bool)) internal exists; // change var name ?
 
     /* listingId => bidderAddress => bidAmount*/
-    mapping(uint256 => mapping(address => uint256)) internal bidPlaced; //TODO: make getter
+    mapping(uint256 => mapping(address => uint256)) internal bidPlaced;
 
-    event AuctionExpired(uint256 listingId, string); //TODO:
-    event AuctionExtended(uint256 listingId, uint256 newDuration);
+    event AuctionExtended(uint256 indexed listingId, uint256 newDuration);
     event BidPlaced(
-        uint256 listingId,
+        uint256 indexed listingId,
         address newHighestBidder,
         uint256 newHighestBid
     );
@@ -92,7 +89,7 @@ abstract contract LegendAuction is LegendSale {
             if (_bidAmount >= instantBuyPrice[_listingId]) {
                 a.duration = (a.duration + _auctionExtension);
 
-                emit AuctionExtended(_listingId, a.duration); // event shows old duration or new? should event only emit listingId?
+                emit AuctionExtended(_listingId, a.duration); // test ; event shows old duration or new?
             }
         }
         emit BidPlaced(_listingId, a.highestBidder, a.highestBid);
@@ -106,7 +103,7 @@ abstract contract LegendAuction is LegendSale {
         l.price = a.highestBid;
         l.status = ListingStatus.Closed;
 
-        _legendOwed[_listingId][a.highestBidder] = l.legendId;
+        _legendPending[_listingId][a.highestBidder] = l.legendId;
 
         _listingsClosed.increment();
 
@@ -141,4 +138,32 @@ abstract contract LegendAuction is LegendSale {
 
         return shouldExtend;
     }
+
+    function fetchAuctionDetails(uint256 _listingId)
+        public
+        view
+        virtual
+        returns (AuctionDetails memory)
+    {}
+
+    function fetchInstantBuyPrice(uint256 _listingId)
+        public
+        view
+        virtual
+        returns (uint256)
+    {}
+
+    function fetchBidders(uint256 _listingId)
+        public
+        view
+        virtual
+        returns (address[] memory)
+    {}
+
+    function fetchBidPlaced(uint256 _listingId, address _bidder)
+        public
+        view
+        virtual
+        returns (uint256)
+    {}
 }

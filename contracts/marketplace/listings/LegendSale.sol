@@ -18,20 +18,19 @@ abstract contract LegendSale is ILegendListing {
         bool isAccepted; // make enum if theres space
     }
 
-    uint256 internal offerDuration = 432000; // 5 days // make private
-    //TODO: offers placed
-
-    /* listingId => offerDetails */
-    mapping(uint256 => OfferDetails) public offerDetails; // make private
+    uint256 internal offerDuration = 432000; // 5 days
 
     /* listingId => listingDetails */
-    mapping(uint256 => LegendListing) public legendListing;
+    mapping(uint256 => LegendListing) internal legendListing;
+
+    /* listingId => offerDetails */
+    mapping(uint256 => OfferDetails) internal offerDetails;
 
     /* listingId => buyerAddress => legendId */
-    mapping(uint256 => mapping(address => uint256)) internal _legendOwed;
+    mapping(uint256 => mapping(address => uint256)) internal _legendPending;
 
-    event OfferMade(uint256 listingId, uint256 price);
-    event OfferDecided(uint256 listingId, bool isAccepted);
+    event OfferMade(uint256 indexed listingId, uint256 price);
+    event OfferDecided(uint256 indexed listingId, bool indexed isAccepted);
 
     function _createLegendSale(
         address _nftContract,
@@ -60,7 +59,7 @@ abstract contract LegendSale is ILegendListing {
         l.status = ListingStatus.Closed;
         l.buyer = payable(msg.sender);
 
-        _legendOwed[_listingId][payable(msg.sender)] = l.legendId;
+        _legendPending[_listingId][payable(msg.sender)] = l.legendId;
 
         _listingsClosed.increment();
 
@@ -106,7 +105,7 @@ abstract contract LegendSale is ILegendListing {
 
             offerDetails[_listingId].isAccepted = true;
 
-            _legendOwed[_listingId][l.buyer] = l.legendId;
+            _legendPending[_listingId][l.buyer] = l.legendId;
 
             _listingsClosed.increment();
         } else {
@@ -127,4 +126,25 @@ abstract contract LegendSale is ILegendListing {
 
         emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
     }
+
+    function isValidListing(uint256 _listingId) public view returns (bool) {
+        return _listingId >= _listingIds.current();
+    }
+
+    function fetchLegendListing(uint256 _listingId)
+        public
+        view
+        virtual
+        returns (
+            // move to interface if move functions moved to virtual
+            LegendListing memory
+        )
+    {}
+
+    function fetchOfferDetails(uint256 _listingId)
+        public
+        view
+        virtual
+        returns (OfferDetails memory)
+    {}
 }

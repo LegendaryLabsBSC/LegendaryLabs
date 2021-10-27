@@ -24,7 +24,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     string private season = "Phoenix";
 
     /* promoId => skipIncubation */
-    mapping(uint256 => bool) private _promoIncubation;
+    mapping(uint256 => bool) private _promoIncubated;
 
     constructor() {}
 
@@ -64,7 +64,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
             _maxTickets
         );
 
-        _promoIncubation[promoId] = _skipIncubation;
+        _promoIncubated[promoId] = _skipIncubation;
     }
 
     function dispensePromoTicket(
@@ -103,27 +103,27 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     {
         require(msg.sender == address(legendRejuvenation), "Not Pod");
 
-        legendsNFT.restoreBlendingSlots(_legendId, _regainedSlots);
+        legendsNFT._restoreBlendingSlots(_legendId, _regainedSlots);
+    }
+
+    function isHatched(uint256 _legendId) public view returns (bool) {
+        return legendsNFT.isHatched(_legendId);
+    }
+
+    function isListable(uint256 _legendId) public view returns (bool) {
+        return legendsNFT.isListable(_legendId);
+    }
+
+    function isBlendable(uint256 _legendId) public view returns (bool) {
+        return legendsNFT.isBlendable(_legendId);
+    }
+
+    function isPromoIncubated(uint256 _promoId) public view returns (bool) {
+        return _promoIncubated[_promoId];
     }
 
     function fetchSeason() public view returns (string memory) {
         return season;
-    }
-
-    function fetchPromoIncubation(uint256 _promoId) public view returns (bool) {
-        return _promoIncubation[_promoId];
-    }
-
-    function fetchIsHatched(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isHatched(_legendId);
-    }
-
-    function fetchIsListable(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isListable(_legendId);
-    }
-
-    function fetchIsBlendable(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isBlendable(_legendId);
     }
 
     function fetchBlendingCount(uint256 _legendId)
@@ -162,10 +162,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsNFT.setBlendingLimit(_newLimit);
     }
 
-    function setBaseBlendingCost(uint256 _newAmount)
-        public
-        onlyOwner
-    {
+    function setBaseBlendingCost(uint256 _newAmount) public onlyOwner {
         legendsNFT.setBaseBlendingCost(_newAmount);
     }
 

@@ -35,14 +35,19 @@ abstract contract TicketMachine {
     /* promoId => recipient => ticketCount */
     mapping(uint256 => mapping(address => uint256)) private promoTickets;
 
-    event PromoCreated(uint256 promoId, string promoName, uint256 expireTime);
-    event TicketDispensed(uint256 promoId, uint256 currentDispensed);
-    event TicketRedeemed(uint256 promoId, uint256 currentRedeemed);
+    event PromoCreated(
+        uint256 indexed promoId,
+        string indexed promoName,
+        uint256 expireTime
+    );
     event PromoClosed(
-        uint256 promoId,
+        uint256 indexed promoId,
         uint256 totalDispensed,
         uint256 totalRedeemed
     );
+
+    event TicketDispensed(uint256 indexed promoId, uint256 currentDispensed);
+    event TicketRedeemed(uint256 indexed promoId, uint256 currentRedeemed);
 
     function _createPromoEvent(
         string memory _name,
@@ -82,7 +87,7 @@ abstract contract TicketMachine {
 
         if (p.isUnrestricted) {
             require(
-                queryIsClaimed(_promoId, _recipient) == false,
+                isClaimed(_promoId, _recipient) == false,
                 "Promo already claimed"
             );
             require(_ticketAmount == 1, "One ticket per address");
@@ -135,7 +140,7 @@ abstract contract TicketMachine {
         );
     }
 
-    function queryIsClaimed(uint256 _promoId, address _recipient)
+    function isClaimed(uint256 _promoId, address _recipient)
         public
         view
         virtual
@@ -160,6 +165,17 @@ abstract contract TicketMachine {
         returns (PromoEvent memory)
     {
         return promoEvent[_promoId];
+    }
+
+    function fetchMaxTicketsDispensable(uint256 _promoId)
+        public
+        view
+        virtual
+        returns (uint256)
+    {
+        require(promoEvent[_promoId].ticketLimit, "No Ticket Limit Set");
+
+        return maxTicketsDispensable[_promoId];
     }
 
     function fetchRedeemableTickets(uint256 _promoId, address _recipient)

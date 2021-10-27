@@ -43,7 +43,7 @@ contract LegendsEscrow is Ownable {
     //TODO: reeval events
     event Deposited(address indexed payee, uint256 weiAmount);
     event Withdrawn(address indexed payee, uint256 weiAmount);
-    event BidRefunded(uint256 listingId, address bidder, uint256 bidAmount);
+    event BidRefunded(uint256 indexed listingId, address indexed bidder, uint256 bidAmount);
 
     constructor() {
         marketplace = payable(msg.sender);

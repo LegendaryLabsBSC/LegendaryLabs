@@ -12,7 +12,7 @@ abstract contract LegendMatching is ILegendMatch {
     Counters.Counter internal _matchingsCancelled;
 
     /* matchingId => matchingDetails */
-    mapping(uint256 => LegendMatching) public legendMatching; //TODO make getter; make private?
+    mapping(uint256 => LegendMatching) internal legendMatching;
 
     /* playerAddress => amount */
     mapping(address => uint256) internal _tokensOwed;
@@ -60,7 +60,14 @@ abstract contract LegendMatching is ILegendMatch {
 
         _matchingsClosed.increment();
 
-        emit MatchMade(_matchingId, _childId, m.price, MatchingStatus.Closed);
+        emit MatchMade(
+            _matchingId,
+            m.surrogateToken,
+            m.breederToken,
+            _childId,
+            m.price,
+            MatchingStatus.Closed
+        );
     }
 
     function _cancelLegendMatching(uint256 _matchingId) internal {
@@ -70,4 +77,11 @@ abstract contract LegendMatching is ILegendMatch {
 
         emit MatchingStatusChanged(_matchingId, MatchingStatus.Cancelled);
     }
+
+    function fetchLegendMatching(uint256 _matchingId)
+        public
+        view
+        virtual
+        returns (LegendMatching memory)
+    {}
 }

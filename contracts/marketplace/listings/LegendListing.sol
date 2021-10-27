@@ -23,6 +23,6 @@ interface ILegendListing {
         ListingStatus status;
     }
 
-    event ListingStatusChanged(uint256 listingId, ListingStatus status);
-    event PaymentClaimed(uint256 listingId, address payee);
+    event ListingStatusChanged(uint256 indexed listingId, ListingStatus status);
+    event TradeClaimed(uint256 indexed listingId, address indexed payee);
 }

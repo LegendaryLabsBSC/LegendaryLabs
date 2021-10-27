@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.4;
+
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../lab/LegendsLaboratory.sol";
@@ -36,8 +37,11 @@ contract LegendsMarketplace is
     ) external nonReentrant {
         IERC721 legendsNFT = IERC721(_nftContract);
 
-        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for testing
-        require(_price != 0, "Price can not be 0");
+        // require(lab.isListable(_legendId), "Not eligible"); // commented out for testing
+        require(
+            _price != 0
+            //, "Price can not be 0"
+        );
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
 
@@ -47,9 +51,18 @@ contract LegendsMarketplace is
     function buyLegend(uint256 _listingId) external payable nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
-        require(l.status == ListingStatus.Open, "Listing Closed");
-        require(msg.sender != l.seller, "Seller can not buy");
-        require(msg.value == l.price, "Incorrect price submitted for item");
+        require(
+            l.status == ListingStatus.Open
+            // , "Listing Closed"
+        );
+        require(
+            msg.sender != l.seller
+            // , "Seller can not buy"
+        );
+        require(
+            msg.value == l.price
+            // , "Incorrect price submitted for item"
+        );
 
         _transferPayment(_listingId, l.seller);
 
@@ -65,9 +78,15 @@ contract LegendsMarketplace is
 
         address legendOwner = legendsNFT.ownerOf(_legendId);
 
-        require(msg.sender != legendOwner, "Already Owned");
-        // require(lab.fetchIsHatched(_legendId), "Not eligible"); // commented out for testing
-        require(msg.value > 0, "Price can not be 0");
+        require(
+            msg.sender != legendOwner
+            // , "Already Owned"
+        );
+        // require(lab.isHatched(_legendId), "Not eligible"); // commented out for testing
+        require(
+            msg.value > 0
+            // , "Price can not be 0"
+        );
 
         uint256 listingId = _makeLegendOffer(
             _nftContract,
@@ -100,6 +119,8 @@ contract LegendsMarketplace is
             "Not authorized"
         );
 
+        _decideLegendOffer(_listingId, _isAccepted);
+
         if (_isAccepted) {
             legendsNFT.transferFrom(msg.sender, address(this), l.legendId);
         } else {
@@ -109,8 +130,6 @@ contract LegendsMarketplace is
              */
             _canWithdrawBid[_listingId][l.buyer] = true;
         }
-
-        _decideLegendOffer(_listingId, _isAccepted);
     }
 
     function createLegendAuction(
@@ -122,7 +141,7 @@ contract LegendsMarketplace is
     ) external nonReentrant {
         IERC721 legendsNFT = IERC721(_nftContract);
 
-        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for testing
+        // require(lab.isListable(_legendId), "Not eligible"); // commented out for testing
         require(_startingPrice > 0, "Price can not be 0");
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
@@ -137,7 +156,7 @@ contract LegendsMarketplace is
     }
 
     function placeBid(uint256 _listingId) external payable nonReentrant {
-        LegendListing storage l = legendListing[_listingId];
+        LegendListing storage l = legendListing[_listingId]; // memory uses significant more contract space; check gas usage between memory vs storage
         AuctionDetails storage a = auctionDetails[_listingId];
 
         require(l.status == ListingStatus.Open, "Listing Closed");
@@ -200,6 +219,8 @@ contract LegendsMarketplace is
             require(bidders[_listingId].length == 0, "Bids already placed");
         }
 
+        _cancelLegendListing(_listingId);
+
         if (l.isOffer) {
             _canWithdrawBid[_listingId][msg.sender] = true;
         } else {
@@ -210,12 +231,10 @@ contract LegendsMarketplace is
                 l.legendId
             );
         }
-
-        _cancelLegendListing(_listingId);
     }
 
     function closeListing(uint256 _listingId) external payable nonReentrant {
-        LegendListing storage l = legendListing[_listingId];
+        LegendListing storage l = legendListing[_listingId]; // memory uses significant more contract space; check gas usage between memory vs storage
         AuctionDetails storage a = auctionDetails[_listingId];
 
         require(
@@ -251,7 +270,7 @@ contract LegendsMarketplace is
             _claimLegend(_listingId);
         }
 
-        emit PaymentClaimed(_listingId, msg.sender);
+        emit TradeClaimed(_listingId, msg.sender);
     }
 
     function collectRoyalties() external payable nonReentrant {
@@ -282,10 +301,10 @@ contract LegendsMarketplace is
     function _claimLegend(uint256 _listingId) internal nonReentrant {
         LegendListing memory l = legendListing[_listingId];
 
-        uint256 legendOwed = _legendOwed[_listingId][l.buyer];
+        uint256 legendOwed = _legendPending[_listingId][l.buyer];
         require(legendOwed != 0, "No Legend Owed"); // make sure can not do again without paying gas to see error
 
-        _legendOwed[_listingId][l.buyer] = 0;
+        _legendPending[_listingId][l.buyer] = 0;
 
         IERC721(l.nftContract).transferFrom(address(this), l.buyer, legendOwed);
     }
@@ -341,9 +360,87 @@ contract LegendsMarketplace is
     function fetchLegendListing(uint256 _listingId)
         public
         view
+        virtual
+        override
         returns (LegendListing memory)
     {
+        // add require messages if room, for all 3 v v
+        require(isValidListing(_listingId));
+
         return legendListing[_listingId];
+    }
+
+    function fetchOfferDetails(uint256 _listingId)
+        public
+        view
+        virtual
+        override
+        returns (OfferDetails memory)
+    {
+        require(legendListing[_listingId].isOffer);
+
+        return offerDetails[_listingId];
+    }
+
+    function fetchAuctionDetails(uint256 _listingId)
+        public
+        view
+        virtual
+        override
+        returns (AuctionDetails memory)
+    {
+        require(legendListing[_listingId].isAuction);
+
+        return auctionDetails[_listingId];
+    }
+
+    function fetchInstantBuyPrice(uint256 _listingId)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        require(auctionDetails[_listingId].isInstantBuy);
+
+        return instantBuyPrice[_listingId];
+    }
+
+    function fetchBidders(uint256 _listingId)
+        public
+        view
+        virtual
+        override
+        returns (address[] memory)
+    {
+        require(isValidListing(_listingId));
+
+        return bidders[_listingId];
+    }
+
+    function fetchBidPlaced(uint256 _listingId, address _bidder)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        require(exists[_listingId][_bidder]);
+
+        return bidPlaced[_listingId][_bidder];
+    }
+
+    function fetchMarketplaceRules()
+        public
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
+        return (_royaltyFee, _marketplaceFee, offerDuration, _auctionExtension);
     }
 
     function setRoyaltyFee(uint256 _newFee) public onlyLab {

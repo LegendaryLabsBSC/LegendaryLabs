@@ -13,9 +13,12 @@ interface IRejuvenationPod {
         bool occupied;
     }
 
-    event PodStatusChanged(uint256 legendId, bool occupied);
-    event PodTokensChanged(uint256 legendId, uint256 newAmount);
-    event BlendingSlotsRestored(uint256 legendId, uint256 restoredSlots);
-    // event PodTokensDecreased(uint256 legendId, uint256 newAmount);
-    // event PodTokensIncreased(uint256 legendId, uint256 newAmount);
+    event PodStatusChanged(uint256 indexed legendId, bool occupied);
+    event PodTokensChanged(uint256 indexed legendId, uint256 newAmount);
+    event BlendingSlotsRestored(
+        uint256 indexed legendId,
+        uint256 slotsRestored
+    );
+    // event PodTokensDecreased(uint256 indexed legendId, uint256 newAmount);
+    // event PodTokensIncreased(uint256 indexed legendId, uint256 newAmount);
 }

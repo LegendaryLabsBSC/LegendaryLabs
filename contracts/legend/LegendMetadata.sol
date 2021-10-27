@@ -9,7 +9,7 @@ interface ILegendMetadata {
         string prefix;
         string postfix;
         uint256[2] parents;
-        uint256 birthDay;
+        uint256 birthday;
         uint256 blendingInstancesUsed; //TODO: take into account if number is lowed and token is over new limir
         uint256 lastBlend;
         uint256 totalOffspring;
@@ -19,9 +19,15 @@ interface ILegendMetadata {
         bool isDestroyed;
     }
 
-    event LegendCreated(uint256 legendId);
-    event LegendHatched(uint256 legendId);
-    event LegendsBlended(uint256 parent1, uint256 parent2, uint256 childId);
-    event LegendNamed(uint256 legendId, string prefix, string postfix);
+    event LegendCreated(uint256 indexed legendId, address indexed creator);
+    event LegendHatched(uint256 indexed legendId, uint256 birthday);
+    event LegendNamed(uint256 indexed legendId, string prefix, string postfix);
+
+    event LegendsBlended(
+        uint256 indexed parent1,
+        uint256 indexed parent2,
+        uint256 childId
+    );
+
     event LegendDestroyed(uint256 legendId);
 }
