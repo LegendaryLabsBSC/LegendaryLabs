@@ -42,7 +42,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         IERC721 legendsNFT = IERC721(_nftContract);
         RejuvenationPod storage r = rejuvenationPod[_legendId];
 
-        // require(lab.fetchIsListable(_legendId), "Not eligible"); // commented out for testing
+        // require(lab.isListable(_legendId), "Not eligible"); // commented out for testing
         require(!r.occupied, "Legend in pod");
         require(
             _tokensToSecure >= minimumSecure,
@@ -174,7 +174,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         view
         returns (uint256)
     {
-
         uint256 earnedReJu = _fetchEarnedReju(_legendId);
 
         uint256 restoredSlots = earnedReJu / reJuNeededPerSlot; // make sure rounds down
@@ -218,6 +217,19 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         uint256 restoredSlots = _calculateRestoredSlots(_legendId);
 
         return (earnedReJu, maxEarnableReJu, restoredSlots);
+    }
+
+    function fetchRejuvenationRules()
+        public
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        )
+    {
+        return (minimumSecure, maxMultiplier, reJuPerBlock, reJuNeededPerSlot);
     }
 
     function setMinimumSecure(uint256 _newMinimum) public onlyLab {
