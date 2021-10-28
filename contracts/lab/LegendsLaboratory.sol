@@ -51,7 +51,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     }
 
     function createPromoEvent(
-        string memory _eventName,
+        string calldata _eventName,
         uint256 _duration,
         bool _isUnrestricted,
         uint256 _maxTickets,
@@ -150,12 +150,16 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         return legendsNFT.fetchLegendMetadata(_legendId).legendCreator;
     }
 
-    function setSeason(string memory _newSeason) public onlyOwner {
+    function setSeason(string calldata _newSeason) public onlyOwner {
         season = _newSeason;
     }
 
     function setKinBlendingLevel(uint256 _newLevel) public onlyOwner {
         legendsNFT.setKinBlendingLevel(_newLevel);
+    }
+
+    function setIncubationViews(string[5] calldata _newViews) public onlyOwner {
+        legendsNFT.setIncubationViews(_newViews);
     }
 
     function setBlendingLimit(uint256 _newLimit) public onlyOwner {

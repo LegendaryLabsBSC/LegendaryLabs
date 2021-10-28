@@ -18,8 +18,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         _;
     }
 
-    //TODO: no-loss-lottery extension support
-
     uint256 private minimumSecure = 1000; // what if min is raised and amount in pod is lower than min ?
     uint256 private maxMultiplier = 5;
 

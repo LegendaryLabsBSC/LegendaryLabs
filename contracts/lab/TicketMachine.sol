@@ -10,7 +10,6 @@ abstract contract TicketMachine {
     Counters.Counter private _promoIds;
     Counters.Counter private _closedPromos;
 
-    //TODO: work in promo id # and ticket max, can pick either or both when making event
     struct PromoEvent {
         string promoName;
         uint256 promoId;
@@ -50,7 +49,7 @@ abstract contract TicketMachine {
     event TicketRedeemed(uint256 indexed promoId, uint256 currentRedeemed);
 
     function _createPromoEvent(
-        string memory _name,
+        string calldata _name,
         uint256 _duration,
         bool _isUnrestricted,
         uint256 _maxTickets
@@ -83,6 +82,7 @@ abstract contract TicketMachine {
         uint256 _ticketAmount
     ) internal {
         PromoEvent storage p = promoEvent[_promoId];
+        
         require(block.timestamp < p.expireTime, "Promo Expired");
 
         if (p.isUnrestricted) {

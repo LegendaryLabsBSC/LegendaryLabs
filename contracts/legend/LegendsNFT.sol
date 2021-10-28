@@ -28,6 +28,15 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     KinBlendingLevel private kinBlendingLevel;
 
+    string[5] private incubationViews = [
+        // replace with chucks incubators
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG"
+    ];
+
     uint256 private baseBlendingCost = 100;
 
     uint256 private blendingLimit = 5;
@@ -63,7 +72,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         // origin Legends wont have parents
         uint256[2] memory parents = [uint256(0), uint256(0)];
 
-        string memory uri = _formatURI(newLegendId, Strings.toString(_promoId));
+        string memory uri = _formatIncubationURI(
+            newLegendId,
+            Strings.toString(_promoId)
+        );
 
         bool skipIncubation = lab.isPromoIncubated(_promoId);
 
@@ -90,8 +102,14 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         LegendMetadata storage p1 = legendMetadata[_parent1];
         LegendMetadata storage p2 = legendMetadata[_parent2];
 
-        require(isBlendable(_parent1), "Blending limit reached");
-        require(isBlendable(_parent2), "Blending limit reached");
+        require(
+            isBlendable(_parent1)
+            // , "Blending limit reached"
+        );
+        require(
+            isBlendable(_parent2)
+            // , "Blending limit reached"
+        );
 
         // thoroughly test bool returns
         if (kinBlendingLevel != KinBlendingLevel.Siblings) {
@@ -121,7 +139,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             parentOf[parents[i]][newLegendId] = true;
         }
 
-        string memory uri = _formatURI(
+        string memory uri = _formatIncubationURI(
             newLegendId,
             string(
                 abi.encodePacked(
@@ -146,9 +164,12 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return (newLegendId);
     }
 
-    function hatchLegend(uint256 _legendId, string memory _ipfsHash) public {
+    function hatchLegend(uint256 _legendId, string calldata _ipfsHash) public {
         require(ownerOf(_legendId) == msg.sender);
-        require(isHatchable(_legendId), "Needs to incubate longer");
+        require(
+            isHatchable(_legendId)
+            // , "Needs to incubate longer"
+        );
 
         legendMetadata[_legendId].isHatched = true;
 
@@ -161,10 +182,13 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     function nameLegend(
         uint256 _legendId,
-        string memory _prefix,
-        string memory _postfix
+        string calldata _prefix,
+        string calldata _postfix
     ) external {
-        require(isListable(_legendId), "Not Authorized");
+        require(
+            isListable(_legendId)
+            // , "Not Authorized"
+        );
 
         legendMetadata[_legendId].prefix = _prefix;
         legendMetadata[_legendId].postfix = _postfix;
@@ -180,25 +204,30 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         emit LegendDestroyed(_legendId);
     }
 
-    function _formatURI(uint256 _newLegendId, string memory data)
+    function _formatIncubationURI(uint256 _newLegendId, string memory data)
         private
-        pure
+        view
         returns (string memory)
     {
-        //TODO:
-        string
-            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
+        uint256 incubationChamber = _randomIncubationChamber();
 
         return
             string(
                 abi.encodePacked(
                     Strings.toString(_newLegendId),
                     ",",
-                    enumEgg,
+                    incubationViews[incubationChamber],
                     ",",
                     data
                 )
             );
+    }
+
+    function _randomIncubationChamber() private view returns (uint256) {
+        return
+            uint256(
+                keccak256(abi.encodePacked(block.difficulty, block.timestamp))
+            ) % incubationViews.length;
     }
 
     function _mintLegend(
@@ -224,7 +253,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         m.id = _newLegendId;
         m.season = lab.fetchSeason();
         m.parents = _parents;
-        // m.birthDay = block.timestamp;
         m.legendCreator = creator;
         m.isLegendary = _isLegendary;
 
@@ -305,6 +333,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isListable(uint256 _legendId) public view returns (bool) {
+        // change to isUsable/syn ?
         if (ownerOf(_legendId) != msg.sender) return false;
         if (!isHatched(_legendId)) return false;
 
@@ -362,14 +391,22 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         );
     }
 
-    function setKinBlendingLevel(uint256 _newLevel) public virtual onlyLab {
+    function fetchIncubationViews() public view returns (string[5] memory) {
+        return incubationViews;
+    }
+
+    function setKinBlendingLevel(uint256 _newLevel) public onlyLab {
         if (_newLevel == 0) {
-            kinBlendingLevel == KinBlendingLevel.None;
+            kinBlendingLevel = KinBlendingLevel.None;
         } else if (_newLevel == 1) {
-            kinBlendingLevel == KinBlendingLevel.Siblings;
+            kinBlendingLevel = KinBlendingLevel.Siblings;
         } else if (_newLevel == 2) {
-            kinBlendingLevel == KinBlendingLevel.Parents;
+            kinBlendingLevel = KinBlendingLevel.Parents;
         }
+    }
+
+    function setIncubationViews(string[5] memory _newViews) public onlyLab {
+        incubationViews = _newViews;
     }
 
     function setBlendingLimit(uint256 _newLimit) public onlyLab {

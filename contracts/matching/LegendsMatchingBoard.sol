@@ -172,15 +172,13 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     function fetchMatchingCounts()
         public
         view
-        returns (Counters.Counter[3] memory)
+        returns (
+            Counters.Counter memory,
+            Counters.Counter memory,
+            Counters.Counter memory
+        )
     {
-        Counters.Counter[3] memory counts = [
-            _matchingIds,
-            _matchingsClosed,
-            _matchingsCancelled
-        ]; // TODO: remove from array
-
-        return counts;
+        return (_matchingIds, _matchingsClosed, _matchingsCancelled);
     }
 
     function fetchLegendMatching(uint256 _matchingId)

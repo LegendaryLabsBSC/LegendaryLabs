@@ -108,8 +108,9 @@ contract LegendsMarketplace is
 
         IERC721 legendsNFT = IERC721(l.nftContract);
 
-        require(l.status == ListingStatus.Open
-        // , "Listing Closed"
+        require(
+            l.status == ListingStatus.Open
+            // , "Listing Closed"
         );
         require(
             block.timestamp < offerDetails[_listingId].expirationTime
@@ -144,8 +145,13 @@ contract LegendsMarketplace is
         IERC721 legendsNFT = IERC721(_nftContract);
 
         // require(lab.isListable(_legendId), "Not eligible"); // commented out for testing
-        require(_startingPrice > 0
-        // , "Price can not be 0"
+        require(
+            _startingPrice > 0
+            // , "Price can not be 0"
+        );
+        require(
+            _instantPrice > _startingPrice
+            // , "Price can not be 0"
         );
 
         legendsNFT.transferFrom(msg.sender, address(this), _legendId);
@@ -163,14 +169,17 @@ contract LegendsMarketplace is
         LegendListing storage l = legendListing[_listingId]; // memory uses significant more contract space; check gas usage between memory vs storage
         AuctionDetails storage a = auctionDetails[_listingId];
 
-        require(l.status == ListingStatus.Open
-        // , "Listing Closed"
+        require(
+            l.status == ListingStatus.Open
+            // , "Listing Closed"
         );
-        require(!isExpired(_listingId)
-        // , "Auction has expired"
+        require(
+            !isExpired(_listingId)
+            // , "Auction has expired"
         );
-        require(msg.sender != l.seller
-        // , "Can not bid"
+        require(
+            msg.sender != l.seller
+            // , "Can not bid"
         );
 
         uint256 bidAmount = bidPlaced[_listingId][msg.sender] + msg.value;
@@ -266,11 +275,11 @@ contract LegendsMarketplace is
 
         if (l.isAuction || l.isOffer) {
             if (_paymentTransferred[_listingId] == false) {
-                _closeBid(_listingId, l.buyer); // make sure auction buyer set in time for call
-
                 _paymentTransferred[_listingId] = true;
 
-                _transferPayment(_listingId, l.seller);
+                _closeBid(_listingId, l.buyer); // make sure auction buyer set in time for call
+
+                _transferPayment(_listingId, l.seller); // !! reeval this and what calls it ; how does this work for bids/auctions ?
             }
         }
 

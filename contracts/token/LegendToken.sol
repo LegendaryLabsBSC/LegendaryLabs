@@ -8,8 +8,6 @@ import "../lab/LegendsLaboratory.sol";
 contract LegendToken is ERC20 {
     LegendsLaboratory lab;
 
-    //TODO: add support for liqlock
-
     modifier onlyLab() {
         require(msg.sender == address(lab), "not lab owner");
         _;
