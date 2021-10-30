@@ -11,12 +11,11 @@ import "./match/LegendMatching.sol";
 contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     using Counters for Counters.Counter;
 
-    // uint256 private _matchingBoardFee = 10;
 
-    LegendsLaboratory lab;
+    LegendsLaboratory _lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(lab), "Not Authorized");
+        require(msg.sender == address(_lab), "Not Authorized");
         _;
     }
 
@@ -34,81 +33,81 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     );
 
     constructor() {
-        lab = LegendsLaboratory(msg.sender);
+        _lab = LegendsLaboratory(msg.sender);
     }
 
     function createLegendMatching(
-        address _nftContract,
-        uint256 _legendId,
-        uint256 _price
+        address nftContract,
+        uint256 legendId,
+        uint256 price
     ) external nonReentrant {
-        IERC721 legendsNFT = IERC721(_nftContract);
+        IERC721 legendsNFT = IERC721(nftContract);
 
-        require(lab.isListable(_legendId), "Not Eligible");
-        require(lab.isBlendable(_legendId));
-        require(_price != 0, "Price can not be 0");
+        require(_lab.isListable(legendId), "Not Eligible");
+        require(_lab.isBlendable(legendId));
+        require(price != 0, "Price can not be 0");
 
-        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
+        legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
-        _createLegendMatching(_nftContract, _legendId, _price);
+        _createLegendMatching(nftContract, legendId, price);
     }
 
-    function matchWithLegend(uint256 _matchingId, uint256 _legendId)
+    function matchWithLegend(uint256 matchingId, uint256 legendId)
         external
         nonReentrant
     {
-        LegendMatching memory m = legendMatching[_matchingId];
+        LegendMatching memory m = _legendMatching[matchingId];
         IERC721 legendsNFT = IERC721(m.nftContract);
 
         require(m.status == MatchingStatus.Open);
         require(m.surrogate != msg.sender, "Seller not authorized");
         // make sure blender has to have enough LGND tokens for payment + blendingCost
 
-        require(lab.isListable(_legendId), "Not Eligible");
-        require(lab.isBlendable(_legendId)); // shouldnt be needed but double check
+        require(_lab.isListable(legendId), "Not Eligible");
+        require(_lab.isBlendable(legendId)); // shouldnt be needed but double check
 
-        // uint256 blendingCost = (lab.fetchBlendingCost(m.surrogateToken) +
-        //     lab.fetchBlendingCost(_legendId)) / 2;
+        // uint256 blendingCost = (_lab.fetchBlendingCost(m.surrogateToken) +
+        //     _lab.fetchBlendingCost(_legendId)) / 2;
 
         // uint256 matchingBoardFee = (m.price * _matchingBoardFee) / 100; // ?? should there be a fee here theres already payment and blendburn
-        // lab.legendToken().matchingBurn(msg.sender, matchingBoardFee); // may become liqlock
+        // _lab.legendToken().matchingBurn(msg.sender, matchingBoardFee); // may become liqlock
 
         // uint256 matchingPayment = m.price + blendingCost;
         uint256 matchingPayment = m.price; // blending function should still pull tokens from msg.sender/blender
-        lab.legendToken().transferFrom(
+        _lab.legendToken().transferFrom(
             msg.sender,
             address(this),
             matchingPayment
         );
 
         // transfer breeder's token to contract .. put in natspec
-        legendsNFT.transferFrom(msg.sender, address(this), _legendId);
+        legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
-        uint256 childId = lab.legendsNFT().blendLegends(
+        uint256 childId = _lab.legendsNFT().blendLegends(
             address(this),
             m.surrogateToken,
-            _legendId,
+            legendId,
             false
         );
 
         _matchWithLegend(
-            _matchingId,
+            matchingId,
             msg.sender,
             childId,
-            _legendId,
+            legendId,
             matchingPayment
         );
 
-        legendsNFT.safeTransferFrom(address(this), msg.sender, _legendId);
+        legendsNFT.safeTransferFrom(address(this), msg.sender, legendId);
     }
 
-    function cancelLegendMatching(uint256 _matchingId) external nonReentrant {
-        LegendMatching memory m = legendMatching[_matchingId];
+    function cancelLegendMatching(uint256 matchingId) external nonReentrant {
+        LegendMatching memory m = _legendMatching[matchingId];
 
         require(msg.sender == m.surrogate);
         require(m.status == MatchingStatus.Open);
 
-        _cancelLegendMatching(_matchingId);
+        _cancelLegendMatching(matchingId);
 
         IERC721(m.nftContract).safeTransferFrom(
             address(this),
@@ -117,18 +116,18 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         );
     }
 
-    function decideMatchingRelist(uint256 _matchingId, bool _isRelisted)
+    function decideMatchingRelist(uint256 matchingId, bool _isRelisted)
         external
         nonReentrant
     {
-        LegendMatching memory m = legendMatching[_matchingId];
+        LegendMatching memory m = _legendMatching[matchingId];
 
         require(msg.sender == m.surrogate);
         require(m.status == MatchingStatus.Closed);
 
         /// @notice price will stay the same if relisting legend
         if (_isRelisted) {
-            require(lab.isBlendable(m.surrogateToken), "Legend Not Blendable");
+            require(_lab.isBlendable(m.surrogateToken), "Legend Not Blendable");
 
             _createLegendMatching(m.nftContract, m.surrogateToken, m.price);
         } else {
@@ -139,32 +138,32 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             );
         }
 
-        emit Relisting(_matchingId, m.surrogateToken, _isRelisted);
+        emit Relisting(matchingId, m.surrogateToken, _isRelisted);
     }
 
-    function claimEgg(uint256 _matchingId) external nonReentrant {
-        LegendMatching memory m = legendMatching[_matchingId];
+    function claimEgg(uint256 matchingId) external nonReentrant {
+        LegendMatching memory m = _legendMatching[matchingId];
 
         require(msg.sender == m.breeder);
         require(m.status == MatchingStatus.Closed);
 
-        uint256 eggOwed = _eggOwed[_matchingId][m.breeder];
+        uint256 eggOwed = _eggPending[matchingId][m.breeder];
         require(eggOwed != 0, "No eggs owed");
 
-        _eggOwed[_matchingId][m.breeder] = 0;
+        _eggPending[matchingId][m.breeder] = 0;
 
-        lab.legendsNFT().safeTransferFrom(address(this), m.breeder, eggOwed);
+        _lab.legendsNFT().safeTransferFrom(address(this), m.breeder, eggOwed);
 
-        emit EggClaimed(m.breeder, _matchingId, eggOwed);
+        emit EggClaimed(m.breeder, matchingId, eggOwed);
     }
 
     function claimTokens() external nonReentrant {
-        uint256 tokensOwed = fetchTokensOwed(msg.sender);
+        uint256 tokensOwed = fetchTokensPending(msg.sender);
         require(tokensOwed != 0, "Address is owed 0");
 
-        _tokensOwed[msg.sender] = 0;
+        _tokensPending[msg.sender] = 0;
 
-        lab.legendToken().transferFrom(address(this), msg.sender, tokensOwed);
+        _lab.legendToken().transferFrom(address(this), msg.sender, tokensOwed);
 
         emit TokensClaimed(msg.sender, tokensOwed);
     }
@@ -181,29 +180,26 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         return (_matchingIds, _matchingsClosed, _matchingsCancelled);
     }
 
-    function fetchLegendMatching(uint256 _matchingId)
+    function fetchLegendMatching(uint256 matchingId)
         public
         view
         virtual
         override
         returns (LegendMatching memory)
     {
-        return legendMatching[_matchingId];
+        return _legendMatching[matchingId];
     }
 
-    function fetchTokensOwed(address _recipient) public view returns (uint256) {
-        return _tokensOwed[_recipient];
+    function fetchTokensPending(address recipient) public view returns (uint256) {
+        return _tokensPending[recipient];
     }
 
-    function fetchEggOwed(uint256 _matchingId, address _breeder)
+    function fetchEggOwed(uint256 matchingId, address breeder)
         public
         view
         returns (uint256)
     {
-        return _eggOwed[_matchingId][_breeder];
+        return _eggPending[matchingId][breeder];
     }
 
-    // function setMatchingBoardFee(uint256 newFee) public onlyLab {
-    //     _matchingBoardFee = newFee;
-    // }
 }

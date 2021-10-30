@@ -12,13 +12,13 @@ abstract contract LegendMatching is ILegendMatch {
     Counters.Counter internal _matchingsCancelled;
 
     /* matchingId => matchingDetails */
-    mapping(uint256 => LegendMatching) internal legendMatching;
+    mapping(uint256 => LegendMatching) internal _legendMatching;
 
     /* playerAddress => amount */
-    mapping(address => uint256) internal _tokensOwed;
+    mapping(address => uint256) internal _tokensPending;
 
     /* matchingId => playerAddress => childId */
-    mapping(uint256 => mapping(address => uint256)) internal _eggOwed;
+    mapping(uint256 => mapping(address => uint256)) internal _eggPending;
 
     function _createLegendMatching(
         address _nftContract,
@@ -28,7 +28,7 @@ abstract contract LegendMatching is ILegendMatch {
         _matchingIds.increment();
         uint256 matchingId = _matchingIds.current();
 
-        LegendMatching storage m = legendMatching[matchingId];
+        LegendMatching storage m = _legendMatching[matchingId];
         m.matchingId = matchingId;
         m.createdAt = block.timestamp;
         m.nftContract = _nftContract;
@@ -48,15 +48,15 @@ abstract contract LegendMatching is ILegendMatch {
         uint256 _legendId,
         uint256 _matchingPayment
     ) internal {
-        LegendMatching storage m = legendMatching[_matchingId];
+        LegendMatching storage m = _legendMatching[_matchingId];
 
         m.breeder = _breeder;
         m.breederToken = _legendId;
         m.childId = _childId;
         m.status = MatchingStatus.Closed;
 
-        _tokensOwed[m.surrogate] += _matchingPayment;
-        _eggOwed[_matchingId][_breeder] = _childId;
+        _tokensPending[m.surrogate] += _matchingPayment;
+        _eggPending[_matchingId][_breeder] = _childId;
 
         _matchingsClosed.increment();
 
@@ -71,7 +71,7 @@ abstract contract LegendMatching is ILegendMatch {
     }
 
     function _cancelLegendMatching(uint256 _matchingId) internal {
-        legendMatching[_matchingId].status = MatchingStatus.Cancelled;
+        _legendMatching[_matchingId].status = MatchingStatus.Cancelled;
 
         _matchingsCancelled.increment();
 

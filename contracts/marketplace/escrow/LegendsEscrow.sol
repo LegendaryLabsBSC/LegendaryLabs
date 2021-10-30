@@ -119,7 +119,7 @@ contract LegendsEscrow is Ownable {
 
         bidder.sendValue(amount);
 
-        emit BidRefunded(listingId, msg.sender, amount); // ! will show 0 payments not set up for bidders
+        emit BidRefunded(listingId, msg.sender, amount); // ! will show 0 payments not set up for _bidders
     }
 
     function closeBid(uint256 _listingId, address _buyer)

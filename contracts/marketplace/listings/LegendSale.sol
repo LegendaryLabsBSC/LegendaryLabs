@@ -19,13 +19,13 @@ abstract contract LegendSale is ILegendListing {
         bool isAccepted; // make enum if theres space
     }
 
-    uint256 internal offerDuration = 432000; // 5 days
+    uint256 internal _offerDuration = 432000; // 5 days
 
     /* listingId => listingDetails */
-    mapping(uint256 => LegendListing) internal legendListing;
+    mapping(uint256 => LegendListing) internal _legendListing;
 
     /* listingId => offerDetails */
-    mapping(uint256 => OfferDetails) internal offerDetails;
+    mapping(uint256 => OfferDetails) internal _offerDetails;
 
     /* listingId => buyerAddress => legendId */
     mapping(uint256 => mapping(address => uint256)) internal _legendPending;
@@ -34,105 +34,105 @@ abstract contract LegendSale is ILegendListing {
     event OfferDecided(uint256 indexed listingId, bool indexed isAccepted);
 
     function _createLegendSale(
-        address _nftContract,
-        uint256 _legendId,
-        uint256 _price
+        address nftContract,
+        uint256 legendId,
+        uint256 price
     ) internal {
         _listingIds.increment();
         uint256 listingId = _listingIds.current();
 
-        LegendListing storage l = legendListing[listingId];
+        LegendListing storage l = _legendListing[listingId];
         l.listingId = listingId;
         l.createdAt = block.timestamp;
-        l.nftContract = _nftContract;
-        l.legendId = _legendId;
+        l.nftContract = nftContract;
+        l.legendId = legendId;
         l.seller = payable(msg.sender);
         l.buyer = payable(address(0));
-        l.price = _price;
+        l.price = price;
         l.status = ListingStatus.Open;
 
         emit ListingStatusChanged(listingId, ListingStatus.Open);
     }
 
-    function _buyLegend(uint256 _listingId) internal {
-        LegendListing storage l = legendListing[_listingId];
+    function _buyLegend(uint256 listingId) internal {
+        LegendListing storage l = _legendListing[listingId];
 
         l.status = ListingStatus.Closed;
         l.buyer = payable(msg.sender);
 
-        _legendPending[_listingId][payable(msg.sender)] = l.legendId;
+        _legendPending[listingId][payable(msg.sender)] = l.legendId;
 
         _listingsClosed.increment();
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Closed);
+        emit ListingStatusChanged(listingId, ListingStatus.Closed);
     }
 
     function _makeLegendOffer(
-        address _nftContract,
-        address payable _legendOwner,
-        uint256 _legendId
+        address nftContract,
+        address payable legendOwner,
+        uint256 legendId
     ) internal returns (uint256) {
         _listingIds.increment();
         uint256 listingId = _listingIds.current();
 
         uint256 price = msg.value;
 
-        LegendListing storage l = legendListing[listingId];
+        LegendListing storage l = _legendListing[listingId];
         l.listingId = listingId;
         l.createdAt = block.timestamp;
-        l.nftContract = _nftContract;
-        l.legendId = _legendId;
+        l.nftContract = nftContract;
+        l.legendId = legendId;
         l.seller = payable(address(0));
         l.buyer = payable(msg.sender);
         l.price = price;
         l.isOffer = true;
         l.status = ListingStatus.Open;
 
-        OfferDetails storage o = offerDetails[listingId];
-        o.expirationTime = block.timestamp + offerDuration;
-        o.legendOwner = payable(_legendOwner);
+        OfferDetails storage o = _offerDetails[listingId];
+        o.expirationTime = block.timestamp + _offerDuration;
+        o.legendOwner = payable(legendOwner);
 
         emit OfferMade(listingId, price);
 
         return (listingId);
     }
 
-    function _decideLegendOffer(uint256 _listingId, bool _isAccepted) internal {
-        LegendListing storage l = legendListing[_listingId];
+    function _decideLegendOffer(uint256 listingId, bool isAccepted) internal {
+        LegendListing storage l = _legendListing[listingId];
 
-        if (_isAccepted) {
+        if (isAccepted) {
             l.status = ListingStatus.Closed;
             l.seller = payable(msg.sender);
 
-            offerDetails[_listingId].isAccepted = true;
+            _offerDetails[listingId].isAccepted = true;
 
-            _legendPending[_listingId][l.buyer] = l.legendId;
+            _legendPending[listingId][l.buyer] = l.legendId;
 
             _listingsClosed.increment();
         } else {
             l.status = ListingStatus.Cancelled;
 
-            offerDetails[_listingId].isAccepted = false;
+            _offerDetails[listingId].isAccepted = false;
 
             _listingsCancelled.increment();
         }
 
-        emit OfferDecided(_listingId, _isAccepted);
+        emit OfferDecided(listingId, isAccepted);
     }
 
-    function _cancelLegendListing(uint256 _listingId) internal {
-        legendListing[_listingId].status = ListingStatus.Cancelled;
+    function _cancelLegendListing(uint256 listingId) internal {
+        _legendListing[listingId].status = ListingStatus.Cancelled;
 
         _listingsCancelled.increment();
 
-        emit ListingStatusChanged(_listingId, ListingStatus.Cancelled);
+        emit ListingStatusChanged(listingId, ListingStatus.Cancelled);
     }
 
-    function isValidListing(uint256 _listingId) public view returns (bool) {
-        return _listingId >= _listingIds.current();
+    function isValidListing(uint256 listingId) public view returns (bool) {
+        return listingId >= _listingIds.current();
     }
 
-    function fetchLegendListing(uint256 _listingId)
+    function fetchLegendListing(uint256 listingId)
         public
         view
         virtual
@@ -142,7 +142,7 @@ abstract contract LegendSale is ILegendListing {
         )
     {}
 
-    function fetchOfferDetails(uint256 _listingId)
+    function fetchOfferDetails(uint256 listingId)
         public
         view
         virtual

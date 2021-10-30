@@ -21,7 +21,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
 
-    string private season = "Phoenix";
+    string private _season = "Phoenix";
 
     /* promoId => skipIncubation */
     mapping(uint256 => bool) private _promoIncubated;
@@ -51,162 +51,167 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     }
 
     function createPromoEvent(
-        string calldata _eventName,
-        uint256 _duration,
-        bool _isUnrestricted,
-        uint256 _maxTickets,
-        bool _skipIncubation
+        string calldata eventName,
+        uint256 duration,
+        bool isUnrestricted,
+        uint256 maxTickets,
+        bool skipIncubation
     ) external onlyOwner {
         uint256 promoId = _createPromoEvent(
-            _eventName,
-            _duration,
-            _isUnrestricted,
-            _maxTickets
+            eventName,
+            duration,
+            isUnrestricted,
+            maxTickets
         );
 
-        _promoIncubated[promoId] = _skipIncubation;
+        _promoIncubated[promoId] = skipIncubation;
     }
 
     function dispensePromoTicket(
-        uint256 _promoId,
-        address _recipient,
-        uint256 _ticketAmount
+        uint256 promoId,
+        address recipient,
+        uint256 ticketAmount
     ) public {
-        if (promoEvent[_promoId].isUnrestricted == false) {
+        if (_promoEvent[promoId].isUnrestricted == false) {
             require(msg.sender == owner(), "Not Authorized");
         }
 
-        _dispensePromoTicket(_promoId, _recipient, _ticketAmount);
+        _dispensePromoTicket(promoId, recipient, ticketAmount);
     }
 
-    function redeemPromoTicket(uint256 _promoId, address _recipient) public {
-        _redeemPromoTicket(_promoId, _recipient);
+    function redeemPromoTicket(uint256 promoId, address recipient) public {
+        _redeemPromoTicket(promoId, recipient);
 
-        legendsNFT.createLegend(_recipient, _promoId, false);
+        legendsNFT.createLegend(recipient, promoId, false);
     }
 
-    function closePromoEvent(uint256 _promoId) public onlyOwner {
-        _closePromoEvent(_promoId);
+    function closePromoEvent(uint256 promoId) public onlyOwner {
+        _closePromoEvent(promoId);
     }
 
-    function mintLegendaryLegend(address _recipient, uint256 _promoId)
+    function mintLegendaryLegend(address recipient, uint256 promoId)
         public
         onlyOwner
     {
-        _redeemPromoTicket(_promoId, _recipient);
+        _redeemPromoTicket(promoId, recipient);
 
-        legendsNFT.createLegend(_recipient, _promoId, true);
+        legendsNFT.createLegend(recipient, promoId, true);
     }
 
-    function _restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+    function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
     {
         require(msg.sender == address(legendRejuvenation), "Not Pod");
 
-        legendsNFT._restoreBlendingSlots(_legendId, _regainedSlots);
+        legendsNFT._restoreBlendingSlots(legendId, regainedSlots);
     }
 
-    function isHatched(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isHatched(_legendId);
+    function isHatched(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isHatched(legendId);
     }
 
-    function isListable(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isListable(_legendId);
+    function isListable(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isListable(legendId);
     }
 
-    function isBlendable(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isBlendable(_legendId);
+    function isBlendable(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isBlendable(legendId);
     }
 
-    function isPromoIncubated(uint256 _promoId) public view returns (bool) {
-        return _promoIncubated[_promoId];
+    function isPromoIncubated(uint256 promoId) public view returns (bool) {
+        return _promoIncubated[promoId];
     }
 
     function fetchSeason() public view returns (string memory) {
-        return season;
+        return _season;
     }
 
-    function fetchBlendingCount(uint256 _legendId)
+    function fetchBlendingCount(uint256 legendId)
         public
         view
         returns (uint256)
     {
-        return legendsNFT.fetchLegendMetadata(_legendId).blendingInstancesUsed;
+        return legendsNFT.fetchLegendMetadata(legendId).blendingInstancesUsed;
     }
 
-    function fetchBlendingCost(uint256 _legendId)
-        public
-        view
-        returns (uint256)
-    {
-        return legendsNFT.fetchBlendingCost(_legendId);
+    function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
+        return legendsNFT.fetchBlendingCost(legendId);
     }
 
-    function fetchRoyaltyRecipient(uint256 _legendId)
+    function fetchRoyaltyRecipient(uint256 legendId)
         public
         view
         returns (address payable)
     {
-        return legendsNFT.fetchLegendMetadata(_legendId).legendCreator;
+        return legendsNFT.fetchLegendMetadata(legendId).legendCreator;
     }
 
-    function setSeason(string calldata _newSeason) public onlyOwner {
-        season = _newSeason;
+    function setSeason(string calldata newSeason) public onlyOwner {
+        _season = newSeason;
     }
 
-    function setKinBlendingLevel(uint256 _newLevel) public onlyOwner {
-        legendsNFT.setKinBlendingLevel(_newLevel);
+    function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyOwner {
+        legendsNFT.setKinBlendingLevel(newKinBlendingLevel);
     }
 
-    function setIncubationViews(string[5] calldata _newViews) public onlyOwner {
-        legendsNFT.setIncubationViews(_newViews);
+    function setIncubationViews(string[5] calldata newIncubationViews)
+        public
+        onlyOwner
+    {
+        legendsNFT.setIncubationViews(newIncubationViews);
     }
 
-    function setBlendingLimit(uint256 _newLimit) public onlyOwner {
-        legendsNFT.setBlendingLimit(_newLimit);
+    function setBlendingLimit(uint256 newBlendingLimit) public onlyOwner {
+        legendsNFT.setBlendingLimit(newBlendingLimit);
     }
 
-    function setBaseBlendingCost(uint256 _newAmount) public onlyOwner {
-        legendsNFT.setBaseBlendingCost(_newAmount);
+    function setBaseBlendingCost(uint256 newBaseBlendingCost) public onlyOwner {
+        legendsNFT.setBaseBlendingCost(newBaseBlendingCost);
     }
 
-    function setIncubationPeriod(uint256 newDuration) public onlyOwner {
-        legendsNFT.setIncubationPeriod(newDuration);
+    function setIncubationPeriod(uint256 newIncubationPeriod) public onlyOwner {
+        legendsNFT.setIncubationPeriod(newIncubationPeriod);
     }
 
-    function setRoyaltyFee(uint256 _newFee) public onlyOwner {
-        legendsMarketplace.setRoyaltyFee(_newFee);
+    function setRoyaltyFee(uint256 newRoyaltyFee) public onlyOwner {
+        legendsMarketplace.setRoyaltyFee(newRoyaltyFee);
     }
 
-    function setMarketplaceFee(uint256 _newFee) public onlyOwner {
-        legendsMarketplace.setMarketplaceFee(_newFee);
+    function setMarketplaceFee(uint256 newMarketplaceFee) public onlyOwner {
+        legendsMarketplace.setMarketplaceFee(newMarketplaceFee);
     }
 
-    function setOfferDuration(uint256 _newDuration) public onlyOwner {
-        legendsMarketplace.setOfferDuration(_newDuration);
+    function setOfferDuration(uint256 newOfferDuration) public onlyOwner {
+        legendsMarketplace.setOfferDuration(newOfferDuration);
     }
 
-    function setAuctionExtension(uint256 _newDuration) public onlyOwner {
-        legendsMarketplace.setAuctionExtension(_newDuration);
+    function setAuctionDurations(uint256[3] calldata newAuctionDurations)
+        public
+        onlyOwner
+    {
+        legendsMarketplace.setAuctionDurations(newAuctionDurations);
     }
 
-    // function setMatchingBoardFee(uint256 newFee) public onlyOwner {
-    //     legendsMatchingBoard.setMatchingBoardFee(newFee);
-    // }
-
-    function setMinimumSecure(uint256 _newMinimum) public onlyOwner {
-        legendRejuvenation.setMinimumSecure(_newMinimum);
+    function setAuctionExtension(uint256 newAuctionExtension) public onlyOwner {
+        legendsMarketplace.setAuctionExtension(newAuctionExtension);
     }
 
-    function setMaxMultiplier(uint256 _newMax) public onlyOwner {
-        legendRejuvenation.setMaxMultiplier(_newMax);
+    function setMinimumSecure(uint256 newMinimumSecure) public onlyOwner {
+        legendRejuvenation.setMinimumSecure(newMinimumSecure);
     }
 
-    function setReJuPerBlock(uint256 _newRate) public onlyOwner {
-        legendRejuvenation.setReJuPerBlock(_newRate);
+    function setMaxMultiplier(uint256 newMaxMultiplier) public onlyOwner {
+        legendRejuvenation.setMaxMultiplier(newMaxMultiplier);
     }
 
-    function setReJuNeededPerSlot(uint256 _newAmount) public onlyOwner {
-        legendRejuvenation.setReJuNeededPerSlot(_newAmount);
+    function setReJuPerBlock(uint256 newReJuEmissionRate) public onlyOwner {
+        legendRejuvenation.setReJuPerBlock(newReJuEmissionRate);
+    }
+
+    function setReJuNeededPerSlot(uint256 newReJuNeededPerSlot)
+        public
+        onlyOwner
+    {
+        legendRejuvenation.setReJuNeededPerSlot(newReJuNeededPerSlot);
     }
 }

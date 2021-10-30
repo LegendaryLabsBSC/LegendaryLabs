@@ -23,16 +23,16 @@ abstract contract TicketMachine {
     }
 
     /* promoId => PromoEvent */
-    mapping(uint256 => PromoEvent) internal promoEvent;
+    mapping(uint256 => PromoEvent) internal _promoEvent;
 
     /* promoId => maxTicketAmount */
-    mapping(uint256 => uint256) internal maxTicketsDispensable;
+    mapping(uint256 => uint256) internal _maxTicketsDispensable;
 
     /* promoId => recipient => isClaimed */
-    mapping(uint256 => mapping(address => bool)) private claimedPromo;
+    mapping(uint256 => mapping(address => bool)) private _claimedPromo;
 
     /* promoId => recipient => ticketCount */
-    mapping(uint256 => mapping(address => uint256)) private promoTickets;
+    mapping(uint256 => mapping(address => uint256)) private _promoTickets;
 
     event PromoCreated(
         uint256 indexed promoId,
@@ -49,84 +49,84 @@ abstract contract TicketMachine {
     event TicketRedeemed(uint256 indexed promoId, uint256 currentRedeemed);
 
     function _createPromoEvent(
-        string calldata _name,
-        uint256 _duration,
-        bool _isUnrestricted,
-        uint256 _maxTickets
+        string calldata name,
+        uint256 duration,
+        bool isUnrestricted,
+        uint256 maxTickets
     ) internal returns (uint256) {
         _promoIds.increment();
         uint256 promoId = _promoIds.current();
 
-        uint256 expireTime = block.timestamp + _duration;
+        uint256 expireTime = block.timestamp + duration;
 
-        PromoEvent storage p = promoEvent[promoId];
-        p.promoName = _name;
+        PromoEvent storage p = _promoEvent[promoId];
+        p.promoName = name;
         p.promoId = promoId;
         p.startTime = block.timestamp;
         p.expireTime = expireTime;
-        p.isUnrestricted = _isUnrestricted;
+        p.isUnrestricted = isUnrestricted;
 
-        if (_maxTickets != 0) {
+        if (maxTickets != 0) {
             p.ticketLimit = true;
-            maxTicketsDispensable[promoId] = _maxTickets;
+            _maxTicketsDispensable[promoId] = maxTickets;
         }
 
-        emit PromoCreated(promoId, _name, expireTime);
+        emit PromoCreated(promoId, name, expireTime);
 
         return (promoId);
     }
 
     function _dispensePromoTicket(
-        uint256 _promoId,
-        address _recipient,
-        uint256 _ticketAmount
+        uint256 promoId,
+        address recipient,
+        uint256 ticketAmount
     ) internal {
-        PromoEvent storage p = promoEvent[_promoId];
+        PromoEvent storage p = _promoEvent[promoId];
         
         require(block.timestamp < p.expireTime, "Promo Expired");
 
         if (p.isUnrestricted) {
             require(
-                isClaimed(_promoId, _recipient) == false,
+                isClaimed(promoId, recipient) == false,
                 "Promo already claimed"
             );
-            require(_ticketAmount == 1, "One ticket per address");
+            require(ticketAmount == 1, "One ticket per address");
         }
 
         if (p.ticketLimit) {
             uint256 currentTicketCount = p.ticketsClaimed.current();
-            require(currentTicketCount < maxTicketsDispensable[_promoId]);
+            require(currentTicketCount < _maxTicketsDispensable[promoId]);
         }
 
-        claimedPromo[_promoId][_recipient] = true;
+        _claimedPromo[promoId][recipient] = true;
 
-        promoTickets[_promoId][_recipient] += _ticketAmount;
+        _promoTickets[promoId][recipient] += ticketAmount;
 
         p.ticketsClaimed.increment();
 
-        emit TicketDispensed(_promoId, p.ticketsClaimed.current());
+        emit TicketDispensed(promoId, p.ticketsClaimed.current());
     }
 
-    function _redeemPromoTicket(uint256 _promoId, address _recipient) internal {
-        PromoEvent storage p = promoEvent[_promoId];
+    function _redeemPromoTicket(uint256 promoId, address recipient) internal {
+        PromoEvent storage p = _promoEvent[promoId];
 
         require(!p.promoClosed, "Promo Closed");
 
         uint256 redeemableTickets = fetchRedeemableTickets(
-            _promoId,
-            _recipient
+            promoId,
+            recipient
         );
         require(redeemableTickets != 0, "No tickets to redeem");
 
-        promoTickets[_promoId][_recipient] -= 1;
+        _promoTickets[promoId][recipient] -= 1;
 
         p.ticketsRedeemed.increment();
 
-        emit TicketRedeemed(_promoId, p.ticketsRedeemed.current());
+        emit TicketRedeemed(promoId, p.ticketsRedeemed.current());
     }
 
-    function _closePromoEvent(uint256 _promoId) internal {
-        PromoEvent storage p = promoEvent[_promoId];
+    function _closePromoEvent(uint256 promoId) internal {
+        PromoEvent storage p = _promoEvent[promoId];
 
         require(block.timestamp > p.expireTime, "Promo not expired");
         require(!p.promoClosed, "Promo already closed");
@@ -134,19 +134,19 @@ abstract contract TicketMachine {
         p.promoClosed = true;
 
         emit PromoClosed(
-            _promoId,
+            promoId,
             p.ticketsClaimed.current(),
             p.ticketsRedeemed.current()
         );
     }
 
-    function isClaimed(uint256 _promoId, address _recipient)
+    function isClaimed(uint256 promoId, address recipient)
         public
         view
         virtual
         returns (bool)
     {
-        return claimedPromo[_promoId][_recipient];
+        return _claimedPromo[promoId][recipient];
     }
 
     function fetchTotalPromoCount()
@@ -158,32 +158,32 @@ abstract contract TicketMachine {
         return (_promoIds, _closedPromos);
     }
 
-    function fetchPromoEvent(uint256 _promoId)
+    function fetchPromoEvent(uint256 promoId)
         public
         view
         virtual
         returns (PromoEvent memory)
     {
-        return promoEvent[_promoId];
+        return _promoEvent[promoId];
     }
 
-    function fetchMaxTicketsDispensable(uint256 _promoId)
+    function fetchMaxTicketsDispensable(uint256 promoId)
         public
         view
         virtual
         returns (uint256)
     {
-        require(promoEvent[_promoId].ticketLimit, "No Ticket Limit Set");
+        require(_promoEvent[promoId].ticketLimit, "No Ticket Limit Set");
 
-        return maxTicketsDispensable[_promoId];
+        return _maxTicketsDispensable[promoId];
     }
 
-    function fetchRedeemableTickets(uint256 _promoId, address _recipient)
+    function fetchRedeemableTickets(uint256 promoId, address recipient)
         public
         view
         virtual
         returns (uint256)
     {
-        return promoTickets[_promoId][_recipient];
+        return _promoTickets[promoId][recipient];
     }
 }

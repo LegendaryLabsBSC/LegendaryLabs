@@ -6,33 +6,33 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../lab/LegendsLaboratory.sol";
 
 contract LegendToken is ERC20 {
-    LegendsLaboratory lab;
+    LegendsLaboratory _lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(lab), "not lab owner");
+        require(msg.sender == address(_lab), "not _lab owner");
         _;
     }
 
     modifier onlyMarketplace() {
         require(
-            msg.sender == address(lab.legendsMarketplace()),
+            msg.sender == address(_lab.legendsMarketplace()),
             "not marketplace"
         );
         _;
     }
 
     modifier onlyBlending() {
-        require(msg.sender == address(lab.legendsNFT()), "not blending");
+        require(msg.sender == address(_lab.legendsNFT()), "not blending");
         _;
     }
 
     constructor(address owner) ERC20("Legends", "LGND") {
-        lab = LegendsLaboratory(msg.sender);
+        _lab = LegendsLaboratory(msg.sender);
         _mint(owner, 100 * 1e24);
     }
 
     function labBurn(uint256 _amount) public onlyLab {
-        _burn(address(lab), _amount);
+        _burn(address(_lab), _amount);
     }
 
     function blendingBurn(address _account, uint256 _amount)
