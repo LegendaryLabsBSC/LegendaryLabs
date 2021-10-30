@@ -44,7 +44,7 @@ abstract contract LegendAuction is LegendSale {
     function _createLegendAuction(
         address nftContract,
         uint256 legendId,
-        uint256 duration,
+        uint256 durationIndex,
         uint256 startingPrice,
         uint256 instantPrice
     ) internal {
@@ -66,6 +66,16 @@ abstract contract LegendAuction is LegendSale {
         l.buyer = payable(address(0));
         l.isAuction = true;
         l.status = ListingStatus.Open;
+
+        // uint256 duration;
+        // if (durationIndex > _auctionDurations.length) {
+        //     duration = _auctionDurations[0];
+        // } else {
+        //     duration = _auctionDurations[durationIndex];
+        // }
+
+        require(durationIndex <= _auctionDurations.length);
+        uint256 duration = _auctionDurations[durationIndex];
 
         AuctionDetails storage a = _auctionDetails[listingId];
         a.duration = duration;

@@ -16,7 +16,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     Counters.Counter private _legendIds;
 
     modifier onlyLab() {
-        require(msg.sender == address(_lab), "Not Authorized");
+        require(msg.sender == address(_lab));
         _;
     }
 
@@ -133,7 +133,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
             m.totalOffspring += 1;
             m.blendingInstancesUsed += 1;
-            // todo: increase bledning cost ???
+
             _parentOf[parents[i]][newLegendId] = true;
         }
 
@@ -302,7 +302,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isHatchable(uint256 legendId) public view returns (bool) {
-        require(!isHatched(legendId), "Already hatched");
+        require(
+            !isHatched(legendId)
+            // , "Already hatched"
+        );
 
         if (_noIncubation[legendId]) return true;
 
@@ -352,17 +355,13 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         returns (string memory)
     {
         require(
-            _exists(legendId),
-            "ERC721Metadata: URI query for nonexistent token"
+            _exists(legendId)
+            // "ERC721Metadata: URI query for nonexistent token"
         );
         return _legendURI[legendId];
     }
 
-    function fetchBlendingCost(uint256 legendId)
-        public
-        view
-        returns (uint256)
-    {
+    function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
         if (_legendMetadata[legendId].totalOffspring != 0) {
             return (_baseBlendingCost *
                 _legendMetadata[legendId].totalOffspring);
@@ -420,5 +419,12 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     function setIncubationPeriod(uint256 newIncubationPeriod) public onlyLab {
         _incubationPeriod = newIncubationPeriod;
+    }
+
+
+
+    function resetLegendName(uint256 legendId) public onlyLab {
+        _legendMetadata[legendId].prefix = "";
+        _legendMetadata[legendId].postfix = "";
     }
 }

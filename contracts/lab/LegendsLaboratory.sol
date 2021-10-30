@@ -214,4 +214,53 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     {
         legendRejuvenation.setReJuNeededPerSlot(newReJuNeededPerSlot);
     }
+
+    /**
+     * Admin - Legend Name Reset
+     * @notice Only to be used in the, hopefully, rare event a
+     * Legend NFT owner assigns their Legend a vulgar name.
+     * Must be both reported by the community a set number of times, and
+     * manually called by an admin address.
+     */
+
+    uint256 private _reportThreshold = 5;
+
+    /* legendId => reportCount */
+    mapping(uint256 => uint256) private _reportCount;
+
+    /* legendId => reporterAddress => hasReported */
+    mapping(uint256 => mapping(address => bool)) private _reported;
+
+    /**
+     * @notice Once an address reports a @param legendId they can not report
+     * that @param legendId again, even after the name reset.
+     * This is to help prevent abuse with the reporting system.
+     */
+    function reportVulgarLegend(uint256 legendId) public {
+        require(!_reported[legendId][msg.sender], "Legend Reported");
+
+        _reported[legendId][msg.sender] = true;
+
+        _reportCount[legendId] += 1;
+    }
+
+    /**
+     * @notice In order for admin to call, a @param legendId must have
+     * a _reportCount equal to or greater than the _reportThreshold.
+     * @dev Calls resetLegendName from LegendsNFT contract, then resets report count to 0.
+     */
+    function resetLegendName(uint256 legendId) public onlyOwner {
+        require(
+            _reportCount[legendId] >= _reportThreshold,
+            "Threshold Not Reached"
+        );
+
+        legendsNFT.resetLegendName(legendId);
+
+        _reportCount[legendId] = 0;
+    }
+
+    function setReportThreshold(uint256 newReportThreshold) public onlyOwner {
+        _reportThreshold = newReportThreshold;
+    }
 }
