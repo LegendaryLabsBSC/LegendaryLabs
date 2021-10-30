@@ -152,7 +152,6 @@ abstract contract TicketMachine {
     function fetchTotalPromoCount()
         public
         view
-        virtual
         returns (Counters.Counter memory, Counters.Counter memory)
     {
         return (_promoIds, _closedPromos);
@@ -161,7 +160,6 @@ abstract contract TicketMachine {
     function fetchPromoEvent(uint256 promoId)
         public
         view
-        virtual
         returns (PromoEvent memory)
     {
         return _promoEvent[promoId];
@@ -170,7 +168,6 @@ abstract contract TicketMachine {
     function fetchMaxTicketsDispensable(uint256 promoId)
         public
         view
-        virtual
         returns (uint256)
     {
         require(_promoEvent[promoId].ticketLimit, "No Ticket Limit Set");
@@ -181,7 +178,6 @@ abstract contract TicketMachine {
     function fetchRedeemableTickets(uint256 promoId, address recipient)
         public
         view
-        virtual
         returns (uint256)
     {
         return _promoTickets[promoId][recipient];

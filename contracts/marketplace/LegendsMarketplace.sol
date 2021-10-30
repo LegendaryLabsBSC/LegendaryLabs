@@ -23,7 +23,7 @@ contract LegendsMarketplace is
     uint256 private _royaltyFee = 2;
     uint256 private _marketplaceFee = 2;
 
-    /* listingId => isPaymentTransferred */
+    /** @dev listingId => isPaymentTransferred */
     mapping(uint256 => bool) private _paymentTransferred;
 
     constructor() {
@@ -37,7 +37,7 @@ contract LegendsMarketplace is
     ) external nonReentrant {
         IERC721 legendsNFT = IERC721(nftContract);
 
-        // require(_lab.isListable(legendId), "Not eligible"); // commented out for testing
+        require(_lab.isListable(legendId), "Not eligible"); // comment out for testing
         require(
             price != 0
             //, "Price can not be 0"
@@ -64,7 +64,11 @@ contract LegendsMarketplace is
             // , "Incorrect price submitted for item"
         );
 
-        _transferPayment(listingId, l.seller);
+        _transferPayment(
+            listingId,
+            // l.seller,
+            false
+        );
 
         _buyLegend(listingId);
     }
@@ -94,9 +98,9 @@ contract LegendsMarketplace is
             legendId
         );
 
-        _canWithdrawBid[listingId][msg.sender] = false;
+        _isBidRefundable[listingId][msg.sender] = false;
 
-        _asyncTransferBid(listingId, msg.sender, msg.value);
+        _asyncTransferBid(msg.value, listingId, payable(msg.sender));
     }
 
     function decideLegendOffer(uint256 listingId, bool isAccepted)
@@ -131,7 +135,7 @@ contract LegendsMarketplace is
              * Token owner can also just let the offer expire
              * if they do not wish to pay gas to reject
              */
-            _canWithdrawBid[listingId][l.buyer] = true;
+            _isBidRefundable[listingId][l.buyer] = true;
         }
     }
 
@@ -182,7 +186,8 @@ contract LegendsMarketplace is
             // , "Can not bid"
         );
 
-        uint256 bidAmount = _bidPlaced[listingId][msg.sender] + msg.value;
+        // uint256 bidAmount = _bidPlaced[listingId][msg.sender] + msg.value;
+        uint256 bidAmount = fetchBidPlaced(listingId, msg.sender);
 
         if (_bidders[listingId].length == 0) {
             require(
@@ -196,11 +201,11 @@ contract LegendsMarketplace is
             );
         }
 
-        _canWithdrawBid[listingId][msg.sender] = false;
+        _isBidRefundable[listingId][msg.sender] = false;
 
-        _asyncTransferBid(listingId, payable(msg.sender), msg.value);
+        _asyncTransferBid(msg.value, listingId, payable(msg.sender));
 
-        _canWithdrawBid[listingId][a.highestBidder] = true;
+        _isBidRefundable[listingId][a.highestBidder] = true;
 
         _placeBid(listingId, bidAmount);
 
@@ -211,16 +216,10 @@ contract LegendsMarketplace is
         }
     }
 
-    function withdrawBid(uint256 listingId) external payable nonReentrant {
-        // require(msg.sender != _legendListing[listingId].seller); // make sure not needed
+    function refundBid(uint256 listingId) external payable nonReentrant {
+        require(_isBidRefundable[listingId][msg.sender], "Not authorized");
 
-        if (_legendListing[listingId].isAuction) {
-            _bidPlaced[listingId][msg.sender] = 0;
-        }
-
-        _withdrawBid(listingId, payable(msg.sender)); // test this being here
-
-        _canWithdrawBid[listingId][msg.sender] = false;
+        _refundBid(listingId, payable(msg.sender));
     }
 
     function cancelLegendListing(uint256 listingId) external nonReentrant {
@@ -241,7 +240,7 @@ contract LegendsMarketplace is
         _cancelLegendListing(listingId);
 
         if (l.isOffer) {
-            _canWithdrawBid[listingId][msg.sender] = true;
+            _isBidRefundable[listingId][msg.sender] = true;
         } else {
             // thoroughly test and check gas cost, due to not using withdraw pattern
             IERC721(l.nftContract).transferFrom(
@@ -277,9 +276,13 @@ contract LegendsMarketplace is
             if (_paymentTransferred[listingId] == false) {
                 _paymentTransferred[listingId] = true;
 
-                _closeBid(listingId, l.buyer); // make sure auction buyer set in time for call
+                // _closeBid(listingId, l.buyer); // make sure auction buyer set in time for call
 
-                _transferPayment(listingId, l.seller); // !! reeval this and what calls it ; how does this work for bids/auctions ?
+                _transferPayment(
+                    listingId,
+                    // l.seller,
+                    true
+                );
             }
         }
 
@@ -293,32 +296,69 @@ contract LegendsMarketplace is
     }
 
     function collectRoyalties() external payable nonReentrant {
-        uint256 amount = accruedRoyalties(msg.sender);
-        require(amount != 0, "Royalties are 0");
-
+        uint256 amount = fetchRoyaltiesAccrued(msg.sender);
+        require(
+            amount != 0
+            // , "Royalties are 0"
+        );
 
         _withdrawRoyalties(payable(msg.sender));
     }
 
-    function _transferPayment(uint256 listingId, address payable payee)
-        internal
-    {
+    /*/*
+     * @dev Calls the {_asyncTransfer} function in the {LegendsMarketClerk} contract.
+     * This then transfers the buyers payment to the {LegendsEscrow} contract to be later withdrawn by the seller.
+     *
+     * @param listingId The id of the Legend-Listing
+     * @param payee The address of the buyer or highestBidder
+     */
+    function _transferPayment(
+        uint256 listingId,
+        // address payable payee,
+        bool isBid
+    ) internal {
+        LegendListing storage l = _legendListing[listingId];
+
         (
             uint256 marketplaceFee,
             address payable legendCreator,
             uint256 royaltyFee
         ) = _calculateFees(listingId);
 
-        _asyncTransfer(
-            payee,
-            msg.value,
-            marketplaceFee,
-            royaltyFee,
-            legendCreator
-        );
+        if (isBid) {
+            _closeBid(
+                listingId,
+                l.buyer,
+                marketplaceFee,
+                royaltyFee,
+                legendCreator,
+                l.seller
+            ); // make sure auction buyer set in time for call
+        } else {
+            _asyncTransfer(
+                msg.value,
+                marketplaceFee,
+                royaltyFee,
+                legendCreator,
+                l.seller
+            );
+        }
     }
 
-    function _claimLegend(uint256 listingId) internal nonReentrant {
+    function _claimPayment(uint256 listingId) internal
+    //  nonReentrant
+      {
+        LegendListing memory l = _legendListing[listingId];
+
+        uint256 amount = fetchPaymentsPending(l.seller);
+        require(amount != 0, "Address is owed 0"); // make sure can not do again without paying gas to see error
+
+        _withdrawPayments(l.seller);
+    }
+
+    function _claimLegend(uint256 listingId) internal 
+    // nonReentrant 
+    {
         LegendListing memory l = _legendListing[listingId];
 
         uint256 legendOwed = _legendPending[listingId][l.buyer];
@@ -329,15 +369,7 @@ contract LegendsMarketplace is
         IERC721(l.nftContract).transferFrom(address(this), l.buyer, legendOwed);
     }
 
-    function _claimPayment(uint256 _listingId) internal nonReentrant {
-        LegendListing memory l = _legendListing[_listingId];
-
-        uint256 amount = payments(l.seller);
-        require(amount != 0, "Address is owed 0"); // make sure can not do again without paying gas to see error
-
-        _withdrawPayments(l.seller);
-    }
-
+    /// fees are removed from total price
     function _calculateFees(uint256 listingId)
         public
         view
@@ -365,9 +397,19 @@ contract LegendsMarketplace is
         return (marketplaceFee, legendCreator, royaltyFee);
     }
 
+    function isBidWithdrawable(uint256 listingId, address bidder)
+        public
+        view
+        returns (bool)
+    {
+        return _isBidRefundable[listingId][bidder];
+    }
+
     function fetchListingCounts()
         public
         view
+        virtual
+        override
         returns (
             Counters.Counter memory,
             Counters.Counter memory,
@@ -448,18 +490,10 @@ contract LegendsMarketplace is
         return _bidders[listingId];
     }
 
-    function fetchBidPlaced(uint256 listingId, address bidder)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
-        require(_exists[listingId][bidder]);
-
-        return _bidPlaced[listingId][bidder];
-    }
-
+    /**
+     * @dev Due to contract size limits, made a single getter for state variables in
+     * both {LegendSale} and {LegendAuction} contracts.
+     */
     function fetchMarketplaceRules()
         public
         view
@@ -470,7 +504,12 @@ contract LegendsMarketplace is
             uint256
         )
     {
-        return (_royaltyFee, _marketplaceFee, _offerDuration, _auctionExtension);
+        return (
+            _royaltyFee,
+            _marketplaceFee,
+            _offerDuration,
+            _auctionExtension
+        );
     }
 
     function setRoyaltyFee(uint256 newRoyaltyFee) public onlyLab {

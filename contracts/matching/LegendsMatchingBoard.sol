@@ -11,7 +11,6 @@ import "./match/LegendMatching.sol";
 contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     using Counters for Counters.Counter;
 
-
     LegendsLaboratory _lab;
 
     modifier onlyLab() {
@@ -61,27 +60,23 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
 
         require(m.status == MatchingStatus.Open);
         require(m.surrogate != msg.sender, "Seller not authorized");
-        // make sure blender has to have enough LGND tokens for payment + blendingCost
 
         require(_lab.isListable(legendId), "Not Eligible");
         require(_lab.isBlendable(legendId)); // shouldnt be needed but double check
 
-        // uint256 blendingCost = (_lab.fetchBlendingCost(m.surrogateToken) +
-        //     _lab.fetchBlendingCost(_legendId)) / 2;
+        // transfer breeder's token to contract .. put in natspec
+        legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
-        // uint256 matchingBoardFee = (m.price * _matchingBoardFee) / 100; // ?? should there be a fee here theres already payment and blendburn
-        // _lab.legendToken().matchingBurn(msg.sender, matchingBoardFee); // may become liqlock
+        uint256 blendingCost = (_lab.fetchBlendingCost(m.surrogateToken) +
+            _lab.fetchBlendingCost(legendId)) / 2;
 
-        // uint256 matchingPayment = m.price + blendingCost;
-        uint256 matchingPayment = m.price; // blending function should still pull tokens from msg.sender/blender
+        // make sure blender has to have enough LGND tokens for payment + blendingCost ; prior to nft transfer
+        uint256 matchingPayment = m.price + blendingCost;
         _lab.legendToken().transferFrom(
             msg.sender,
             address(this),
             matchingPayment
         );
-
-        // transfer breeder's token to contract .. put in natspec
-        legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
         uint256 childId = _lab.legendsNFT().blendLegends(
             address(this),
@@ -171,6 +166,8 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     function fetchMatchingCounts()
         public
         view
+        virtual
+        override
         returns (
             Counters.Counter memory,
             Counters.Counter memory,
@@ -190,16 +187,23 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         return _legendMatching[matchingId];
     }
 
-    function fetchTokensPending(address recipient) public view returns (uint256) {
+    function fetchTokensPending(address recipient)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _tokensPending[recipient];
     }
 
     function fetchEggOwed(uint256 matchingId, address breeder)
         public
         view
+        virtual
+        override
         returns (uint256)
     {
         return _eggPending[matchingId][breeder];
     }
-
 }

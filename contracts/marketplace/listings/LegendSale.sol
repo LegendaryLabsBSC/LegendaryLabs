@@ -12,7 +12,6 @@ abstract contract LegendSale is ILegendListing {
     Counters.Counter internal _listingsClosed;
     Counters.Counter internal _listingsCancelled;
 
-
     struct OfferDetails {
         uint256 expirationTime;
         address payable legendOwner;
@@ -21,13 +20,13 @@ abstract contract LegendSale is ILegendListing {
 
     uint256 internal _offerDuration = 432000; // 5 days
 
-    /* listingId => listingDetails */
+    /** @dev listingId => listingDetails */
     mapping(uint256 => LegendListing) internal _legendListing;
 
-    /* listingId => offerDetails */
+    /** @dev listingId => offerDetails */
     mapping(uint256 => OfferDetails) internal _offerDetails;
 
-    /* listingId => buyerAddress => legendId */
+    /** @dev listingId => buyerAddress => legendId */
     mapping(uint256 => mapping(address => uint256)) internal _legendPending;
 
     event OfferMade(uint256 indexed listingId, uint256 price);
@@ -131,6 +130,21 @@ abstract contract LegendSale is ILegendListing {
     function isValidListing(uint256 listingId) public view returns (bool) {
         return listingId >= _listingIds.current();
     }
+
+    /**
+     * @dev Getters implemented in parent contract LegendsMarketplace
+     */
+
+    function fetchListingCounts()
+        public
+        view
+        virtual
+        returns (
+            Counters.Counter memory,
+            Counters.Counter memory,
+            Counters.Counter memory
+        )
+    {}
 
     function fetchLegendListing(uint256 listingId)
         public

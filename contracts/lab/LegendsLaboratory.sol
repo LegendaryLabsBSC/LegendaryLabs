@@ -23,7 +23,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     string private _season = "Phoenix";
 
-    /* promoId => skipIncubation */
+    /** @dev promoId => skipIncubation */
     mapping(uint256 => bool) private _promoIncubated;
 
     constructor() {}

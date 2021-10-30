@@ -21,9 +21,9 @@ abstract contract LegendMatching is ILegendMatch {
     mapping(uint256 => mapping(address => uint256)) internal _eggPending;
 
     function _createLegendMatching(
-        address _nftContract,
-        uint256 _legendId,
-        uint256 _price
+        address nftContract,
+        uint256 legendId,
+        uint256 price
     ) internal {
         _matchingIds.increment();
         uint256 matchingId = _matchingIds.current();
@@ -31,57 +31,82 @@ abstract contract LegendMatching is ILegendMatch {
         LegendMatching storage m = _legendMatching[matchingId];
         m.matchingId = matchingId;
         m.createdAt = block.timestamp;
-        m.nftContract = _nftContract;
+        m.nftContract = nftContract;
         m.surrogate = msg.sender;
-        m.surrogateToken = _legendId;
+        m.surrogateToken = legendId;
         m.breeder = address(0);
-        m.price = _price;
+        m.price = price;
         m.status = MatchingStatus.Open;
 
         emit MatchingStatusChanged(matchingId, MatchingStatus.Open);
     }
 
     function _matchWithLegend(
-        uint256 _matchingId,
-        address _breeder,
-        uint256 _childId,
-        uint256 _legendId,
-        uint256 _matchingPayment
+        uint256 matchingId,
+        address breeder,
+        uint256 childId,
+        uint256 legendId,
+        uint256 matchingPayment
     ) internal {
-        LegendMatching storage m = _legendMatching[_matchingId];
+        LegendMatching storage m = _legendMatching[matchingId];
 
-        m.breeder = _breeder;
-        m.breederToken = _legendId;
-        m.childId = _childId;
+        m.breeder = breeder;
+        m.breederToken = legendId;
+        m.childId = childId;
         m.status = MatchingStatus.Closed;
 
-        _tokensPending[m.surrogate] += _matchingPayment;
-        _eggPending[_matchingId][_breeder] = _childId;
+        _tokensPending[m.surrogate] += matchingPayment;
+        _eggPending[matchingId][breeder] = childId;
 
         _matchingsClosed.increment();
 
         emit MatchMade(
-            _matchingId,
+            matchingId,
             m.surrogateToken,
             m.breederToken,
-            _childId,
+            childId,
             m.price,
             MatchingStatus.Closed
         );
     }
 
-    function _cancelLegendMatching(uint256 _matchingId) internal {
-        _legendMatching[_matchingId].status = MatchingStatus.Cancelled;
+    function _cancelLegendMatching(uint256 matchingId) internal {
+        _legendMatching[matchingId].status = MatchingStatus.Cancelled;
 
         _matchingsCancelled.increment();
 
-        emit MatchingStatusChanged(_matchingId, MatchingStatus.Cancelled);
+        emit MatchingStatusChanged(matchingId, MatchingStatus.Cancelled);
     }
 
-    function fetchLegendMatching(uint256 _matchingId)
+    function fetchMatchingCounts()
+        public
+        view
+        virtual
+        returns (
+            Counters.Counter memory,
+            Counters.Counter memory,
+            Counters.Counter memory
+        )
+    {}
+
+    function fetchLegendMatching(uint256 matchingId)
         public
         view
         virtual
         returns (LegendMatching memory)
+    {}
+
+    function fetchTokensPending(address recipient)
+        public
+        view
+        virtual
+        returns (uint256)
+    {}
+
+    function fetchEggOwed(uint256 matchingId, address breeder)
+        public
+        view
+        virtual
+        returns (uint256)
     {}
 }

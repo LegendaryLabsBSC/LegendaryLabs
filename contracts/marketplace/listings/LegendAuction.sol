@@ -19,20 +19,20 @@ abstract contract LegendAuction is LegendSale {
 
     uint256 internal _auctionExtension = 600;
 
-    /* listingId => auctionDetails*/
+    /** @dev listingId => auctionDetails*/
     mapping(uint256 => AuctionDetails) internal _auctionDetails;
 
-    /* listingId => instantBuyPrice */
+    /** @dev listingId => instantBuyPrice */
     mapping(uint256 => uint256) internal _instantBuyPrice;
 
-    /* listingId => bidderAddresses */
+    /** @dev listingId => bidderAddresses */
     mapping(uint256 => address[]) internal _bidders;
 
-    /* listingId => bidderAddress => previouslyPlacedBid */
+    /** @dev listingId => bidderAddress => previouslyPlacedBid */
     mapping(uint256 => mapping(address => bool)) internal _exists; // change var name ?
 
-    /* listingId => bidderAddress => bidAmount*/
-    mapping(uint256 => mapping(address => uint256)) internal _bidPlaced;
+    // /** @dev listingId => bidderAddress => bidAmount*/
+    // mapping(uint256 => mapping(address => uint256)) internal _bidPlaced;
 
     event AuctionExtended(uint256 indexed listingId, uint256 newDuration);
     event BidPlaced(
@@ -88,7 +88,7 @@ abstract contract LegendAuction is LegendSale {
     function _placeBid(uint256 listingId, uint256 bidAmount) internal {
         AuctionDetails storage a = _auctionDetails[listingId];
 
-        _bidPlaced[listingId][msg.sender] += bidAmount;
+        // _bidPlaced[listingId][msg.sender] += bidAmount;
 
         if (!_exists[listingId][msg.sender]) {
             _bidders[listingId].push(msg.sender);
@@ -152,6 +152,10 @@ abstract contract LegendAuction is LegendSale {
         return shouldExtend;
     }
 
+    /**
+     * @dev Getters implemented in parent contract LegendsMarketplace
+     */
+
     function fetchAuctionDurations()
         public
         view
@@ -178,12 +182,5 @@ abstract contract LegendAuction is LegendSale {
         view
         virtual
         returns (address[] memory)
-    {}
-
-    function fetchBidPlaced(uint256 listingId, address bidder)
-        public
-        view
-        virtual
-        returns (uint256)
     {}
 }
