@@ -8,7 +8,9 @@ abstract contract LegendMatching is ILegendMatch {
     using Counters for Counters.Counter;
 
     modifier isValidMatching(uint256 matchingId) {
-        require(matchingId >= _matchingIds.current(), 'Matching ID Not Valid');
+        if (matchingId < _matchingIds.current()) {
+            revert("Matching ID Not Valid");
+        }
         _;
     }
 

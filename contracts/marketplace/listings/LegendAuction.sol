@@ -87,7 +87,7 @@ abstract contract LegendAuction is LegendSale {
         a.highestBidder = payable(msg.sender);
 
         if (_shouldExtend(listingId)) {
-            if (bidAmount >= _instantBuyPrice[listingId]) {
+            if (bidAmount < _instantBuyPrice[listingId]) { // ! test
                 a.duration = (a.duration + _auctionExtension);
 
                 emit AuctionExtended(listingId, a.duration); // test ; event shows old duration or new?
@@ -149,14 +149,12 @@ abstract contract LegendAuction is LegendSale {
         view
         virtual
         returns (uint256[3] memory);
-    
 
     function fetchAuctionDetails(uint256 listingId)
         public
         view
         virtual
         returns (AuctionDetails memory);
-    
 
     function fetchInstantBuyPrice(uint256 listingId)
         public
@@ -164,11 +162,9 @@ abstract contract LegendAuction is LegendSale {
         virtual
         returns (uint256);
 
-
     function fetchBidders(uint256 listingId)
         public
         view
         virtual
         returns (address[] memory);
-    
 }

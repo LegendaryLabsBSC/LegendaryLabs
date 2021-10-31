@@ -8,7 +8,9 @@ abstract contract LegendSale is ILegendListing {
     using Counters for Counters.Counter;
 
     modifier isValidListing(uint256 listingId) {
-        require(listingId >= _listingIds.current());
+        if (listingId < _listingIds.current()) {
+            revert();
+        }
         _;
     }
 

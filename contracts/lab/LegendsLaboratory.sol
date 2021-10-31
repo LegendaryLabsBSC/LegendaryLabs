@@ -281,10 +281,9 @@ contract LegendsLaboratory is Ownable, TicketMachine {
      * @dev Calls resetLegendName from LegendsNFT contract, then resets report count to 0.
      */
     function resetLegendName(uint256 legendId) public onlyOwner {
-        require(
-            _reportCount[legendId] >= _reportThreshold,
-            "Threshold Not Reached For Admin To Call"
-        );
+        if (_reportCount[legendId] < _reportThreshold) {
+            revert("Threshold Not Reached For Admin To Call");
+        }
 
         legendsNFT.resetLegendName(legendId);
 

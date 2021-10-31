@@ -44,13 +44,15 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         require(
             _lab.isListable(legendId),
             "Caller Is Not Owner Or Legend Has Not Hatched"
-        ); // commented out for testing
-        require(!r.occupied, "Legend Already Occupying Pod");
-        require(
-            tokensToSecure >= _minimumSecure,
-            "LGND Token Amount Must Meet The Minimum To Rejuvenate Legend"
-        ); // can put in more than max multiplier but will not increase reju, will raise odds of no-loss-lottery win
+        );
 
+        require(!r.occupied, "Legend Already Occupying Pod");
+
+        if (tokensToSecure < _minimumSecure) {
+            revert(
+                "LGND Token Amount Must Meet The Minimum To Rejuvenate Legend"
+            ); // can put in more than max multiplier but will not increase reju, will raise odds of no-loss-lottery win
+        }
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
         _lab.legendToken().transferFrom(
