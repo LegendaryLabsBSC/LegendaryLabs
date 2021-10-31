@@ -2,7 +2,8 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
@@ -13,7 +14,7 @@ import "./TicketMachine.sol";
 /**
  *
  */
-contract LegendsLaboratory is Ownable, TicketMachine {
+contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
     LegendRejuvenation public legendRejuvenation = new LegendRejuvenation();
@@ -21,12 +22,22 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
 
+    bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
+    bytes32 public constant LAB_TECH = keccak256("LAB_TECH");
+
     string private _season = "Phoenix";
 
     /** @dev promoId => skipIncubation */
     mapping(uint256 => bool) private _promoIncubated;
 
-    constructor() {}
+    constructor() {
+        _setupRole(DEFAULT_ADMIN_ROLE, address(this));
+        _setupRole(LAB_ADMIN, msg.sender);
+        _setupRole(LAB_TECH, msg.sender);
+
+        // _setRoleAdmin(LAB_ADMIN, LAB_ADMIN);
+        _setRoleAdmin(LAB_TECH, LAB_ADMIN);
+    }
 
     // for testing, remove before MVP launch
     function getChildContracts()
@@ -56,7 +67,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         bool isUnrestricted,
         uint256 maxTickets,
         bool skipIncubation
-    ) external onlyOwner {
+    ) external onlyRole(LAB_TECH) {
         uint256 promoId = _createPromoEvent(
             eventName,
             duration,
@@ -73,10 +84,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         uint256 ticketAmount
     ) public {
         if (_promoEvent[promoId].isUnrestricted == false) {
-            require(
-                msg.sender == owner(),
-                "Promo Event Can Only Be Called By Lab Admins"
-            );
+            _checkRole(LAB_TECH, msg.sender);
         }
 
         _dispensePromoTicket(promoId, recipient, ticketAmount);
@@ -88,21 +96,37 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsNFT.createLegend(recipient, promoId, false);
     }
 
-    function closePromoEvent(uint256 promoId) public onlyOwner {
+    function closePromoEvent(uint256 promoId) public onlyRole(LAB_TECH) {
         _closePromoEvent(promoId);
     }
 
     function mintLegendaryLegend(address recipient, uint256 promoId)
         public
-        onlyOwner
+        onlyRole(LAB_ADMIN)
     {
         _redeemPromoTicket(promoId, recipient);
 
         legendsNFT.createLegend(recipient, promoId, true);
     }
 
-    function captureLGNDSnapshot() public onlyOwner returns (uint256) {
+    function transferLabAdmin(address currentAdmin, address newAdmin)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        this.revokeRole(LAB_ADMIN, currentAdmin);
+        this.grantRole(LAB_ADMIN, newAdmin);
+    }
+
+    function captureLGNDSnapshot()
+        public
+        onlyRole(LAB_ADMIN)
+        returns (uint256)
+    {
         return legendToken.snapshot();
+    }
+
+    function labBurn(uint256 amount) public onlyRole(LAB_ADMIN) {
+        legendToken.labBurn(amount);
     }
 
     function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
@@ -156,7 +180,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         return legendsNFT.fetchLegendMetadata(legendId).legendCreator;
     }
 
-    function setSeason(string calldata newSeason) public onlyOwner {
+    function setSeason(string calldata newSeason) public onlyRole(LAB_ADMIN) {
         _season = newSeason;
     }
 
@@ -166,7 +190,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     function setIncubationViews(string[5] calldata newIncubationViews)
         public
-        onlyOwner
+        onlyRole(LAB_TECH)
     {
         legendsNFT.setIncubationViews(newIncubationViews);
     }
@@ -185,7 +209,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     function setBlendingRule(uint256 blendingRule, uint256 newRuleData)
         public
-        onlyOwner
+        onlyRole(LAB_ADMIN)
     {
         require(blendingRule < 4, "Blending Rule Does Not Exist");
 
@@ -198,7 +222,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     function setMarketplaceRule(uint256 marketplaceRule, uint256 newRuleData)
         public
-        onlyOwner
+        onlyRole(LAB_ADMIN)
     {
         require(marketplaceRule < 4, "Marketplace Rule Does Not Exist");
 
@@ -219,7 +243,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
 
     function setAuctionDurations(uint256[3] calldata newAuctionDurations)
         public
-        onlyOwner
+        onlyRole(LAB_TECH)
     {
         legendsMarketplace.setAuctionDurations(newAuctionDurations);
     }
@@ -228,21 +252,30 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     //     legendsMarketplace.setAuctionExtension(newAuctionExtension);
     // }
 
-    function setMinimumSecure(uint256 newMinimumSecure) public onlyOwner {
+    function setMinimumSecure(uint256 newMinimumSecure)
+        public
+        onlyRole(LAB_TECH)
+    {
         legendRejuvenation.setMinimumSecure(newMinimumSecure);
     }
 
-    function setMaxMultiplier(uint256 newMaxMultiplier) public onlyOwner {
+    function setMaxMultiplier(uint256 newMaxMultiplier)
+        public
+        onlyRole(LAB_ADMIN)
+    {
         legendRejuvenation.setMaxMultiplier(newMaxMultiplier);
     }
 
-    function setReJuPerBlock(uint256 newReJuEmissionRate) public onlyOwner {
+    function setReJuPerBlock(uint256 newReJuEmissionRate)
+        public
+        onlyRole(LAB_ADMIN)
+    {
         legendRejuvenation.setReJuPerBlock(newReJuEmissionRate);
     }
 
     function setReJuNeededPerSlot(uint256 newReJuNeededPerSlot)
         public
-        onlyOwner
+        onlyRole(LAB_ADMIN)
     {
         legendRejuvenation.setReJuNeededPerSlot(newReJuNeededPerSlot);
     }
@@ -284,7 +317,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
      * a _reportCount equal to or greater than the _reportThreshold.
      * @dev Calls resetLegendName from LegendsNFT contract, then resets report count to 0.
      */
-    function resetLegendName(uint256 legendId) public onlyOwner {
+    function resetLegendName(uint256 legendId) public onlyRole(LAB_TECH) {
         if (_reportCount[legendId] < _reportThreshold) {
             revert("Threshold Not Reached For Admin To Call");
         }
@@ -294,7 +327,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         _reportCount[legendId] = 0;
     }
 
-    function setReportThreshold(uint256 newReportThreshold) public onlyOwner {
+    function setReportThreshold(uint256 newReportThreshold)
+        public
+        onlyRole(LAB_TECH)
+    {
         _reportThreshold = newReportThreshold;
     }
 }

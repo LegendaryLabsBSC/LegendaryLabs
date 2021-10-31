@@ -126,7 +126,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         uint256 newLegendId = _legendIds.current();
 
         uint256[2] memory parents = [parent1, parent2];
-        
+
         for (uint256 i = 0; i < parents.length; i++) {
             // test thoroughly
             LegendMetadata storage m = _legendMetadata[parents[i]];
@@ -210,7 +210,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
                     ",",
                     _incubationViews[incubationChamber],
                     ",",
-                    data
+                    data //  not returning parent
                 )
             );
     }

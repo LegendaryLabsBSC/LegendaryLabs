@@ -70,7 +70,7 @@ function App() {
    */
   async function createPromoEvent() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.lab.write.createPromoEvent(promoName, 86400, true, false)
+      await contract.lab.write.createPromoEvent(promoName, 86400, true, 0, false)
     }
   }
   async function fetchPromoDetails() {
@@ -171,7 +171,7 @@ function App() {
    */
   async function fetchURI() {
     if (typeof window.ethereum !== 'undefined') {
-      const legendURI = await contract.nft.read.tokenURI(id)
+      const legendURI = await contract.nft.read.fetchLegendURI(id)
       console.log('IPFS URI: ', legendURI)
     }
   }
@@ -286,7 +286,7 @@ function App() {
     }
   }
   async function loadLegends(tokenID) {
-    const imgURL = await contract.nft.read.tokenURI(tokenID)
+    const imgURL = await contract.nft.read.fetchLegendURI(tokenID)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
     return { tokenID, imgURL }
     // Logic for rendering Legend Card Component here from pinata ?

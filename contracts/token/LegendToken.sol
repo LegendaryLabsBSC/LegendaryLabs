@@ -36,25 +36,25 @@ contract LegendToken is ERC20Snapshot {
 
     constructor(address owner) ERC20("Legends", "LGND") {
         _lab = LegendsLaboratory(msg.sender);
-        _mint(owner, 100 * 1e24);
+        _mint(owner, 100 * 1e24); // 100 Million
     }
 
     function snapshot() public onlyLab returns (uint256) {
         return _snapshot();
     }
 
-    function labBurn(uint256 _amount) public onlyLab {
-        _burn(address(_lab), _amount);
+    function labBurn(uint256 amount) public onlyLab {
+        _burn(address(_lab), amount);
     }
 
-    function blendingBurn(address _account, uint256 _amount)
+    function blendingBurn(address account, uint256 amount)
         public
         onlyBlending
     {
-        _burn(_account, _amount);
+        _burn(account, amount);
     }
 
-    function burn(uint256 _amount) public {
-        _burn(msg.sender, _amount);
+    function burn(uint256 amount) public {
+        _burn(msg.sender, amount);
     }
 }
