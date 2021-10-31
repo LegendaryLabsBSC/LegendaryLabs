@@ -100,14 +100,8 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         LegendMetadata storage p1 = _legendMetadata[parent1];
         LegendMetadata storage p2 = _legendMetadata[parent2];
 
-        uint256[2] memory parents = [parent1, parent2];
-
-        for (uint256 i = 0; i < parents.length; i++) {
-            require(isBlendable(i), "Legend Has Reached Max Blending Slots");
-        }
-
-        // require(isBlendable(parent1), "Blending limit reached");
-        // require(isBlendable(parent2), "Blending limit reached");
+        require(isBlendable(parent1));
+        require(isBlendable(parent2));
 
         // thoroughly test bool returns
         if (_kinBlendingLevel != KinBlendingLevel.Siblings) {
@@ -131,8 +125,8 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
-        // uint256[2] memory parents = [parent1, parent2];
-
+        uint256[2] memory parents = [parent1, parent2];
+        
         for (uint256 i = 0; i < parents.length; i++) {
             // test thoroughly
             LegendMetadata storage m = _legendMetadata[parents[i]];
@@ -297,8 +291,11 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isBlendable(uint256 legendId) public view returns (bool) {
-        return (_legendMetadata[legendId].blendingInstancesUsed <
-            _blendingLimit); // test return thoroughly
+        if (_legendMetadata[legendId].blendingInstancesUsed > _blendingLimit) {
+            revert("Legend Has Reached Max Blending Slots"); // test return thoroughly
+        }
+
+        return true;
     }
 
     function isHatchable(uint256 legendId) public view returns (bool) {
@@ -338,6 +335,13 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return true;
     }
 
+    function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
+        uint256 blendingCost = _baseBlendingCost *
+            (_legendMetadata[legendId].totalOffspring + 1);
+
+        return blendingCost;
+    }
+
     function fetchLegendMetadata(uint256 legendId)
         public
         view
@@ -356,15 +360,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     {
         require(_exists(legendId));
         return _legendURI[legendId];
-    }
-
-    function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
-        if (_legendMetadata[legendId].totalOffspring != 0) {
-            return (_baseBlendingCost *
-                _legendMetadata[legendId].totalOffspring);
-        } else {
-            return _baseBlendingCost;
-        }
     }
 
     function fetchBlendingRules()

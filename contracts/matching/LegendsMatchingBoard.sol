@@ -46,10 +46,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             _lab.isListable(legendId),
             "Caller Is Not Owner Or Legend Has Not Hatched"
         );
-        require(
-            _lab.isBlendable(legendId),
-            "Legend Has Reached Max Blending Slots"
-        );
+        require(_lab.isBlendable(legendId));
         require(price != 0, "Price Can Not Be 0");
 
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
@@ -74,10 +71,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             _lab.isListable(legendId),
             "Caller Is Not Owner Or Legend Has Not Hatched"
         );
-        require(
-            _lab.isBlendable(legendId),
-            "Legend Has Reached Max Blending Slots"
-        );
+        require(_lab.isBlendable(legendId));
 
         // transfer breeder's token to contract .. put in natspec
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
@@ -140,10 +134,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
 
         /// @notice price will stay the same if relisting legend
         if (_isRelisted) {
-            require(
-                _lab.isBlendable(m.surrogateToken),
-                "Legend Has Reached Max Blending Slots"
-            );
+            require(_lab.isBlendable(m.surrogateToken));
 
             _createLegendMatching(m.nftContract, m.surrogateToken, m.price);
         } else {
