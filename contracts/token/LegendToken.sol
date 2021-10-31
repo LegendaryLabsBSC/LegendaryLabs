@@ -2,10 +2,15 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
 import "../lab/LegendsLaboratory.sol";
 
-contract LegendToken is ERC20 {
+/**
+snapshot
+ */
+
+contract LegendToken is ERC20Snapshot {
     LegendsLaboratory _lab;
 
     modifier onlyLab() {
@@ -32,6 +37,10 @@ contract LegendToken is ERC20 {
     constructor(address owner) ERC20("Legends", "LGND") {
         _lab = LegendsLaboratory(msg.sender);
         _mint(owner, 100 * 1e24);
+    }
+
+    function snapshot() public onlyLab returns (uint256) {
+        return _snapshot();
     }
 
     function labBurn(uint256 _amount) public onlyLab {

@@ -101,6 +101,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         legendsNFT.createLegend(recipient, promoId, true);
     }
 
+    function captureLGNDSnapshot() public onlyOwner returns (uint256) {
+        return legendToken.snapshot();
+    }
+
     function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
     {
