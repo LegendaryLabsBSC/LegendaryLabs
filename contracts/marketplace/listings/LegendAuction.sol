@@ -29,7 +29,7 @@ abstract contract LegendAuction is LegendSale {
     mapping(uint256 => address[]) internal _bidders;
 
     /** @dev listingId => bidderAddress => previouslyPlacedBid */
-    mapping(uint256 => mapping(address => bool)) internal _exists; // change var name ?
+    mapping(uint256 => mapping(address => bool)) internal _exists; //TODO: change var name ?
 
     // /** @dev listingId => bidderAddress => bidAmount*/
     // mapping(uint256 => mapping(address => uint256)) internal _bidPlaced;
@@ -67,13 +67,6 @@ abstract contract LegendAuction is LegendSale {
         l.isAuction = true;
         l.status = ListingStatus.Open;
 
-        // uint256 duration;
-        // if (durationIndex > _auctionDurations.length) {
-        //     duration = _auctionDurations[0];
-        // } else {
-        //     duration = _auctionDurations[durationIndex];
-        // }
-
         require(durationIndex <= _auctionDurations.length);
         uint256 duration = _auctionDurations[durationIndex];
 
@@ -87,9 +80,7 @@ abstract contract LegendAuction is LegendSale {
 
     function _placeBid(uint256 listingId, uint256 bidAmount) internal {
         AuctionDetails storage a = _auctionDetails[listingId];
-
-        // _bidPlaced[listingId][msg.sender] += bidAmount;
-
+        
         if (!_exists[listingId][msg.sender]) {
             _bidders[listingId].push(msg.sender);
             _exists[listingId][msg.sender] = true;

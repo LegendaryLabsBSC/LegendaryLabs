@@ -37,9 +37,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG"
     ];
 
-    uint256 private _baseBlendingCost = 100;
-
     uint256 private _blendingLimit = 5;
+
+    uint256 private _baseBlendingCost = 100;
 
     uint256 private _incubationPeriod; // seconds
 
@@ -100,20 +100,23 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         LegendMetadata storage p1 = _legendMetadata[parent1];
         LegendMetadata storage p2 = _legendMetadata[parent2];
 
-        require(
-            isBlendable(parent1)
-            // , "Blending limit reached"
-        );
-        require(
-            isBlendable(parent2)
-            // , "Blending limit reached"
-        );
+        uint256[2] memory parents = [parent1, parent2];
+
+        for (uint256 i = 0; i < parents.length; i++) {
+            require(isBlendable(i), "Blending Limit Reached");
+        }
+
+        // require(isBlendable(parent1), "Blending limit reached");
+        // require(isBlendable(parent2), "Blending limit reached");
 
         // thoroughly test bool returns
         if (_kinBlendingLevel != KinBlendingLevel.Siblings) {
-            require(_notSiblings(p1.parents, p2.parents));
+            require(
+                _notSiblings(p1.parents, p2.parents),
+                "Blending Not Allowed"
+            );
             if (_kinBlendingLevel != KinBlendingLevel.Parents) {
-                require(_notParent(parent1, parent2));
+                require(_notParent(parent1, parent2), "Blending Not Allowed");
             }
         }
 
@@ -125,7 +128,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
-        uint256[2] memory parents = [parent1, parent2];
+        // uint256[2] memory parents = [parent1, parent2];
 
         for (uint256 i = 0; i < parents.length; i++) {
             // test thoroughly
@@ -164,10 +167,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     function hatchLegend(uint256 legendId, string calldata ipfsHash) public {
         require(ownerOf(legendId) == msg.sender);
-        require(
-            isHatchable(legendId)
-            // , "Needs to incubate longer"
-        );
+        require(isHatchable(legendId), "Needs to incubate longer");
 
         _legendMetadata[legendId].isHatched = true;
 
@@ -183,10 +183,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         string calldata prefix,
         string calldata postfix
     ) external {
-        require(
-            isListable(legendId)
-            // , "Not Authorized"
-        );
+        require(isListable(legendId));
 
         _legendMetadata[legendId].prefix = prefix;
         _legendMetadata[legendId].postfix = postfix;
@@ -243,7 +240,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         if (parents[0] == 0) {
             creator = payable(address(0));
         } else {
-            ///@dev To accommodate matching, creator is legend's second parent creator(breeder address)
+            /** @dev To accommodate matching, creator is legend's second parent creator(breeder address) */
             creator = payable(_legendMetadata[parents[1]].legendCreator);
         }
 
@@ -302,10 +299,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isHatchable(uint256 legendId) public view returns (bool) {
-        require(
-            !isHatched(legendId)
-            // , "Already hatched"
-        );
+        require(!isHatched(legendId), "Already hatched");
 
         if (_noIncubation[legendId]) return true;
 
@@ -354,10 +348,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         view
         returns (string memory)
     {
-        require(
-            _exists(legendId)
-            // "ERC721Metadata: URI query for nonexistent token"
-        );
+        require(_exists(legendId));
         return _legendURI[legendId];
     }
 
@@ -370,7 +361,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         }
     }
 
-    function fetchLabRules()
+    function fetchBlendingRules()
         public
         view
         returns (
@@ -382,8 +373,8 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     {
         return (
             _kinBlendingLevel,
-            _baseBlendingCost,
             _blendingLimit,
+            _baseBlendingCost,
             _incubationPeriod
         );
     }
@@ -392,13 +383,34 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return _incubationViews;
     }
 
-    function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyLab {
-        if (newKinBlendingLevel == 0) {
-            _kinBlendingLevel = KinBlendingLevel.None;
-        } else if (newKinBlendingLevel == 1) {
-            _kinBlendingLevel = KinBlendingLevel.Siblings;
-        } else if (newKinBlendingLevel == 2) {
-            _kinBlendingLevel = KinBlendingLevel.Parents;
+    // function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyLab {
+    //     if (newKinBlendingLevel == 0) {
+    //         _kinBlendingLevel = KinBlendingLevel.None;
+    //     } else if (newKinBlendingLevel == 1) {
+    //         _kinBlendingLevel = KinBlendingLevel.Siblings;
+    //     } else if (newKinBlendingLevel == 2) {
+    //         _kinBlendingLevel = KinBlendingLevel.Parents;
+    //     }
+    // }
+
+    function setBlendingRule(uint256 blendingRule, uint256 newRuleData)
+        public
+        onlyLab
+    {
+        if (blendingRule == 0) {
+            if (newRuleData == 0) {
+                _kinBlendingLevel = KinBlendingLevel.None;
+            } else if (newRuleData == 1) {
+                _kinBlendingLevel = KinBlendingLevel.Siblings;
+            } else if (newRuleData == 2) {
+                _kinBlendingLevel = KinBlendingLevel.Parents;
+            }
+        } else if (blendingRule == 1) {
+            _blendingLimit = newRuleData;
+        } else if (blendingRule == 2) {
+            _baseBlendingCost = newRuleData;
+        } else if (blendingRule == 3) {
+            _incubationPeriod = newRuleData;
         }
     }
 
@@ -409,19 +421,21 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _incubationViews = newIncubationViews;
     }
 
-    function setBlendingLimit(uint256 newBlendingLimit) public onlyLab {
-        _blendingLimit = newBlendingLimit;
-    }
+    /**
+     * Do not delete below functions until after adding docs to above(setrules) ;; if still not enough size may just use individual
+     */
 
-    function setBaseBlendingCost(uint256 newBaseBlendingCost) public onlyLab {
-        _baseBlendingCost = newBaseBlendingCost;
-    }
+    // function setBlendingLimit(uint256 newBlendingLimit) public onlyLab {
+    //     _blendingLimit = newBlendingLimit;
+    // }
 
-    function setIncubationPeriod(uint256 newIncubationPeriod) public onlyLab {
-        _incubationPeriod = newIncubationPeriod;
-    }
+    // function setBaseBlendingCost(uint256 newBaseBlendingCost) public onlyLab {
+    //     _baseBlendingCost = newBaseBlendingCost;
+    // }
 
-
+    // function setIncubationPeriod(uint256 newIncubationPeriod) public onlyLab {
+    //     _incubationPeriod = newIncubationPeriod;
+    // }
 
     function resetLegendName(uint256 legendId) public onlyLab {
         _legendMetadata[legendId].prefix = "";
