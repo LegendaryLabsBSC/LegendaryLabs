@@ -15,12 +15,5 @@ ReactDOM.render(
       {/* <Farms /> */}
     </Providers>
   </React.StrictMode>,
-  document.getElementById('root-react-app'),
-)
-
-ReactDOM.render(
-  <React.StrictMode>
-    <MainNav />
-  </React.StrictMode>,
-  document.getElementById('root-react-nav'),
+  document.getElementById('root'),
 )
