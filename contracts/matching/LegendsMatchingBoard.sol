@@ -14,7 +14,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     LegendsLaboratory _lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(_lab), "Not Authorized");
+        require(msg.sender == address(_lab), "Not Called By Lab Admin");
         _;
     }
 
@@ -42,9 +42,15 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     ) external nonReentrant {
         IERC721 legendsNFT = IERC721(nftContract);
 
-        require(_lab.isListable(legendId), "Not Eligible");
-        require(_lab.isBlendable(legendId));
-        require(price != 0, "Price can not be 0");
+        require(
+            _lab.isListable(legendId),
+            "Caller Is Not Owner Or Legend Has Not Hatched"
+        );
+        require(
+            _lab.isBlendable(legendId),
+            "Legend Has Reached Max Blending Slots"
+        );
+        require(price != 0, "Price Can Not Be 0");
 
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
@@ -58,11 +64,20 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         LegendMatching memory m = _legendMatching[matchingId];
         IERC721 legendsNFT = IERC721(m.nftContract);
 
-        require(m.status == MatchingStatus.Open);
-        require(m.surrogate != msg.sender, "Seller not authorized");
+        require(m.status == MatchingStatus.Open, "Legend Matching Not Open");
+        require(
+            m.surrogate != msg.sender,
+            "Seller Not Authorized To Purchase Own Matching"
+        );
 
-        require(_lab.isListable(legendId), "Not Eligible");
-        require(_lab.isBlendable(legendId)); // shouldnt be needed but double check
+        require(
+            _lab.isListable(legendId),
+            "Caller Is Not Owner Or Legend Has Not Hatched"
+        );
+        require(
+            _lab.isBlendable(legendId),
+            "Legend Has Reached Max Blending Slots"
+        );
 
         // transfer breeder's token to contract .. put in natspec
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
@@ -99,8 +114,8 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     function cancelLegendMatching(uint256 matchingId) external nonReentrant {
         LegendMatching memory m = _legendMatching[matchingId];
 
-        require(msg.sender == m.surrogate);
-        require(m.status == MatchingStatus.Open);
+        require(msg.sender == m.surrogate, "Caller Did Not List Legend");
+        require(m.status == MatchingStatus.Open, "Legend Matching Not Open");
 
         _cancelLegendMatching(matchingId);
 
@@ -117,12 +132,18 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     {
         LegendMatching memory m = _legendMatching[matchingId];
 
-        require(msg.sender == m.surrogate);
-        require(m.status == MatchingStatus.Closed);
+        require(msg.sender == m.surrogate, "Caller Did Not List Legend");
+        require(
+            m.status == MatchingStatus.Closed,
+            "Legend Matching Not Closed"
+        );
 
         /// @notice price will stay the same if relisting legend
         if (_isRelisted) {
-            require(_lab.isBlendable(m.surrogateToken), "Legend Not Blendable");
+            require(
+                _lab.isBlendable(m.surrogateToken),
+                "Legend Has Reached Max Blending Slots"
+            );
 
             _createLegendMatching(m.nftContract, m.surrogateToken, m.price);
         } else {
@@ -139,11 +160,14 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     function claimEgg(uint256 matchingId) external nonReentrant {
         LegendMatching memory m = _legendMatching[matchingId];
 
-        require(msg.sender == m.breeder);
-        require(m.status == MatchingStatus.Closed);
+        require(msg.sender == m.breeder, "Caller Did Not Purchase Matching");
+        require(
+            m.status == MatchingStatus.Closed,
+            "Legend Matching Not Closed"
+        );
 
         uint256 eggOwed = _eggPending[matchingId][m.breeder];
-        require(eggOwed != 0, "No eggs owed");
+        require(eggOwed != 0, "Egg Owed Is Equal To 0");
 
         _eggPending[matchingId][m.breeder] = 0;
 
@@ -154,7 +178,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
 
     function claimTokens() external nonReentrant {
         uint256 tokensOwed = fetchTokensPending(msg.sender);
-        require(tokensOwed != 0, "Address is owed 0");
+        require(tokensOwed != 0, "Address Is Owed 0 LGND Tokens");
 
         _tokensPending[msg.sender] = 0;
 
@@ -182,6 +206,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         view
         virtual
         override
+        isValidMatching(matchingId)
         returns (LegendMatching memory)
     {
         return _legendMatching[matchingId];
@@ -202,6 +227,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         view
         virtual
         override
+        isValidMatching(matchingId)
         returns (uint256)
     {
         return _eggPending[matchingId][breeder];

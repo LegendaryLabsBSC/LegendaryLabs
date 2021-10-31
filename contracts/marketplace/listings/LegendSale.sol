@@ -7,6 +7,11 @@ import "./LegendListing.sol";
 abstract contract LegendSale is ILegendListing {
     using Counters for Counters.Counter;
 
+    modifier isValidListing(uint256 listingId) {
+        require(listingId >= _listingIds.current());
+        _;
+    }
+
     /// @dev initialize counters, used for all three marketplace types (Sale, Auction, Offer)
     Counters.Counter internal _listingIds;
     Counters.Counter internal _listingsClosed;
@@ -127,10 +132,6 @@ abstract contract LegendSale is ILegendListing {
         emit ListingStatusChanged(listingId, ListingStatus.Cancelled);
     }
 
-    function isValidListing(uint256 listingId) public view returns (bool) {
-        return listingId >= _listingIds.current();
-    }
-
     /**
      * @dev Getters implemented in parent contract LegendsMarketplace
      */
@@ -143,23 +144,11 @@ abstract contract LegendSale is ILegendListing {
             Counters.Counter memory,
             Counters.Counter memory,
             Counters.Counter memory
-        )
-    {}
-
-    function fetchLegendListing(uint256 listingId)
-        public
-        view
-        virtual
-        returns (
-            // move to interface if move functions moved to virtual
-            LegendListing memory
-        )
-    {}
+        );
 
     function fetchOfferDetails(uint256 listingId)
         public
         view
         virtual
-        returns (OfferDetails memory)
-    {}
+        returns (OfferDetails memory);
 }

@@ -44,7 +44,7 @@ abstract contract LegendAuction is LegendSale {
     function _createLegendAuction(
         address nftContract,
         uint256 legendId,
-        uint256 durationIndex,
+        uint256 duration,
         uint256 startingPrice,
         uint256 instantPrice
     ) internal {
@@ -67,9 +67,6 @@ abstract contract LegendAuction is LegendSale {
         l.isAuction = true;
         l.status = ListingStatus.Open;
 
-        require(durationIndex <= _auctionDurations.length);
-        uint256 duration = _auctionDurations[durationIndex];
-
         AuctionDetails storage a = _auctionDetails[listingId];
         a.duration = duration;
         a.startingPrice = startingPrice;
@@ -80,7 +77,7 @@ abstract contract LegendAuction is LegendSale {
 
     function _placeBid(uint256 listingId, uint256 bidAmount) internal {
         AuctionDetails storage a = _auctionDetails[listingId];
-        
+
         if (!_exists[listingId][msg.sender]) {
             _bidders[listingId].push(msg.sender);
             _exists[listingId][msg.sender] = true;
@@ -151,27 +148,27 @@ abstract contract LegendAuction is LegendSale {
         public
         view
         virtual
-        returns (uint256[3] memory)
-    {}
+        returns (uint256[3] memory);
+    
 
     function fetchAuctionDetails(uint256 listingId)
         public
         view
         virtual
-        returns (AuctionDetails memory)
-    {}
+        returns (AuctionDetails memory);
+    
 
     function fetchInstantBuyPrice(uint256 listingId)
         public
         view
         virtual
-        returns (uint256)
-    {}
+        returns (uint256);
+
 
     function fetchBidders(uint256 listingId)
         public
         view
         virtual
-        returns (address[] memory)
-    {}
+        returns (address[] memory);
+    
 }

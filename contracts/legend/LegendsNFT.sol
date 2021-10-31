@@ -103,7 +103,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         uint256[2] memory parents = [parent1, parent2];
 
         for (uint256 i = 0; i < parents.length; i++) {
-            require(isBlendable(i), "Blending Limit Reached");
+            require(isBlendable(i), "Legend Has Reached Max Blending Slots");
         }
 
         // require(isBlendable(parent1), "Blending limit reached");
@@ -113,10 +113,13 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         if (_kinBlendingLevel != KinBlendingLevel.Siblings) {
             require(
                 _notSiblings(p1.parents, p2.parents),
-                "Blending Not Allowed"
+                "Blending Not Allowed With Sibling Legend"
             );
             if (_kinBlendingLevel != KinBlendingLevel.Parents) {
-                require(_notParent(parent1, parent2), "Blending Not Allowed");
+                require(
+                    _notParent(parent1, parent2),
+                    "Blending Not Allowed With Parent Legend"
+                );
             }
         }
 
@@ -167,7 +170,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     function hatchLegend(uint256 legendId, string calldata ipfsHash) public {
         require(ownerOf(legendId) == msg.sender);
-        require(isHatchable(legendId), "Needs to incubate longer");
+        require(isHatchable(legendId), "Legend Needs Longer To Incubate");
 
         _legendMetadata[legendId].isHatched = true;
 
@@ -299,7 +302,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     function isHatchable(uint256 legendId) public view returns (bool) {
-        require(!isHatched(legendId), "Already hatched");
+        require(!isHatched(legendId));
 
         if (_noIncubation[legendId]) return true;
 
@@ -338,8 +341,11 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     function fetchLegendMetadata(uint256 legendId)
         public
         view
+        virtual
+        override
         returns (LegendMetadata memory)
     {
+        require(_exists(legendId));
         return _legendMetadata[legendId];
     }
 

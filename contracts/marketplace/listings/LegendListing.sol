@@ -23,6 +23,11 @@ interface ILegendListing {
         ListingStatus status;
     }
 
+    function fetchLegendListing(uint256 listingId)
+        external
+        view
+        returns (LegendListing memory);
+
     event ListingStatusChanged(uint256 indexed listingId, ListingStatus status);
     event TradeClaimed(uint256 indexed listingId, address indexed payee);
 }

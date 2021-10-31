@@ -22,6 +22,11 @@ interface ILegendMatch {
         MatchingStatus status;
     }
 
+    function fetchLegendMatching(uint256 matchingId)
+        external
+        view
+        returns (LegendMatching memory);
+
     event MatchingStatusChanged(
         uint256 indexed matchingId,
         MatchingStatus status

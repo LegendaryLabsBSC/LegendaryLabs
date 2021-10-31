@@ -19,6 +19,11 @@ interface ILegendMetadata {
         bool isDestroyed;
     }
 
+    function fetchLegendMetadata(uint256 legendId)
+        external
+        view
+        returns (LegendMetadata memory);
+
     event LegendCreated(uint256 indexed legendId, address indexed creator);
     event LegendHatched(uint256 indexed legendId, uint256 birthday);
     event LegendNamed(uint256 indexed legendId, string prefix, string postfix);

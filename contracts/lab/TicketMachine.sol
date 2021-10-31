@@ -82,20 +82,26 @@ abstract contract TicketMachine {
         uint256 ticketAmount
     ) internal {
         PromoEvent storage p = _promoEvent[promoId];
-        
-        require(block.timestamp < p.expireTime, "Promo Expired");
+
+        require(
+            block.timestamp < p.expireTime,
+            "Promo Event Has Already Expired"
+        );
 
         if (p.isUnrestricted) {
             require(
                 isClaimed(promoId, recipient) == false,
-                "Promo already claimed"
+                "Promo Event Has Already Been Claimed"
             );
-            require(ticketAmount == 1, "One ticket per address");
+            require(ticketAmount == 1, "Amount Must Equal 1");
         }
 
         if (p.ticketLimit) {
             uint256 currentTicketCount = p.ticketsClaimed.current();
-            require(currentTicketCount < _maxTicketsDispensable[promoId]);
+            require(
+                currentTicketCount < _maxTicketsDispensable[promoId],
+                "Max Ticket Limit Has Been Reached"
+            );
         }
 
         _claimedPromo[promoId][recipient] = true;
@@ -110,13 +116,13 @@ abstract contract TicketMachine {
     function _redeemPromoTicket(uint256 promoId, address recipient) internal {
         PromoEvent storage p = _promoEvent[promoId];
 
-        require(!p.promoClosed, "Promo Closed");
+        require(!p.promoClosed, "Promo Event Has Already Closed");
 
-        uint256 redeemableTickets = fetchRedeemableTickets(
-            promoId,
-            recipient
+        uint256 redeemableTickets = fetchRedeemableTickets(promoId, recipient);
+        require(
+            redeemableTickets != 0,
+            "Address Has No Tickets To Redeem For This Promo Event"
         );
-        require(redeemableTickets != 0, "No tickets to redeem");
 
         _promoTickets[promoId][recipient] -= 1;
 
@@ -128,8 +134,8 @@ abstract contract TicketMachine {
     function _closePromoEvent(uint256 promoId) internal {
         PromoEvent storage p = _promoEvent[promoId];
 
-        require(block.timestamp > p.expireTime, "Promo not expired");
-        require(!p.promoClosed, "Promo already closed");
+        require(block.timestamp > p.expireTime, "Promo Has Not Yet Expired");
+        require(!p.promoClosed, "Promo Has Already Closed");
 
         p.promoClosed = true;
 
@@ -170,7 +176,10 @@ abstract contract TicketMachine {
         view
         returns (uint256)
     {
-        require(_promoEvent[promoId].ticketLimit, "No Ticket Limit Set");
+        require(
+            _promoEvent[promoId].ticketLimit,
+            "Promo Event Does Not Have A Max Ticket Limit"
+        );
 
         return _maxTicketsDispensable[promoId];
     }

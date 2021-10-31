@@ -7,6 +7,11 @@ import "./LegendMatch.sol";
 abstract contract LegendMatching is ILegendMatch {
     using Counters for Counters.Counter;
 
+    modifier isValidMatching(uint256 matchingId) {
+        require(matchingId >= _matchingIds.current(), 'Matching ID Not Valid');
+        _;
+    }
+
     Counters.Counter internal _matchingIds;
     Counters.Counter internal _matchingsClosed;
     Counters.Counter internal _matchingsCancelled;
@@ -86,27 +91,17 @@ abstract contract LegendMatching is ILegendMatch {
             Counters.Counter memory,
             Counters.Counter memory,
             Counters.Counter memory
-        )
-    {}
-
-    function fetchLegendMatching(uint256 matchingId)
-        public
-        view
-        virtual
-        returns (LegendMatching memory)
-    {}
+        );
 
     function fetchTokensPending(address recipient)
         public
         view
         virtual
-        returns (uint256)
-    {}
+        returns (uint256);
 
     function fetchEggOwed(uint256 matchingId, address breeder)
         public
         view
         virtual
-        returns (uint256)
-    {}
+        returns (uint256);
 }

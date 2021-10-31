@@ -9,20 +9,23 @@ contract LegendToken is ERC20 {
     LegendsLaboratory _lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(_lab), "not _lab owner");
+        require(msg.sender == address(_lab), "Not Called By Lab Admin");
         _;
     }
 
     modifier onlyMarketplace() {
         require(
             msg.sender == address(_lab.legendsMarketplace()),
-            "not marketplace"
+            "Not Called By Marketplace Contract"
         );
         _;
     }
 
     modifier onlyBlending() {
-        require(msg.sender == address(_lab.legendsNFT()), "not blending");
+        require(
+            msg.sender == address(_lab.legendsNFT()),
+            "Not Called By NFT Contract"
+        );
         _;
     }
 

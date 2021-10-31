@@ -14,7 +14,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     LegendsLaboratory _lab;
 
     modifier onlyLab() {
-        require(msg.sender == address(_lab));
+        require(msg.sender == address(_lab), "Not Called By Lab Admin");
         _;
     }
 
@@ -41,11 +41,14 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         IERC721 legendsNFT = IERC721(nftContract);
         RejuvenationPod storage r = rejuvenationPod[legendId];
 
-        // require(_lab.isListable(legendId), "Not eligible"); // commented out for testing
-        require(!r.occupied, "Legend in pod");
+        require(
+            _lab.isListable(legendId),
+            "Caller Is Not Owner Or Legend Has Not Hatched"
+        ); // commented out for testing
+        require(!r.occupied, "Legend Already Occupying Pod");
         require(
             tokensToSecure >= _minimumSecure,
-            "amount must be minimum or greater"
+            "LGND Token Amount Must Meet The Minimum To Rejuvenate Legend"
         ); // can put in more than max multiplier but will not increase reju, will raise odds of no-loss-lottery win
 
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
@@ -66,13 +69,14 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         r.occupied = true;
 
         emit PodStatusChanged(legendId, true);
+        emit PodTokensIncreased(legendId, tokensToSecure);
     }
 
     function leaveRejuvenationPod(uint256 legendId) external nonReentrant {
         RejuvenationPod storage r = rejuvenationPod[legendId];
 
-        require(r.occupied, "Legend not in pod");
-        require(msg.sender == r.depositedBy, "Not Authorized");
+        require(r.occupied, "Legend Is Not Occupying Pod");
+        require(msg.sender == r.depositedBy, "Caller Did Not Enter Legend");
 
         r.occupied = false;
 
@@ -93,11 +97,13 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     {
         RejuvenationPod storage r = rejuvenationPod[legendId];
 
-        require(msg.sender == r.depositedBy, "Not authorized");
-        require(
-            amountToRemove != 0 && amountToRemove <= r.tokenAmountSecured,
-            "Invalid amount"
-        );
+        require(r.occupied, "Legend Is Not Occupying Pod");
+        require(msg.sender == r.depositedBy, "Caller Did Not Enter Legend");
+        require(amountToRemove != 0, "Amount Can Not Be 0");
+
+        if (amountToRemove > r.tokenAmountSecured) {
+            revert("Amount Can Not Be Greater Than Secured");
+        }
 
         if (r.blendingInstancesUsed != 0) {
             _restoreBlendingSlots(legendId);
@@ -114,7 +120,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             amountToRemove
         );
 
-        emit PodTokensChanged(legendId, newAmount);
+        emit PodTokensDecreased(legendId, newAmount);
     }
 
     function increaseSecuredTokens(uint256 legendId, uint256 amountToSecure)
@@ -123,8 +129,9 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     {
         RejuvenationPod storage r = rejuvenationPod[legendId];
 
-        require(msg.sender == r.depositedBy, "Not authorized");
-        require(r.occupied, "Not in Pod");
+        require(r.occupied, "Legend Is Not Occupying Pod");
+        require(msg.sender == r.depositedBy, "Caller Did Not Enter Legend");
+        require(amountToSecure != 0, "Amount Can Not Be 0");
 
         if (r.blendingInstancesUsed != 0) {
             _restoreBlendingSlots(legendId);
@@ -141,7 +148,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         r.tokenAmountSecured = newAmount;
         r.multiplier = _calculateMultiplier(newAmount);
 
-        emit PodTokensChanged(legendId, newAmount);
+        emit PodTokensIncreased(legendId, newAmount);
     }
 
     function _restoreBlendingSlots(uint256 legendId) private {
@@ -180,14 +187,11 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         return restoredSlots;
     }
 
-    function _fetchEarnedReju(uint256 legendId)
-        private
-        view
-        returns (uint256)
-    {
+    function _fetchEarnedReju(uint256 legendId) private view returns (uint256) {
         RejuvenationPod memory r = rejuvenationPod[legendId];
 
-        uint256 maxEarnableReJu = (_reJuNeededPerSlot * r.blendingInstancesUsed);
+        uint256 maxEarnableReJu = (_reJuNeededPerSlot *
+            r.blendingInstancesUsed);
 
         uint256 earnedReJu = ((_reJuPerBlock * r.multiplier) *
             (block.number - r.depositBlock));
@@ -199,6 +203,21 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         return earnedReJu;
     }
 
+    function fetchPodDetails(uint256 legendId)
+        public
+        view
+        virtual
+        override
+        returns (RejuvenationPod memory)
+    {
+        require(
+            rejuvenationPod[legendId].occupied,
+            "Legend Is Not Occupying Pod"
+        );
+
+        return rejuvenationPod[legendId];
+    }
+
     function fetchRejuvenationProgress(uint256 legendId)
         public
         view
@@ -208,6 +227,11 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             uint256
         )
     {
+        require(
+            rejuvenationPod[legendId].occupied,
+            "Legend Is Not Occupying Pod"
+        );
+
         uint256 earnedReJu = _fetchEarnedReju(legendId);
 
         uint256 maxEarnableReJu = (_reJuNeededPerSlot *
@@ -228,7 +252,12 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             uint256
         )
     {
-        return (_minimumSecure, _maxMultiplier, _reJuPerBlock, _reJuNeededPerSlot);
+        return (
+            _minimumSecure,
+            _maxMultiplier,
+            _reJuPerBlock,
+            _reJuNeededPerSlot
+        );
     }
 
     function setMinimumSecure(uint256 newMinimumSecure) public onlyLab {

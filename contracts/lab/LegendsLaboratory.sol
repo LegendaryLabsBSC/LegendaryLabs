@@ -73,7 +73,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
         uint256 ticketAmount
     ) public {
         if (_promoEvent[promoId].isUnrestricted == false) {
-            require(msg.sender == owner(), "Not Authorized");
+            require(
+                msg.sender == owner(),
+                "Promo Event Can Only Be Called By Lab Admins"
+            );
         }
 
         _dispensePromoTicket(promoId, recipient, ticketAmount);
@@ -101,7 +104,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
     {
-        require(msg.sender == address(legendRejuvenation), "Not Pod");
+        require(
+            msg.sender == address(legendRejuvenation),
+            "Not Called By Rejuvenation Contract"
+        );
 
         legendsNFT._restoreBlendingSlots(legendId, regainedSlots);
     }
@@ -259,7 +265,10 @@ contract LegendsLaboratory is Ownable, TicketMachine {
      * This is to help prevent abuse with the reporting system.
      */
     function reportVulgarLegend(uint256 legendId) public {
-        require(!_reported[legendId][msg.sender], "Legend Reported");
+        require(
+            !_reported[legendId][msg.sender],
+            "You Have Already Reported This Legend's Name"
+        );
 
         _reported[legendId][msg.sender] = true;
 
@@ -274,7 +283,7 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     function resetLegendName(uint256 legendId) public onlyOwner {
         require(
             _reportCount[legendId] >= _reportThreshold,
-            "Threshold Not Reached"
+            "Threshold Not Reached For Admin To Call"
         );
 
         legendsNFT.resetLegendName(legendId);
