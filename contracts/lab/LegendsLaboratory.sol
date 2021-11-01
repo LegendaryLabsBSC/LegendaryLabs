@@ -4,6 +4,10 @@ pragma solidity 0.8.4;
 
 // import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+
+// import "@openzeppelin/contracts/governance/TimelockController.sol";
+
+import "./LaboratoryGovernor.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
@@ -21,6 +25,8 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
+    LaboratoryGovernor public laboratoryGovernor =
+        new LaboratoryGovernor(legendToken);
 
     bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
     bytes32 public constant LAB_TECH = keccak256("LAB_TECH");
@@ -117,13 +123,13 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         this.grantRole(LAB_ADMIN, newAdmin);
     }
 
-    function captureLGNDSnapshot()
-        public
-        onlyRole(LAB_ADMIN)
-        returns (uint256)
-    {
-        return legendToken.snapshot();
-    }
+    // function captureLGNDSnapshot()
+    //     public
+    //     onlyRole(LAB_ADMIN)
+    //     returns (uint256)
+    // {
+    //     return legendToken.snapshot();
+    // }
 
     function labBurn(uint256 amount) public onlyRole(LAB_ADMIN) {
         legendToken.labBurn(amount);

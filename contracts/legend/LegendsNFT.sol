@@ -210,7 +210,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
                     ",",
                     _incubationViews[incubationChamber],
                     ",",
-                    data //  not returning parent
+                    data
                 )
             );
     }
