@@ -11,12 +11,12 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     using Counters for Counters.Counter;
     using Strings for uint256;
 
+    LegendsLaboratory _lab;
+
     Counters.Counter private _legendIds;
 
-    LegendsLaboratory lab;
-
     modifier onlyLab() {
-        require(msg.sender == address(lab), "Not Authorized");
+        require(msg.sender == address(_lab));
         _;
     }
 
@@ -26,18 +26,25 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         Siblings
     }
 
-    KinBlendingLevel private kinBlendingLevel;
+    KinBlendingLevel private _kinBlendingLevel;
 
-    uint256 private baseBlendingCost = 100;
+    string[5] private _incubationViews = [
+        // replace with Chucks incubators
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG",
+        "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG"
+    ];
 
-    uint256 private blendingLimit = 5;
+    uint256 private _blendingLimit = 5;
 
-    // uint256 private blendingCooldown = 86400; // seconds // hold off until discuss relisting in matching
+    uint256 private _baseBlendingCost = 100;
 
-    uint256 private incubationPeriod; // seconds
+    uint256 private _incubationPeriod; // seconds
 
     /* legendId => metadata */
-    mapping(uint256 => LegendMetadata) private legendMetadata;
+    mapping(uint256 => LegendMetadata) private _legendMetadata;
 
     /* legendId => ipfsHash */
     mapping(uint256 => string) private _legendURI;
@@ -46,16 +53,16 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     mapping(uint256 => bool) private _noIncubation;
 
     /* parentId => childId => isParent? */
-    mapping(uint256 => mapping(uint256 => bool)) private parentOf;
+    mapping(uint256 => mapping(uint256 => bool)) private _parentOf;
 
     constructor() ERC721("Legend", "LEGEND") {
-        lab = LegendsLaboratory(msg.sender);
+        _lab = LegendsLaboratory(msg.sender);
     }
 
     function createLegend(
-        address _recipient,
-        uint256 _promoId,
-        bool _isLegendary
+        address recipient,
+        uint256 promoId,
+        bool isLegendary
     ) external onlyLab {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
@@ -63,65 +70,74 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         // origin Legends wont have parents
         uint256[2] memory parents = [uint256(0), uint256(0)];
 
-        string memory uri = _formatURI(newLegendId, Strings.toString(_promoId));
+        string memory uri = _formatIncubationURI(
+            newLegendId,
+            Strings.toString(promoId)
+        );
 
-        bool skipIncubation = lab.isPromoIncubated(_promoId);
+        bool skipIncubation = _lab.isPromoIncubated(promoId);
 
         _mintLegend(
-            _recipient,
+            recipient,
             newLegendId,
             parents,
             uri,
-            _isLegendary,
+            isLegendary,
             skipIncubation
         );
     }
 
     function blendLegends(
-        address _recipient,
-        uint256 _parent1,
-        uint256 _parent2,
-        bool _skipIncubation
+        address recipient,
+        uint256 parent1,
+        uint256 parent2,
+        bool skipIncubation
     ) external returns (uint256) {
         require(
-            ownerOf(_parent1) == msg.sender && ownerOf(_parent2) == msg.sender
+            ownerOf(parent1) == msg.sender && ownerOf(parent2) == msg.sender
         );
 
-        LegendMetadata storage p1 = legendMetadata[_parent1];
-        LegendMetadata storage p2 = legendMetadata[_parent2];
+        LegendMetadata storage p1 = _legendMetadata[parent1];
+        LegendMetadata storage p2 = _legendMetadata[parent2];
 
-        require(isBlendable(_parent1), "Blending limit reached");
-        require(isBlendable(_parent2), "Blending limit reached");
+        require(isBlendable(parent1));
+        require(isBlendable(parent2));
 
         // thoroughly test bool returns
-        if (kinBlendingLevel != KinBlendingLevel.Siblings) {
-            require(_notSiblings(p1.parents, p2.parents));
-            if (kinBlendingLevel != KinBlendingLevel.Parents) {
-                require(_notParent(_parent1, _parent2));
+        if (_kinBlendingLevel != KinBlendingLevel.Siblings) {
+            require(
+                _notSiblings(p1.parents, p2.parents),
+                "Blending Not Allowed With Sibling Legend"
+            );
+            if (_kinBlendingLevel != KinBlendingLevel.Parents) {
+                require(
+                    _notParent(parent1, parent2),
+                    "Blending Not Allowed With Parent Legend"
+                );
             }
         }
 
-        uint256 blendingCost = (fetchBlendingCost(_parent1) +
-            fetchBlendingCost(_parent2)) / 2;
+        uint256 blendingCost = (fetchBlendingCost(parent1) +
+            fetchBlendingCost(parent2)) / 2;
 
-        lab.legendToken().blendingBurn(msg.sender, blendingCost); // may become liqlock
+        _lab.legendToken().blendingBurn(msg.sender, blendingCost); // may become liqlock
 
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
-        uint256[2] memory parents = [_parent1, _parent2];
+        uint256[2] memory parents = [parent1, parent2];
 
         for (uint256 i = 0; i < parents.length; i++) {
             // test thoroughly
-            LegendMetadata storage m = legendMetadata[parents[i]];
+            LegendMetadata storage m = _legendMetadata[parents[i]];
 
             m.totalOffspring += 1;
             m.blendingInstancesUsed += 1;
 
-            parentOf[parents[i]][newLegendId] = true;
+            _parentOf[parents[i]][newLegendId] = true;
         }
 
-        string memory uri = _formatURI(
+        string memory uri = _formatIncubationURI(
             newLegendId,
             string(
                 abi.encodePacked(
@@ -133,218 +149,220 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         );
 
         _mintLegend(
-            _recipient,
+            recipient,
             newLegendId,
             parents,
             uri,
             false,
-            _skipIncubation
+            skipIncubation
         );
 
-        emit LegendsBlended(_parent1, _parent2, newLegendId);
+        emit LegendsBlended(parent1, parent2, newLegendId);
 
         return (newLegendId);
     }
 
-    function hatchLegend(uint256 _legendId, string memory _ipfsHash) public {
-        require(ownerOf(_legendId) == msg.sender);
-        require(isHatchable(_legendId), "Needs to incubate longer");
+    function hatchLegend(uint256 legendId, string calldata ipfsHash) public {
+        require(ownerOf(legendId) == msg.sender);
+        require(isHatchable(legendId), "Legend Needs Longer To Incubate");
 
-        legendMetadata[_legendId].isHatched = true;
+        _legendMetadata[legendId].isHatched = true;
 
-        _setLegendURI(_legendId, _ipfsHash);
+        _setLegendURI(legendId, ipfsHash);
 
-        legendMetadata[_legendId].birthday = block.timestamp;
+        _legendMetadata[legendId].birthday = block.timestamp;
 
-        emit LegendHatched(_legendId, block.timestamp);
+        emit LegendHatched(legendId, block.timestamp);
     }
 
     function nameLegend(
-        uint256 _legendId,
-        string memory _prefix,
-        string memory _postfix
+        uint256 legendId,
+        string calldata prefix,
+        string calldata postfix
     ) external {
-        require(isListable(_legendId), "Not Authorized");
+        require(isListable(legendId));
 
-        legendMetadata[_legendId].prefix = _prefix;
-        legendMetadata[_legendId].postfix = _postfix;
+        _legendMetadata[legendId].prefix = prefix;
+        _legendMetadata[legendId].postfix = postfix;
 
-        emit LegendNamed(_legendId, _prefix, _postfix);
+        emit LegendNamed(legendId, prefix, postfix);
     }
 
-    function destroyLegend(uint256 _legendId) public {
-        require(ownerOf(_legendId) == msg.sender);
+    function destroyLegend(uint256 legendId) public {
+        require(ownerOf(legendId) == msg.sender);
 
-        _burn(_legendId);
+        _burn(legendId);
 
-        emit LegendDestroyed(_legendId);
+        emit LegendDestroyed(legendId);
     }
 
-    function _formatURI(uint256 _newLegendId, string memory data)
+    function _formatIncubationURI(uint256 newLegendId, string memory data)
         private
-        pure
+        view
         returns (string memory)
     {
-        //TODO:
-        string
-            memory enumEgg = "ipfs://QmewiUnCt6cgadmci4M2s2jnDNx1y5gTQ2Qi5EX4EXBbNG";
+        uint256 incubationChamber = _randomIncubationChamber();
 
         return
             string(
                 abi.encodePacked(
-                    Strings.toString(_newLegendId),
+                    Strings.toString(newLegendId),
                     ",",
-                    enumEgg,
+                    _incubationViews[incubationChamber],
                     ",",
                     data
                 )
             );
     }
 
+    function _randomIncubationChamber() private view returns (uint256) {
+        return
+            uint256(
+                keccak256(abi.encodePacked(block.difficulty, block.timestamp))
+            ) % _incubationViews.length;
+    }
+
     function _mintLegend(
-        address _recipient,
-        uint256 _newLegendId,
-        uint256[2] memory _parents,
-        string memory _uri,
-        bool _isLegendary,
-        bool _skipIncubation
+        address recipient,
+        uint256 newLegendId,
+        uint256[2] memory parents,
+        string memory uri,
+        bool isLegendary,
+        bool skipIncubation
     ) private {
-        _mint(_recipient, _newLegendId);
+        _mint(recipient, newLegendId);
 
         address payable creator;
 
-        if (_parents[0] == 0) {
+        if (parents[0] == 0) {
             creator = payable(address(0));
         } else {
-            ///@dev To accommodate matching, creator is legend's second parent creator(breeder address)
-            creator = payable(legendMetadata[_parents[1]].legendCreator);
+            /** @dev To accommodate matching, creator is legend's second parent creator(breeder address) */
+            creator = payable(_legendMetadata[parents[1]].legendCreator);
         }
 
-        LegendMetadata storage m = legendMetadata[_newLegendId];
-        m.id = _newLegendId;
-        m.season = lab.fetchSeason();
-        m.parents = _parents;
-        // m.birthDay = block.timestamp;
+        LegendMetadata storage m = _legendMetadata[newLegendId];
+        m.id = newLegendId;
+        m.season = _lab.fetchSeason();
+        m.parents = parents;
         m.legendCreator = creator;
-        m.isLegendary = _isLegendary;
+        m.isLegendary = isLegendary;
 
-        _noIncubation[_newLegendId] = _skipIncubation;
+        _noIncubation[newLegendId] = skipIncubation;
 
-        _setLegendURI(_newLegendId, _uri);
+        _setLegendURI(newLegendId, uri);
 
-        emit LegendCreated(_newLegendId, creator);
+        emit LegendCreated(newLegendId, creator);
     }
 
-    function _setLegendURI(uint256 _legendId, string memory _ipfsHash) private {
-        _legendURI[_legendId] = _ipfsHash;
+    function _setLegendURI(uint256 legendId, string memory ipfsHash) private {
+        _legendURI[legendId] = ipfsHash;
     }
 
     function _notSiblings(
-        uint256[2] memory _parents1,
-        uint256[2] memory _parents2
+        uint256[2] memory parents1,
+        uint256[2] memory parents2
     ) private pure returns (bool) {
-        if (_parents1[0] == 0 || _parents2[0] == 0) return true;
+        if (parents1[0] == 0 || parents2[0] == 0) return true;
 
         return
-            keccak256(abi.encodePacked(_parents1)) !=
-            keccak256(abi.encodePacked(_parents2)) &&
-            keccak256(abi.encodePacked(_parents2)) !=
-            keccak256(abi.encodePacked(_parents1));
+            keccak256(abi.encodePacked(parents1)) !=
+            keccak256(abi.encodePacked(parents2)) &&
+            keccak256(abi.encodePacked(parents2)) !=
+            keccak256(abi.encodePacked(parents1));
     }
 
-    function _notParent(uint256 _parent1, uint256 _parent2)
+    function _notParent(uint256 parent1, uint256 parent2)
         private
         view
         returns (bool)
     {
-        if (parentOf[_parent1][_parent2]) return false;
-        if (parentOf[_parent2][_parent1]) return false;
+        if (_parentOf[parent1][parent2]) return false;
+        if (_parentOf[parent2][parent1]) return false;
 
         return true;
     }
 
-    function _restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+    function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
         onlyLab
     {
-        legendMetadata[_legendId].blendingInstancesUsed -= _regainedSlots;
+        _legendMetadata[legendId].blendingInstancesUsed -= regainedSlots;
     }
 
-    function isBlendable(uint256 _legendId) public view returns (bool) {
-        return (legendMetadata[_legendId].blendingInstancesUsed <
-            blendingLimit); // test return thoroughly
+    function isBlendable(uint256 legendId) public view returns (bool) {
+        if (_legendMetadata[legendId].blendingInstancesUsed > _blendingLimit) {
+            revert("Legend Has Reached Max Blending Slots"); // test return thoroughly
+        }
+
+        return true;
     }
 
-    function isHatchable(uint256 _legendId) public view returns (bool) {
-        require(!isHatched(_legendId), "Already hatched");
+    function isHatchable(uint256 legendId) public view returns (bool) {
+        require(!isHatched(legendId));
 
-        if (_noIncubation[_legendId]) return true;
+        if (_noIncubation[legendId]) return true;
 
-        uint256 hatchableWhen = (legendMetadata[_legendId].birthday +
-            incubationPeriod);
+        uint256 hatchableWhen = (_legendMetadata[legendId].birthday +
+            _incubationPeriod);
 
         if (block.timestamp < hatchableWhen) return false;
 
         return true;
     }
 
-    function isHatched(uint256 _legendId) public view returns (bool) {
-        return legendMetadata[_legendId].isHatched;
+    function isHatched(uint256 legendId) public view returns (bool) {
+        return _legendMetadata[legendId].isHatched;
     }
 
-    function isNoIncubation(uint256 _legendId) public view returns (bool) {
-        return _noIncubation[_legendId];
+    function isNoIncubation(uint256 legendId) public view returns (bool) {
+        return _noIncubation[legendId];
     }
 
-    function isParentOf(uint256 _parentLegendId, uint256 _childLegendId)
+    function isParentOf(uint256 parentLegendId, uint256 childLegendId)
         public
         view
         returns (bool)
     {
-        return parentOf[_parentLegendId][_childLegendId];
+        return _parentOf[parentLegendId][childLegendId];
     }
 
-    function isListable(uint256 _legendId) public view returns (bool) {
-        if (ownerOf(_legendId) != msg.sender) return false;
-        if (!isHatched(_legendId)) return false;
+    function isListable(uint256 legendId) public view returns (bool) {
+        // change to isUsable/syn ?
+        if (ownerOf(legendId) != msg.sender) return false;
+        if (!isHatched(legendId)) return false;
 
         return true;
     }
 
-    function fetchLegendMetadata(uint256 _legendId)
-        public
-        view
-        returns (LegendMetadata memory)
-    {
-        return legendMetadata[_legendId];
+    function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
+        uint256 blendingCost = _baseBlendingCost *
+            (_legendMetadata[legendId].totalOffspring + 1);
+
+        return blendingCost;
     }
 
-    function fetchLegendURI(uint256 _legendId)
+    function fetchLegendMetadata(uint256 legendId)
+        public
+        view
+        virtual
+        override
+        returns (LegendMetadata memory)
+    {
+        require(_exists(legendId));
+        return _legendMetadata[legendId];
+    }
+
+    function fetchLegendURI(uint256 legendId)
         public
         view
         returns (string memory)
     {
-        require(
-            _exists(_legendId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
-        return _legendURI[_legendId];
+        require(_exists(legendId));
+        return _legendURI[legendId];
     }
 
-    function fetchBlendingCost(uint256 _legendId)
-        public
-        view
-        returns (uint256)
-    {
-        if (legendMetadata[_legendId].totalOffspring != 0) {
-            return (baseBlendingCost *
-                legendMetadata[_legendId].totalOffspring);
-        } else {
-            return baseBlendingCost;
-        }
-    }
-
-    function fetchLabRules()
+    function fetchBlendingRules()
         public
         view
         returns (
@@ -355,32 +373,73 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         )
     {
         return (
-            kinBlendingLevel,
-            baseBlendingCost,
-            blendingLimit,
-            incubationPeriod
+            _kinBlendingLevel,
+            _blendingLimit,
+            _baseBlendingCost,
+            _incubationPeriod
         );
     }
 
-    function setKinBlendingLevel(uint256 _newLevel) public virtual onlyLab {
-        if (_newLevel == 0) {
-            kinBlendingLevel == KinBlendingLevel.None;
-        } else if (_newLevel == 1) {
-            kinBlendingLevel == KinBlendingLevel.Siblings;
-        } else if (_newLevel == 2) {
-            kinBlendingLevel == KinBlendingLevel.Parents;
+    function fetchIncubationViews() public view returns (string[5] memory) {
+        return _incubationViews;
+    }
+
+    // function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyLab {
+    //     if (newKinBlendingLevel == 0) {
+    //         _kinBlendingLevel = KinBlendingLevel.None;
+    //     } else if (newKinBlendingLevel == 1) {
+    //         _kinBlendingLevel = KinBlendingLevel.Siblings;
+    //     } else if (newKinBlendingLevel == 2) {
+    //         _kinBlendingLevel = KinBlendingLevel.Parents;
+    //     }
+    // }
+
+    function setBlendingRule(uint256 blendingRule, uint256 newRuleData)
+        public
+        onlyLab
+    {
+        if (blendingRule == 0) {
+            if (newRuleData == 0) {
+                _kinBlendingLevel = KinBlendingLevel.None;
+            } else if (newRuleData == 1) {
+                _kinBlendingLevel = KinBlendingLevel.Siblings;
+            } else if (newRuleData == 2) {
+                _kinBlendingLevel = KinBlendingLevel.Parents;
+            }
+        } else if (blendingRule == 1) {
+            _blendingLimit = newRuleData;
+        } else if (blendingRule == 2) {
+            _baseBlendingCost = newRuleData;
+        } else if (blendingRule == 3) {
+            _incubationPeriod = newRuleData;
         }
     }
 
-    function setBlendingLimit(uint256 _newLimit) public onlyLab {
-        blendingLimit = _newLimit;
+    function setIncubationViews(string[5] memory newIncubationViews)
+        public
+        onlyLab
+    {
+        _incubationViews = newIncubationViews;
     }
 
-    function setBaseBlendingCost(uint256 _newAmount) public onlyLab {
-        baseBlendingCost = _newAmount;
-    }
+    /**
+     * Do not delete below functions until after adding docs to above(setrules) ;; if still not enough size may just use individual
+     */
 
-    function setIncubationPeriod(uint256 _newDuration) public onlyLab {
-        incubationPeriod = _newDuration;
+    // function setBlendingLimit(uint256 newBlendingLimit) public onlyLab {
+    //     _blendingLimit = newBlendingLimit;
+    // }
+
+    // function setBaseBlendingCost(uint256 newBaseBlendingCost) public onlyLab {
+    //     _baseBlendingCost = newBaseBlendingCost;
+    // }
+
+    // function setIncubationPeriod(uint256 newIncubationPeriod) public onlyLab {
+    //     _incubationPeriod = newIncubationPeriod;
+    // }
+
+    function resetLegendName(uint256 legendId) public onlyLab {
+        _legendMetadata[legendId].prefix = "";
+        _legendMetadata[legendId].postfix = "";
     }
 }

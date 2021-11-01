@@ -13,12 +13,20 @@ interface IRejuvenationPod {
         bool occupied;
     }
 
+    function fetchPodDetails(uint256 legendId)
+        external
+        view
+        returns (RejuvenationPod memory);
+
     event PodStatusChanged(uint256 indexed legendId, bool occupied);
-    event PodTokensChanged(uint256 indexed legendId, uint256 newAmount);
+
+    event PodTokensIncreased(uint256 indexed legendId, uint256 newAmount);
+    event PodTokensDecreased(uint256 indexed legendId, uint256 newAmount);
+
     event BlendingSlotsRestored(
         uint256 indexed legendId,
         uint256 slotsRestored
     );
-    // event PodTokensDecreased(uint256 indexed legendId, uint256 newAmount);
-    // event PodTokensIncreased(uint256 indexed legendId, uint256 newAmount);
+
+    // event PodTokensChanged(uint256 indexed legendId, uint256 newAmount);
 }

@@ -2,7 +2,12 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+
+// import "@openzeppelin/contracts/governance/TimelockController.sol";
+
+import "./LaboratoryGovernor.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
@@ -13,20 +18,32 @@ import "./TicketMachine.sol";
 /**
  *
  */
-contract LegendsLaboratory is Ownable, TicketMachine {
+contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsNFT public legendsNFT = new LegendsNFT();
     LegendToken public legendToken = new LegendToken(msg.sender);
     LegendRejuvenation public legendRejuvenation = new LegendRejuvenation();
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
+    LaboratoryGovernor public laboratoryGovernor =
+        new LaboratoryGovernor(legendToken);
 
-    string private season = "Phoenix";
+    bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
+    bytes32 public constant LAB_TECH = keccak256("LAB_TECH");
 
-    /* promoId => skipIncubation */
+    string private _season = "Phoenix";
+
+    /** @dev promoId => skipIncubation */
     mapping(uint256 => bool) private _promoIncubated;
 
-    constructor() {}
+    constructor() {
+        _setupRole(DEFAULT_ADMIN_ROLE, address(this));
+        _setupRole(LAB_ADMIN, msg.sender);
+        _setupRole(LAB_TECH, msg.sender);
+
+        // _setRoleAdmin(LAB_ADMIN, LAB_ADMIN);
+        _setRoleAdmin(LAB_TECH, LAB_ADMIN);
+    }
 
     // for testing, remove before MVP launch
     function getChildContracts()
@@ -51,158 +68,275 @@ contract LegendsLaboratory is Ownable, TicketMachine {
     }
 
     function createPromoEvent(
-        string memory _eventName,
-        uint256 _duration,
-        bool _isUnrestricted,
-        uint256 _maxTickets,
-        bool _skipIncubation
-    ) external onlyOwner {
+        string calldata eventName,
+        uint256 duration,
+        bool isUnrestricted,
+        uint256 maxTickets,
+        bool skipIncubation
+    ) external onlyRole(LAB_TECH) {
         uint256 promoId = _createPromoEvent(
-            _eventName,
-            _duration,
-            _isUnrestricted,
-            _maxTickets
+            eventName,
+            duration,
+            isUnrestricted,
+            maxTickets
         );
 
-        _promoIncubated[promoId] = _skipIncubation;
+        _promoIncubated[promoId] = skipIncubation;
     }
 
     function dispensePromoTicket(
-        uint256 _promoId,
-        address _recipient,
-        uint256 _ticketAmount
+        uint256 promoId,
+        address recipient,
+        uint256 ticketAmount
     ) public {
-        if (promoEvent[_promoId].isUnrestricted == false) {
-            require(msg.sender == owner(), "Not Authorized");
+        if (_promoEvent[promoId].isUnrestricted == false) {
+            _checkRole(LAB_TECH, msg.sender);
         }
 
-        _dispensePromoTicket(_promoId, _recipient, _ticketAmount);
+        _dispensePromoTicket(promoId, recipient, ticketAmount);
     }
 
-    function redeemPromoTicket(uint256 _promoId, address _recipient) public {
-        _redeemPromoTicket(_promoId, _recipient);
+    function redeemPromoTicket(uint256 promoId, address recipient) public {
+        _redeemPromoTicket(promoId, recipient);
 
-        legendsNFT.createLegend(_recipient, _promoId, false);
+        legendsNFT.createLegend(recipient, promoId, false);
     }
 
-    function closePromoEvent(uint256 _promoId) public onlyOwner {
-        _closePromoEvent(_promoId);
+    function closePromoEvent(uint256 promoId) public onlyRole(LAB_TECH) {
+        _closePromoEvent(promoId);
     }
 
-    function mintLegendaryLegend(address _recipient, uint256 _promoId)
+    function mintLegendaryLegend(address recipient, uint256 promoId)
         public
-        onlyOwner
+        onlyRole(LAB_ADMIN)
     {
-        _redeemPromoTicket(_promoId, _recipient);
+        _redeemPromoTicket(promoId, recipient);
 
-        legendsNFT.createLegend(_recipient, _promoId, true);
+        legendsNFT.createLegend(recipient, promoId, true);
     }
 
-    function _restoreBlendingSlots(uint256 _legendId, uint256 _regainedSlots)
+    function transferLabAdmin(address currentAdmin, address newAdmin)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        this.revokeRole(LAB_ADMIN, currentAdmin);
+        this.grantRole(LAB_ADMIN, newAdmin);
+    }
+
+    // function captureLGNDSnapshot()
+    //     public
+    //     onlyRole(LAB_ADMIN)
+    //     returns (uint256)
+    // {
+    //     return legendToken.snapshot();
+    // }
+
+    function labBurn(uint256 amount) public onlyRole(LAB_ADMIN) {
+        legendToken.labBurn(amount);
+    }
+
+    function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
     {
-        require(msg.sender == address(legendRejuvenation), "Not Pod");
+        require(
+            msg.sender == address(legendRejuvenation),
+            "Not Called By Rejuvenation Contract"
+        );
 
-        legendsNFT._restoreBlendingSlots(_legendId, _regainedSlots);
+        legendsNFT._restoreBlendingSlots(legendId, regainedSlots);
     }
 
-    function isHatched(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isHatched(_legendId);
+    function isHatched(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isHatched(legendId);
     }
 
-    function isListable(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isListable(_legendId);
+    function isListable(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isListable(legendId);
     }
 
-    function isBlendable(uint256 _legendId) public view returns (bool) {
-        return legendsNFT.isBlendable(_legendId);
+    function isBlendable(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isBlendable(legendId);
     }
 
-    function isPromoIncubated(uint256 _promoId) public view returns (bool) {
-        return _promoIncubated[_promoId];
+    function isPromoIncubated(uint256 promoId) public view returns (bool) {
+        return _promoIncubated[promoId];
     }
 
     function fetchSeason() public view returns (string memory) {
-        return season;
+        return _season;
     }
 
-    function fetchBlendingCount(uint256 _legendId)
+    function fetchBlendingCount(uint256 legendId)
         public
         view
         returns (uint256)
     {
-        return legendsNFT.fetchLegendMetadata(_legendId).blendingInstancesUsed;
+        return legendsNFT.fetchLegendMetadata(legendId).blendingInstancesUsed;
     }
 
-    function fetchBlendingCost(uint256 _legendId)
-        public
-        view
-        returns (uint256)
-    {
-        return legendsNFT.fetchBlendingCost(_legendId);
+    function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
+        return legendsNFT.fetchBlendingCost(legendId);
     }
 
-    function fetchRoyaltyRecipient(uint256 _legendId)
+    function fetchRoyaltyRecipient(uint256 legendId)
         public
         view
         returns (address payable)
     {
-        return legendsNFT.fetchLegendMetadata(_legendId).legendCreator;
+        return legendsNFT.fetchLegendMetadata(legendId).legendCreator;
     }
 
-    function setSeason(string memory _newSeason) public onlyOwner {
-        season = _newSeason;
+    function setSeason(string calldata newSeason) public onlyRole(LAB_ADMIN) {
+        _season = newSeason;
     }
 
-    function setKinBlendingLevel(uint256 _newLevel) public onlyOwner {
-        legendsNFT.setKinBlendingLevel(_newLevel);
-    }
-
-    function setBlendingLimit(uint256 _newLimit) public onlyOwner {
-        legendsNFT.setBlendingLimit(_newLimit);
-    }
-
-    function setBaseBlendingCost(uint256 _newAmount) public onlyOwner {
-        legendsNFT.setBaseBlendingCost(_newAmount);
-    }
-
-    function setIncubationPeriod(uint256 newDuration) public onlyOwner {
-        legendsNFT.setIncubationPeriod(newDuration);
-    }
-
-    function setRoyaltyFee(uint256 _newFee) public onlyOwner {
-        legendsMarketplace.setRoyaltyFee(_newFee);
-    }
-
-    function setMarketplaceFee(uint256 _newFee) public onlyOwner {
-        legendsMarketplace.setMarketplaceFee(_newFee);
-    }
-
-    function setOfferDuration(uint256 _newDuration) public onlyOwner {
-        legendsMarketplace.setOfferDuration(_newDuration);
-    }
-
-    function setAuctionExtension(uint256 _newDuration) public onlyOwner {
-        legendsMarketplace.setAuctionExtension(_newDuration);
-    }
-
-    // function setMatchingBoardFee(uint256 newFee) public onlyOwner {
-    //     legendsMatchingBoard.setMatchingBoardFee(newFee);
+    // function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyOwner {
+    //     legendsNFT.setKinBlendingLevel(newKinBlendingLevel);
     // }
 
-    function setMinimumSecure(uint256 _newMinimum) public onlyOwner {
-        legendRejuvenation.setMinimumSecure(_newMinimum);
+    function setIncubationViews(string[5] calldata newIncubationViews)
+        public
+        onlyRole(LAB_TECH)
+    {
+        legendsNFT.setIncubationViews(newIncubationViews);
     }
 
-    function setMaxMultiplier(uint256 _newMax) public onlyOwner {
-        legendRejuvenation.setMaxMultiplier(_newMax);
+    // function setBlendingLimit(uint256 newBlendingLimit) public onlyOwner {
+    //     legendsNFT.setBlendingLimit(newBlendingLimit);
+    // }
+
+    // function setBaseBlendingCost(uint256 newBaseBlendingCost) public onlyOwner {
+    //     legendsNFT.setBaseBlendingCost(newBaseBlendingCost);
+    // }
+
+    // function setIncubationPeriod(uint256 newIncubationPeriod) public onlyOwner {
+    //     legendsNFT.setIncubationPeriod(newIncubationPeriod);
+    // }
+
+    function setBlendingRule(uint256 blendingRule, uint256 newRuleData)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        require(blendingRule < 4, "Blending Rule Does Not Exist");
+
+        if (blendingRule == 0) {
+            require(newRuleData < 3, "Kin Blending Level Does Not Exist");
+        }
+
+        legendsNFT.setBlendingRule(blendingRule, newRuleData);
     }
 
-    function setReJuPerBlock(uint256 _newRate) public onlyOwner {
-        legendRejuvenation.setReJuPerBlock(_newRate);
+    function setMarketplaceRule(uint256 marketplaceRule, uint256 newRuleData)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        require(marketplaceRule < 4, "Marketplace Rule Does Not Exist");
+
+        legendsMarketplace.setMarketplaceRule(marketplaceRule, newRuleData);
     }
 
-    function setReJuNeededPerSlot(uint256 _newAmount) public onlyOwner {
-        legendRejuvenation.setReJuNeededPerSlot(_newAmount);
+    // function setRoyaltyFee(uint256 newRoyaltyFee) public onlyOwner {
+    //     legendsMarketplace.setRoyaltyFee(newRoyaltyFee);
+    // }
+
+    // function setMarketplaceFee(uint256 newMarketplaceFee) public onlyOwner {
+    //     legendsMarketplace.setMarketplaceFee(newMarketplaceFee);
+    // }
+
+    // function setOfferDuration(uint256 newOfferDuration) public onlyOwner {
+    //     legendsMarketplace.setOfferDuration(newOfferDuration);
+    // }
+
+    function setAuctionDurations(uint256[3] calldata newAuctionDurations)
+        public
+        onlyRole(LAB_TECH)
+    {
+        legendsMarketplace.setAuctionDurations(newAuctionDurations);
+    }
+
+    // function setAuctionExtension(uint256 newAuctionExtension) public onlyOwner {
+    //     legendsMarketplace.setAuctionExtension(newAuctionExtension);
+    // }
+
+    function setMinimumSecure(uint256 newMinimumSecure)
+        public
+        onlyRole(LAB_TECH)
+    {
+        legendRejuvenation.setMinimumSecure(newMinimumSecure);
+    }
+
+    function setMaxMultiplier(uint256 newMaxMultiplier)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        legendRejuvenation.setMaxMultiplier(newMaxMultiplier);
+    }
+
+    function setReJuPerBlock(uint256 newReJuEmissionRate)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        legendRejuvenation.setReJuPerBlock(newReJuEmissionRate);
+    }
+
+    function setReJuNeededPerSlot(uint256 newReJuNeededPerSlot)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        legendRejuvenation.setReJuNeededPerSlot(newReJuNeededPerSlot);
+    }
+
+    /**
+     * Admin - Legend Name Reset
+     * @notice Only to be used in the, hopefully, rare event a
+     * Legend NFT owner assigns their Legend a vulgar name.
+     * Must be both reported by the community a set number of times, and
+     * manually called by an admin address.
+     */
+
+    uint256 private _reportThreshold = 5;
+
+    /* legendId => reportCount */
+    mapping(uint256 => uint256) private _reportCount;
+
+    /* legendId => reporterAddress => hasReported */
+    mapping(uint256 => mapping(address => bool)) private _reported;
+
+    /**
+     * @notice Once an address reports a @param legendId they can not report
+     * that @param legendId again, even after the name reset.
+     * This is to help prevent abuse with the reporting system.
+     */
+    function reportVulgarLegend(uint256 legendId) public {
+        require(
+            !_reported[legendId][msg.sender],
+            "You Have Already Reported This Legend's Name"
+        );
+
+        _reported[legendId][msg.sender] = true;
+
+        _reportCount[legendId] += 1;
+    }
+
+    /**
+     * @notice In order for admin to call, a @param legendId must have
+     * a _reportCount equal to or greater than the _reportThreshold.
+     * @dev Calls resetLegendName from LegendsNFT contract, then resets report count to 0.
+     */
+    function resetLegendName(uint256 legendId) public onlyRole(LAB_TECH) {
+        if (_reportCount[legendId] < _reportThreshold) {
+            revert("Threshold Not Reached For Admin To Call");
+        }
+
+        legendsNFT.resetLegendName(legendId);
+
+        _reportCount[legendId] = 0;
+    }
+
+    function setReportThreshold(uint256 newReportThreshold)
+        public
+        onlyRole(LAB_TECH)
+    {
+        _reportThreshold = newReportThreshold;
     }
 }

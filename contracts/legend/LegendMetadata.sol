@@ -10,7 +10,7 @@ interface ILegendMetadata {
         string postfix;
         uint256[2] parents;
         uint256 birthday;
-        uint256 blendingInstancesUsed; //TODO: take into account if number is lowed and token is over new limir
+        uint256 blendingInstancesUsed; // test lowering limit below current used count
         uint256 lastBlend;
         uint256 totalOffspring;
         address payable legendCreator;
@@ -18,6 +18,11 @@ interface ILegendMetadata {
         bool isHatched;
         bool isDestroyed;
     }
+
+    function fetchLegendMetadata(uint256 legendId)
+        external
+        view
+        returns (LegendMetadata memory);
 
     event LegendCreated(uint256 indexed legendId, address indexed creator);
     event LegendHatched(uint256 indexed legendId, uint256 birthday);
