@@ -3,6 +3,13 @@
 pragma solidity 0.8.4;
 
 interface ILegendMetadata {
+    
+    /**
+     * @notice this is legends
+     * @dev this is legends
+     *
+     *
+     */
     struct LegendMetadata {
         uint256 id;
         string season;

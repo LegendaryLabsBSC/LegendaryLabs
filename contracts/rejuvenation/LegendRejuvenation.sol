@@ -156,7 +156,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     function _restoreBlendingSlots(uint256 legendId) private {
         uint256 restoredSlots = _calculateRestoredSlots(legendId);
 
-        _lab._restoreBlendingSlots(legendId, restoredSlots);
+        _lab.restoreBlendingSlots(legendId, restoredSlots);
 
         rejuvenationPod[legendId].blendingInstancesUsed -= restoredSlots;
 

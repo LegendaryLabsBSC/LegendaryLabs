@@ -106,6 +106,17 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         _closePromoEvent(promoId);
     }
 
+    function restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
+        public
+    {
+        require(
+            msg.sender == address(legendRejuvenation),
+            "Not Called By Rejuvenation Contract"
+        );
+
+        legendsNFT.restoreBlendingSlots(legendId, regainedSlots);
+    }
+
     function mintLegendaryLegend(address recipient, uint256 promoId)
         public
         onlyRole(LAB_ADMIN)
@@ -115,35 +126,8 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         legendsNFT.createLegend(recipient, promoId, true);
     }
 
-    function transferLabAdmin(address currentAdmin, address newAdmin)
-        public
-        onlyRole(LAB_ADMIN)
-    {
-        this.revokeRole(LAB_ADMIN, currentAdmin);
-        this.grantRole(LAB_ADMIN, newAdmin);
-    }
-
-    // function captureLGNDSnapshot()
-    //     public
-    //     onlyRole(LAB_ADMIN)
-    //     returns (uint256)
-    // {
-    //     return legendToken.snapshot();
-    // }
-
     function labBurn(uint256 amount) public onlyRole(LAB_ADMIN) {
         legendToken.labBurn(amount);
-    }
-
-    function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
-        public
-    {
-        require(
-            msg.sender == address(legendRejuvenation),
-            "Not Called By Rejuvenation Contract"
-        );
-
-        legendsNFT._restoreBlendingSlots(legendId, regainedSlots);
     }
 
     function isHatched(uint256 legendId) public view returns (bool) {
@@ -286,6 +270,18 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         legendRejuvenation.setReJuNeededPerSlot(newReJuNeededPerSlot);
     }
 
+    function transferLaboratoryAdmin(address currentAdmin, address newAdmin)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        this.revokeRole(LAB_ADMIN, currentAdmin);
+        this.grantRole(LAB_ADMIN, newAdmin);
+
+        // work in black list
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Admin - Legend Name Reset
      * @notice Only to be used in the, hopefully, rare event a
@@ -312,6 +308,8 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
             !_reported[legendId][msg.sender],
             "You Have Already Reported This Legend's Name"
         );
+
+        // require(_checkRole(_, msg.sender));
 
         _reported[legendId][msg.sender] = true;
 

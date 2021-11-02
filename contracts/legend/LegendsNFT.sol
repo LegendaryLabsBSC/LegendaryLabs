@@ -41,7 +41,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
     uint256 private _baseBlendingCost = 100;
 
-    uint256 private _incubationPeriod; // seconds
+    uint256 private _incubationPeriod = 100; // seconds
 
     /* legendId => metadata */
     mapping(uint256 => LegendMetadata) private _legendMetadata;
@@ -283,7 +283,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return true;
     }
 
-    function _restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
+    function restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
         onlyLab
     {
@@ -414,6 +414,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             _incubationPeriod = newRuleData;
         }
     }
+
 
     function setIncubationViews(string[5] memory newIncubationViews)
         public
