@@ -48,6 +48,7 @@ abstract contract TicketMachine {
     event TicketDispensed(uint256 indexed promoId, uint256 currentDispensed);
     event TicketRedeemed(uint256 indexed promoId, uint256 currentRedeemed);
 
+
     function _createPromoEvent(
         string calldata name,
         uint256 duration,
@@ -113,6 +114,12 @@ abstract contract TicketMachine {
         emit TicketDispensed(promoId, p.ticketsClaimed.current());
     }
 
+    /**
+     * @dev
+     *
+     *
+     *
+     */
     function _redeemPromoTicket(uint256 promoId, address recipient) internal {
         PromoEvent storage p = _promoEvent[promoId];
 
