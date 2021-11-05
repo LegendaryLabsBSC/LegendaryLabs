@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 
+/**
+ * @dev Contract that allows Legendary Labs to hold voting
+ */
 contract LaboratoryGovernor is
     Governor,
     GovernorCountingSimple,
@@ -17,6 +20,7 @@ contract LaboratoryGovernor is
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
     {}
+
 
     function votingDelay() public pure override returns (uint256) {
         return 6575; // 1 day

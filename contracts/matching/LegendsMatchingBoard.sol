@@ -90,8 +90,8 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
         uint256 childId = _lab.legendsNFT().blendLegends(
             address(this),
             m.surrogateToken,
-            legendId,
-            false
+            legendId
+            // false
         );
 
         _matchWithLegend(

@@ -36,6 +36,7 @@
     "hh:size": "npx hardhat compile && hardhat size-contracts",
     "hh:lint": "npx hardhat check",
     "gendocs": "npx solidity-docgen --solc-module solc-0.8",
+    "hh:scanfunct": "npx hardhat compile && yarn run hardhat docgen",
     "start:api": "nodemon scripts/generateLegend.js"
   }
 }

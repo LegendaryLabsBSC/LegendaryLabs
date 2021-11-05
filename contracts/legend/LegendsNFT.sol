@@ -17,10 +17,24 @@ import "./ILegendMetadata.sol";
  *
  * Laboratory State variables such as `_kinBlendingLevel` and `_baseBlendingCost` are all manages and set by {LegendsLaboratory}
  * Each of these variables are private and have a corresponding public getter function. Due to smart-contract size limitations (EIP-170)
- * many of these variable's getters have be combines i.e. `fetchBlendingRules' which returns (4) values. Once again due to reaching size limits 
- * in this contract there are a few state variables with combined setter functions. However, with `setBlendingRule` the **`ADMIN`** caller 
+ * many of these variable's getters have be combines i.e. `fetchBlendingRules' which returns (4) values. Once again due to reaching size limits
+ * in this contract there are a few state variables with combined setter functions. However, with `setBlendingRule` the **`ADMIN`** caller
  * specifies which (1) of the (4) **Blending Rules** they wish to set.
  *
+ *
+ * :::info Important
+ *
+ * Legends will be given a temporary *Incubation URI*  when minted, prior to recieveing their
+ * permanent *DNA-Generated URI* via `hatchLegend`
+ *
+ * :::
+ *
+ * :::note
+ *
+ * If space were to of allowed, of ends up allowing in the future, this would be reset to
+ * a Legend base-naming scheme
+ *
+ * :::
  *
  */
 
@@ -77,9 +91,20 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Creates a new Legend NFT via redemption of a *promo ticket*.
+     * Called by [`redeemPromoTicket`](docs/lab/LegendsLaboratory#redeemPromoTicket)
+     *
+     * :::note
+     *
+     * Legends created by this method will be assigned a (0) for both elements in `_legendMetadata.parents[2]`. Any Legend NFT
+     * with (0)s in it's `_legendMetadata.parents[2]` will not be eligible to receive [**Royalties**](docs/info/royalties)
+     *
+     * :::
      *
      *
+     * @param recipient Address that will receive the minted Legend
+     * @param promoId ID of redeemed PromoEvent
+     * @param isLegendary Determines if NFT is a Legendary
      */
     function createLegend(
         address recipient,
@@ -89,7 +114,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         _legendIds.increment();
         uint256 newLegendId = _legendIds.current();
 
-        // origin Legends wont have parents
         uint256[2] memory parents = [uint256(0), uint256(0)];
 
         string memory uri = _formatIncubationURI(
@@ -97,6 +121,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             Strings.toString(promoId)
         );
 
+        /**
+         * @dev Queries if the *promo event* permits the Legend to be immediately *hatched* or not
+         *
+         */
         bool skipIncubation = _lab.isPromoIncubated(promoId);
 
         _mintLegend(
@@ -110,16 +138,32 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @notice Blend Two Legends Together
+     *
+     * @dev Blends two eligible Legends DNA, creating a new *child Legend*
+     *
+     * :::note
+     *
+     * During MVP phase, all new Legends created via the *blending* method will be required to undergo **Incubation**
+     *
+     * :::
      *
      *
+     * @param recipient Address that will receive the *child Legend*
+     * @param parent1 ID of first Legend used to create the *child Legend*
+     * @param parent2 ID of first Legend used to create the *child Legend*
      */
     function blendLegends(
         address recipient,
         uint256 parent1,
-        uint256 parent2,
-        bool skipIncubation
-    ) external returns (uint256) {
+        uint256 parent2
+    )
+        external
+        returns (
+            // bool skipIncubation
+            uint256
+        )
+    {
         require(
             ownerOf(parent1) == msg.sender && ownerOf(parent2) == msg.sender
         );
@@ -144,6 +188,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             }
         }
 
+        /**
+         * @dev Uses simple average to calculate blending cost of parents *(P1 + P2) / 2*
+         */
         uint256 blendingCost = (fetchBlendingCost(parent1) +
             fetchBlendingCost(parent2)) / 2;
 
@@ -175,14 +222,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             )
         );
 
-        _mintLegend(
-            recipient,
-            newLegendId,
-            parents,
-            uri,
-            false,
-            skipIncubation
-        );
+        _mintLegend(recipient, newLegendId, parents, uri, false, false);
 
         emit LegendsBlended(parent1, parent2, newLegendId);
 
@@ -190,9 +230,19 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @notice Your New Specimen Awaits
+     *
+     * @dev Removes Legend from *incubation* stage and assigns permanent IPFS-URL
+     *
+     * :::note
+     *
+     * Requires Legend to met `isHatchable` criteria
+     *
+     * :::
      *
      *
+     * @param legendId ID of Legend being removed from *incubation*
+     * @param ipfsHash IPFS URL containing immutable off-chain Legend data
      */
     function hatchLegend(uint256 legendId, string calldata ipfsHash) public {
         require(ownerOf(legendId) == msg.sender);
@@ -208,9 +258,13 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @notice Name Your Lab Specimen
      *
+     * @dev Allows current Legend owner to modify `_legendMetadata.prefix` and `_legendMetadata.postfix`
      *
+     * @param legendId ID of Legend being renamed
+     * @param prefix First name element of Legend
+     * @param postfix Second name element of Legend
      */
     function nameLegend(
         uint256 legendId,
@@ -226,9 +280,17 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @notice You Are Sending Your Legend To It's Death
      *
+     * @dev Allows current Legend owner to send their Legend NFT token to the burn address, destroying it permanently
      *
+     * :::warning
+     *
+     * If this is called on a `legendId` that Legend will cease to exist for all eternity.
+     *
+     * :::
+     *
+     * @param legendId ID of Legend being sent to burn address
      */
     function destroyLegend(uint256 legendId) public {
         require(ownerOf(legendId) == msg.sender);
@@ -239,9 +301,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Formats a string to be used as the *incubation URI*
      *
-     *
+     * @param newLegendId Address that will receive the minted Legend
+     * @param data ID of redeemed PromoEvent
      */
     function _formatIncubationURI(uint256 newLegendId, string memory data)
         private
@@ -263,8 +326,11 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Returns a "random" `_incubationViews` index for the Legend to display during the incubation stage.
      *
+     * Relying on the blockchain for randomness has it's well documented flaws. So it should be noted that
+     * the`incubationChamber` a Legend is assigned has zero influence over the post-incubation appearance
+     * of the Legend, or otherwise value in any way.
      *
      */
     function _randomIncubationChamber() private view returns (uint256) {
@@ -275,9 +341,14 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Mints a brand new Legend NFT and assigns it metadata. If this
      *
-     *
+     * @param recipient Address that will receive the minted Legend
+     * @param newLegendId ID the *child Legend*
+     * @param parents IDs[2] of Legend's parents
+     * @param uri incubation URI
+     * @param isLegendary Determines if NFT is a Legendary
+     * @param skipIncubation Determines if Legend is allowed to be hatched immediately after being minted
      */
     function _mintLegend(
         address recipient,
@@ -294,7 +365,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         if (parents[0] == 0) {
             creator = payable(address(0));
         } else {
-            /** @dev To accommodate matching, creator is legend's second parent creator(breeder address) */
+            /**
+             * @dev To accommodate Matching, `creator` is Legend's second parent (breeder address)
+             */
             creator = payable(_legendMetadata[parents[1]].legendCreator);
         }
 
@@ -313,18 +386,21 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Sets the Legend NFT's URI
      *
-     *
+     * @param legendId ID of Legend having their URI set
+     * @param ipfsHash Immutable Legend DNA
      */
     function _setLegendURI(uint256 legendId, string memory ipfsHash) private {
         _legendURI[legendId] = ipfsHash;
     }
 
     /**
-     * @dev
+     * @dev Queries if Legends are siblings
      *
      *
+     * @param parents1 IDs[2] of first Legend's parents
+     * @param parents2 IDs[2] of second Legend's parents
      */
     function _notSiblings(
         uint256[2] memory parents1,
@@ -340,9 +416,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Queries if Legends are each other's parents
      *
-     *
+     * @param parent1 ID of first parent Legend
+     * @param parent2 ID of second parent Legend
      */
     function _notParent(uint256 parent1, uint256 parent2)
         private
@@ -356,9 +433,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
-     *
-     *
+     * @dev Function only callable by [`LegendsLaboratory`](/docs/lab/LegendsLaboratory#restoreBlendingSlots)
      */
     function restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
         public
@@ -368,9 +443,10 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Queries whether a Legend can be used to create a *child Legend* or not, based on
+     * comparing `_legendsMetadata.blendingInstancesUsed` against the `_blendingLimit`
      *
-     *
+     * @param legendId ID of Legend being queried
      */
     function isBlendable(uint256 legendId) public view returns (bool) {
         if (_legendMetadata[legendId].blendingInstancesUsed > _blendingLimit) {
@@ -381,9 +457,15 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Queries whether a Legend is ready to be *hatched* or not, by reading the Legend's age.
      *
+     * :::note
      *
+     * Legends with `_noIncubation(true)` will be able to bypass this check
+     *
+     * :::
+     *
+     * @param legendId ID of Legend being queried
      */
     function isHatchable(uint256 legendId) public view returns (bool) {
         require(!isHatched(legendId));
@@ -399,27 +481,35 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Queries whether a Legend already has *hatched* or not
+     *
+     * :::info Important
+     *
+     * Whether a Legend has been hatched or not will not incluence the NFT owner's ability to transfer the token.
+     *
+     * :::
      *
      *
+     * @param legendId ID of Legend being queried
      */
     function isHatched(uint256 legendId) public view returns (bool) {
         return _legendMetadata[legendId].isHatched;
     }
 
     /**
-     * @dev
+     * @dev Queries whether a Legend is allowed to bypass the incubation period
      *
-     *
+     * @param legendId ID of Legend being queried
      */
     function isNoIncubation(uint256 legendId) public view returns (bool) {
         return _noIncubation[legendId];
     }
 
     /**
-     * @dev
+     * @dev Queries whether a Legend is the parent of another Legend
      *
-     *
+     * @param parentLegendId ID of suspected parent Legend
+     * @param childLegendId ID of suspected child Legend
      */
     function isParentOf(uint256 parentLegendId, uint256 childLegendId)
         public
@@ -430,9 +520,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Queries whether a Legend can be used in the **Marketplace**, **MatchingBoard, or **RejuvenationPod**.
      *
-     *
+     * @param legendId ID of Legend being queried
      */
     function isListable(uint256 legendId) public view returns (bool) {
         // change to isUsable/syn ?
@@ -443,9 +533,17 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Returns the cost to blend (2) Legend's together. *baseBlendCost x (totalOffspring + 1) *
+     *
+     * :::note
+     *
+     * `_legendMetadata.totalOffspring starts at (0), hence the need to increment the *offspring count*
+     * for the purpose of calculating the *blending cost*.
+     *
+     * :::
      *
      *
+     * @param legendId ID of Legend being queried
      */
     function fetchBlendingCost(uint256 legendId) public view returns (uint256) {
         uint256 blendingCost = _baseBlendingCost *
@@ -455,9 +553,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Returns the metadata of a given Legend NFT
      *
-     *
+     * @param legendId ID of Legend being queried
      */
     function fetchLegendMetadata(uint256 legendId)
         public
@@ -471,9 +569,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Returns the URI of a given Legend
      *
-     *
+     * @param legendId ID of Legend being queried
      */
     function fetchLegendURI(uint256 legendId)
         public
@@ -485,8 +583,16 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
+     * @dev Returns the values of the (4) *blending rules*
      *
+     * :::note Blending Rules:
+     *
+     * * [`_kinBlendingLevel`](/docs/info#kinBlendingLevel)
+     * * [`_blendingLimit`](/docs/info#blendingLimit)
+     * * [`_baseBlendingCost`](/docs/info#baseBlendingCost)
+     * * [`_incubationPeriod`](/docs/info#incubationPeriod)
+     *
+     * :::
      *
      */
     function fetchBlendingRules()
@@ -508,28 +614,14 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
-     *
-     *
+     * @dev Returns the current array[5] of strings being used as `incubationChamber`s
      */
     function fetchIncubationViews() public view returns (string[5] memory) {
         return _incubationViews;
     }
 
-    // function setKinBlendingLevel(uint256 newKinBlendingLevel) public onlyLab {
-    //     if (newKinBlendingLevel == 0) {
-    //         _kinBlendingLevel = KinBlendingLevel.None;
-    //     } else if (newKinBlendingLevel == 1) {
-    //         _kinBlendingLevel = KinBlendingLevel.Siblings;
-    //     } else if (newKinBlendingLevel == 2) {
-    //         _kinBlendingLevel = KinBlendingLevel.Parents;
-    //     }
-    // }
-
     /**
-     * @dev
-     *
-     *
+     * @dev Function only callable by [**LegendsLaboratory**](/docs/LegendsLaboratory#setBlendingRule)'s `setBlendingRule`
      */
     function setBlendingRule(uint256 blendingRule, uint256 newRuleData)
         public
@@ -539,9 +631,9 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             if (newRuleData == 0) {
                 _kinBlendingLevel = KinBlendingLevel.None;
             } else if (newRuleData == 1) {
-                _kinBlendingLevel = KinBlendingLevel.Siblings;
-            } else if (newRuleData == 2) {
                 _kinBlendingLevel = KinBlendingLevel.Parents;
+            } else if (newRuleData == 2) {
+                _kinBlendingLevel = KinBlendingLevel.Siblings;
             }
         } else if (blendingRule == 1) {
             _blendingLimit = newRuleData;
@@ -553,9 +645,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev
-     *
-     *
+     * @dev Function only callable by [**LegendsLaboratory**](/docs/LegendsLaboratory#setIncubationViews)'s `setIncubationViews`
      */
     function setIncubationViews(string[5] memory newIncubationViews)
         public
@@ -565,25 +655,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * Do not delete below functions until after adding docs to above(setrules) ;; if still not enough size may just use individual
-     */
-
-    // function setBlendingLimit(uint256 newBlendingLimit) public onlyLab {
-    //     _blendingLimit = newBlendingLimit;
-    // }
-
-    // function setBaseBlendingCost(uint256 newBaseBlendingCost) public onlyLab {
-    //     _baseBlendingCost = newBaseBlendingCost;
-    // }
-
-    // function setIncubationPeriod(uint256 newIncubationPeriod) public onlyLab {
-    //     _incubationPeriod = newIncubationPeriod;
-    // }
-
-    /**
-     * @dev
-     *
-     *
+     * @dev Function only callable by [**LegendsLaboratory**](/docs/LegendsLaboratory#resetLegendName)'s `resetLegendName`
      */
     function resetLegendName(uint256 legendId) public onlyLab {
         _legendMetadata[legendId].prefix = "";

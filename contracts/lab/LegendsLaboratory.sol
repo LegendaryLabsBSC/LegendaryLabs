@@ -143,15 +143,15 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      *
      * @dev Calls `_dispensePromoTicket` from [`TicketMachine`](/docs/TicketMachine).
      *
-     * :::note
+     * :::important
      *
-     * ##In an *Unrestricted* **Promo Event**:##
+     * ## In an *Unrestricted* **Promo Event**:
      *
      *  * Players have the opportunity to call `dispensePromoTicket` without having admin access.
      *  * Tickets can only be dispensed to the calling address, as `_recipient` is automatically set to `msg.sender`
      *  * Each address is permitted to claim (1) ticket from the **Ticket Dispenser**.
      *
-     * ##In an *Restricted* **Promo Event**:##
+     * ## In an *Restricted* **Promo Event**:
      *
      *  * Only addresses with `LAB_TECH` access are allowed to dispense tickets.
      *  * The admin-caller has the ability to dispense a ticket and specify a receiving address other than their own.
@@ -165,7 +165,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      * :::
      *
      *
-     * @param promoId Numerical ID of the Legendary Labs `_promoEvent`
+     * @param promoId Numerical ID of the Legendary Labs *promoEvent*
      * @param recipient Address of player receiving promo ticket
      * @param ticketAmount Number of tickets to be dispensed
      */
@@ -193,7 +193,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      * @dev Calls `_redeemPromoTicket` from [`TicketMachine`](/docs/TicketMachine). Once a ticket has been successfully redeemed, `createLegend` is called
      * from [LegendsNFT](/docs/LegendsNFT). Which mints and issues a new Legend NFT token to the ticket redeemer.
      *
-     * @param promoId Numerical ID of the Legendary Labs `_promoEvent`
+     * @param promoId Numerical ID of the Legendary Labs *promo event*
      */
     function redeemPromoTicket(uint256 promoId) public {
         _redeemPromoTicket(promoId, msg.sender);
@@ -212,7 +212,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      *
      * :::
      *
-     * @param promoId Numerical ID of the Legendary Labs `_promoEvent`
+     * @param promoId Numerical ID of the Legendary Labs *promo event*
      */
     function closePromoEvent(uint256 promoId) public onlyRole(LAB_TECH) {
         _closePromoEvent(promoId);
@@ -245,7 +245,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      *
      * :::
      *
-     * @param promoId Numerical ID of the Legendary Labs `_promoEvent`
+     * @param promoId Numerical ID of the Legendary Labs *promo event*
      * @param recipient Address of *Legendary* Legend NFT recipient
      */
     function mintLegendaryLegend(uint256 promoId, address recipient)
@@ -275,7 +275,26 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     }
 
     /**
-     * @dev Queries whether a Legend has hatched or not, [`isHatched`](/docs/LegendsNFT#isHatched).
+     * @dev Queries whether a PromoEvent permits a Legend to bypass incubation
+     *
+     * @param promoId Numerical ID of the Legendary Labs *promo event*
+     */
+    function isPromoIncubated(uint256 promoId) public view returns (bool) {
+        return _promoIncubated[promoId];
+    }
+
+
+    /**
+     * @dev Queries whether a Legend is blendable or not, [`isBlendable`](/docs/LegendsNFT#isBlendable).
+     *
+     * @param legendId ID of Legend being queried
+     */
+    function isBlendable(uint256 legendId) public view returns (bool) {
+        return legendsNFT.isBlendable(legendId);
+    }
+
+    /**
+     * @dev Queries whether a Legend has *hatched* or not, [`isHatched`](/docs/LegendsNFT#isHatched).
      *
      * @param legendId ID of Legend being queried
      */
@@ -290,24 +309,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      */
     function isListable(uint256 legendId) public view returns (bool) {
         return legendsNFT.isListable(legendId);
-    }
-
-    /**
-     * @dev Queries whether a Legend is blendable or not, [`isBlendable`](/docs/LegendsNFT#isBlendable).
-     *
-     * @param legendId ID of Legend being queried
-     */
-    function isBlendable(uint256 legendId) public view returns (bool) {
-        return legendsNFT.isBlendable(legendId);
-    }
-
-    /**
-     * @dev Queries whether a PromoEvent permits a Legend to bypass incubation
-     *
-     * @param promoId Numerical ID of the Legendary Labs `_promoEvent`
-     */
-    function isPromoIncubated(uint256 promoId) public view returns (bool) {
-        return _promoIncubated[promoId];
     }
 
     /**
@@ -385,13 +386,22 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      *
      * @dev Resets the [`_kinBlendingLevel`](docs/LegendsNFT/#setBlendingRule). Only callable by *the* `LAB_ADMIN`.
      *
-     * @param newKinBlendingLevel integer between (0) and (3)
+     * :::info Kin Blending Level Codes:
+     *
+     * * 0 => **None** Legend can **not** *blend* with either siblings or parents
+     * * 1 => **Parents** Legend can *blend* with parent Legends but not siblings
+     * * 2 => **Siblings** Legend has no restrictions on other Legends it can *blend* with
+     *
+     * :::
+     *
+     *
+     * @param newKinBlendingLevel integer between (0) and (2)
      */
     function setKinBlendingLevel(uint256 newKinBlendingLevel)
         public
         onlyRole(LAB_ADMIN)
     {
-        require(newKinBlendingLevel < 3, "Kin Blending Level Does Not Exist");
+        require(newKinBlendingLevel < 3, "Kin Blending Level Does Not Exist"); // less than 2 or 3 ?
 
         legendsNFT.setBlendingRule(0, newKinBlendingLevel);
     }
@@ -425,7 +435,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     }
 
     /**
-     * @notice Set New Kin Base Blending Cost
+     * @notice Set New Base Blending Cost
      *
      * @dev Resets the [`_baseBlendingCost`](docs/LegendsNFT/#setBlendingRule). Only callable by *the* `LAB_ADMIN`.
      *
@@ -451,28 +461,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     {
         legendsNFT.setBlendingRule(3, newIncubationPeriod);
     }
-
-    // function setBlendingRule(uint256 blendingRule, uint256 newRuleData)
-    //     public
-    //     onlyRole(LAB_ADMIN)
-    // {
-    //     require(blendingRule < 4, "Blending Rule Does Not Exist");
-
-    //     if (blendingRule == 0) {
-    //         require(newRuleData < 3, "Kin Blending Level Does Not Exist");
-    //     }
-
-    //     legendsNFT.setBlendingRule(blendingRule, newRuleData);
-    // }
-
-    // function setMarketplaceRule(uint256 marketplaceRule, uint256 newRuleData)
-    //     public
-    //     onlyRole(LAB_ADMIN)
-    // {
-    //     require(marketplaceRule < 4, "Marketplace Rule Does Not Exist");
-
-    //     legendsMarketplace.setMarketplaceRule(marketplaceRule, newRuleData);
-    // }
 
     /**
      * @notice Set New Marketplace Royalty Fee
@@ -689,7 +677,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      * @notice Reset A Legend's Name
      *
      * @dev If a Legend's name has been reported enough times to reach the `_reportThreshold` a `LAB_TECH` is given
-     * authorization to reset the Legend's name to the base name.
+     * authorization to reset the Legend's name to the base name. Calls `resetLegendName` in [**LegendsNFT**](docs/legend/LegendsNFT#resetLegendName)
      *
      * @param legendId ID of Legend having it's name reset
      */
