@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 // import "@openzeppelin/contracts/governance/TimelockController.sol";
 
-import "./LaboratoryGovernor.sol";
+// import "./LaboratoryGovernor.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
@@ -29,8 +29,8 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
-    LaboratoryGovernor public laboratoryGovernor =
-        new LaboratoryGovernor(legendToken);
+    // LaboratoryGovernor public laboratoryGovernor =
+    //     new LaboratoryGovernor(legendToken);
 
     bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
     bytes32 public constant LAB_TECH = keccak256("LAB_TECH");
@@ -43,7 +43,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     constructor() {
         _setupRole(DEFAULT_ADMIN_ROLE, address(this));
         _setupRole(LAB_ADMIN, msg.sender);
-        _setupRole(LAB_TECH, msg.sender);
+        _setupRole(LAB_TECH, msg.sender); // maybe dont give both ACs ?
 
         // _setRoleAdmin(LAB_ADMIN, LAB_ADMIN);
         _setRoleAdmin(LAB_TECH, LAB_ADMIN);

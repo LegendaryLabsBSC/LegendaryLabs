@@ -66,8 +66,114 @@ function App() {
   // const [amount, setAmount] = useState(0)
 
   /**
+   * Access Control Start
+   */
+
+  const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000'
+  const LAB_ADMIN = '0xa3c50eadf7191eaea0f91d60683b45bf06671be68100f95bbe6bf79e0f7f49da'
+  const LAB_TECH = '0x50cfca4094c55bf42de4c6bab117b8cffa7bc564d44ed30ce3669a40f63c829b'
+
+  async function hasRole() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const role = LAB_ADMIN
+      const checkRole = await contract.lab.read.hasRole(role, account)
+
+      console.log(checkRole)
+    }
+  }
+
+  async function getRoleAdmin() {
+    if (typeof window.ethereum !== 'undefined') {
+      const role = LAB_TECH
+      const checkRole = await contract.lab.read.getRoleAdmin(role)
+
+      console.log(checkRole)
+    }
+  }
+
+  async function getRoleMember() {
+    if (typeof window.ethereum !== 'undefined') {
+      const role = DEFAULT_ADMIN_ROLE
+      const checkRole = await contract.lab.read.getRoleMember(role, 0)
+
+      console.log(checkRole)
+    }
+  }
+
+  async function getRoleMemberCount() {
+    if (typeof window.ethereum !== 'undefined') {
+      const role = DEFAULT_ADMIN_ROLE
+      const roleCount = await contract.lab.read.getRoleMemberCount(role)
+
+      console.log(roleCount.toString())
+    }
+  }
+
+  const bread = '0x55f76D8a23AE95944dA55Ea5dBAAa78Da4D29A52'
+  const dug = '0xb60c96b1206B9925666A679fB88745986e58af95'
+  const philip = '0x646F9efDf28686ECC95769eB3B95b9a6BF7bf608'
+
+  async function grantRole() {
+    if (typeof window.ethereum !== 'undefined') {
+      const role = LAB_TECH
+      const account = dug
+      await contract.lab.write.grantRole(role, account)
+    }
+  }
+
+  async function revokeRole() {
+    if (typeof window.ethereum !== 'undefined') {
+      const role = LAB_TECH
+      const account = dug
+      await contract.lab.write.revokeRole(role, account)
+    }
+  }
+
+  async function renounceRole() {
+    if (typeof window.ethereum !== 'undefined') {
+      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      const role = LAB_TECH
+      await contract.lab.write.renounceRole(role, account)
+    }
+  }
+
+  async function transferLaboratoryAdmin() {
+    if (typeof window.ethereum !== 'undefined') {
+      const role = LAB_TECH
+      const account = philip
+
+      await contract.lab.write.transferLaboratoryAdmin(account)
+    }
+  }
+
+  /**
+   * Access Control End
+   */
+
+  /**
    * Admin Start
    */
+
+  async function fetchLabGetters() {
+    if (typeof window.ethereum !== 'undefined') {
+      const currentSeason = await contract.lab.read.fetchSeason()
+
+      const blendingCount = await contract.lab.read.fetchBlendingCount(1)
+
+      const blendingCost = await contract.lab.read.fetchBlendingCost(1)
+
+      const royaltyRecipient = await contract.lab.read.fetchRoyaltyRecipient(1)
+
+      console.log(`
+      currentSeason: ${currentSeason},
+      blendingCount: ${blendingCount},
+      blendingCost: ${blendingCost},
+      royaltyRecipient: ${royaltyRecipient}
+        `)
+    }
+  }
+
   async function createPromoEvent() {
     if (typeof window.ethereum !== 'undefined') {
       await contract.lab.write.createPromoEvent(promoName, 86400, true, 0, false)
@@ -101,11 +207,7 @@ function App() {
   }
   async function redeemPromoTicket() {
     if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.lab.write.redeemPromoTicket(
-        id,
-        account
-      )
+      await contract.lab.write.redeemPromoTicket(id)
     }
   }
   async function fetchRedeemableTickets() {
@@ -131,37 +233,103 @@ function App() {
       await contract.lab.write.closePromoEvent(id)
     }
   }
-  async function setIncubationDuration() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const unixTime = value * 86400
-      await contract.lab.write.setIncubationDuration(unixTime)
-    }
-  }
-  async function setBreedingCooldown() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.lab.write.setBreedingCooldown(value)
-    }
-  }
-  async function setOffspringLimit() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.lab.write.setOffspringLimit(value)
-    }
-  }
-  async function setBaseBreedingCost() {
-    if (typeof window.ethereum !== 'undefined') {
-      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.lab.write.setBaseBreedingCost(value)
-    }
-  }
+
   async function setSeason() {
     if (typeof window.ethereum !== 'undefined') {
-      // const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
       await contract.lab.write.setSeason(season)
     }
   }
+
+  async function setKinBlendingLevel() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.setKinBlendingLevel(id)
+    }
+  }
+
+  async function setIncubationViews() {
+    if (typeof window.ethereum !== 'undefined') {
+      const newViews = ['test1', 'test2', 'test3', 'test4', 'test5']
+      await contract.lab.write.setIncubationViews(newViews)
+    }
+  }
+
+  async function setBlendingLimit() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.setBlendingLimit(season)
+    }
+  }
+
+  async function setBaseBreedingCost() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.setBaseBreedingCost(value)
+    }
+  }
+
+  async function setIncubationPeriod() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+  async function setRoyaltyFee() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+
+  async function setMarketplaceFee() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+  async function setOfferDuration() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.setBreedingCooldown(value)
+    }
+  }
+  async function setAuctionDurations() {
+    if (typeof window.ethereum !== 'undefined') {
+      await contract.lab.write.setOffspringLimit(value)
+    }
+  }
+
+  async function setAuctionExtension() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+
+  async function setMinimumSecure() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+
+  async function setMaxMultiplier() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+
+  async function setReJuPerBlock() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+
+  async function setReJuNeededPerSlot() {
+    if (typeof window.ethereum !== 'undefined') {
+      const unixTime = value * 86400
+      await contract.lab.write.setIncubationPeriod(unixTime)
+    }
+  }
+
   /**
    * Admin End
    */
@@ -358,8 +526,8 @@ function App() {
       // await contract.nft.write.mintPromo(account, prefix, postfix, isLegendary, skipIncubation).then(
       await contract.nft.write.mintPromo(account, id, isLegendary)
       // .then(
-        // // ! receiving multiple responses ?
-       // // ? is .then even needed
+      // // ! receiving multiple responses ?
+      // // ? is .then even needed
       //   contract.nft.write.once('NewLegend', (data, event) => {
       //     console.log('New Token Created:', data.toString()) // return token id instead of watching for event
       //     const newItemId = data.toString()
@@ -735,8 +903,38 @@ function App() {
     <div>
       <header>
         <div>
+          <button type="submit" onClick={hasRole}>
+            Has Role
+          </button>
+          <button type="submit" onClick={getRoleMemberCount}>
+            Role Count
+          </button>
+          <button type="submit" onClick={getRoleAdmin}>
+            Get Role Admin
+          </button>
+          <button type="submit" onClick={getRoleMember}>
+            Get Role Member
+          </button>
+          <button type="submit" onClick={grantRole}>
+            Grant Role
+          </button>
+          <button type="submit" onClick={revokeRole}>
+            Revoke Role
+          </button>
+          <button type="submit" onClick={renounceRole}>
+            Renounce Role
+          </button>
+          <button type="submit" onClick={transferLaboratoryAdmin}>
+            Transfer Lab Adminship
+          </button>
+        </div>
+        <br />
+        <div>
+          <button type="submit" onClick={fetchLabGetters}>
+            Fetch Lab Getter Values
+          </button>
           <input type="number" placeholder="Value" onChange={(e) => setValue(e.target.value)} />
-          <button type="submit" onClick={setIncubationDuration}>
+          <button type="submit" onClick={setIncubationPeriod}>
             Set Base Incubation Duration
           </button>
           <button type="submit" onClick={setBreedingCooldown}>
