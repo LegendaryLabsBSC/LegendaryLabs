@@ -22,7 +22,7 @@ import "./ILegendMetadata.sol";
  * specifies which (1) of the (4) **Blending Rules** they wish to set.
  *
  *
- * :::info Important
+ * :::important
  *
  * Legends will be given a temporary *Incubation URI*  when minted, prior to recieveing their
  * permanent *DNA-Generated URI* via `hatchLegend`
@@ -80,7 +80,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     /* legendId => ipfsHash */
     mapping(uint256 => string) private _legendURI;
 
-    /* legendId => skipIncubation? */
+    /* legendId => skipIncubation */
     mapping(uint256 => bool) private _noIncubation;
 
     /* parentId => childId => isParent */
@@ -301,6 +301,18 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
+     * @dev Function only callable by [`LegendsLaboratory`](/docs/lab/LegendsLaboratory#restoreBlendingSlots)
+     */
+    function restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
+        public
+        onlyLab
+    {
+        _legendMetadata[legendId].blendingInstancesUsed -= regainedSlots;
+    }
+
+
+
+    /**
      * @dev Formats a string to be used as the *incubation URI*
      *
      * @param newLegendId Address that will receive the minted Legend
@@ -341,7 +353,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     }
 
     /**
-     * @dev Mints a brand new Legend NFT and assigns it metadata. If this
+     * @dev Mints a brand new Legend NFT and assigns it metadata.
      *
      * @param recipient Address that will receive the minted Legend
      * @param newLegendId ID the *child Legend*
@@ -432,15 +444,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         return true;
     }
 
-    /**
-     * @dev Function only callable by [`LegendsLaboratory`](/docs/lab/LegendsLaboratory#restoreBlendingSlots)
-     */
-    function restoreBlendingSlots(uint256 legendId, uint256 regainedSlots)
-        public
-        onlyLab
-    {
-        _legendMetadata[legendId].blendingInstancesUsed -= regainedSlots;
-    }
 
     /**
      * @dev Queries whether a Legend can be used to create a *child Legend* or not, based on
@@ -483,7 +486,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     /**
      * @dev Queries whether a Legend already has *hatched* or not
      *
-     * :::info Important
+     * :::important
      *
      * Whether a Legend has been hatched or not will not incluence the NFT owner's ability to transfer the token.
      *

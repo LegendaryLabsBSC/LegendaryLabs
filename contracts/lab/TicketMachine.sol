@@ -46,8 +46,8 @@ abstract contract TicketMachine {
      * * `isUnrestricted` => Indicates if a *promo event* can have tickets dispensed by any address or not
      * * `isTicketLimit` => Indicates if a *promo event* has set a max number of *tickets* to be dispensed or not
      * * `isPromoClosed` => Indicates if a *promo event* has closed or not
-     * * `ticketsClaimed` => Total number of times a Legend NFT has created a *child Legend*. Can never be decreased.
-     * * `ticketsRedeemed` => Address of Legend NFT creator. Legends created via a *promo event* will be assigned the *zero address*.
+     * * `ticketsClaimed` => Number of *promo tickets* that have been *dispensed* from the associated *promo event*
+     * * `ticketsRedeemed` => Number of *promo tickets* that have been *redeemed* from the associated *promo event*
      *
      * :::
      *
