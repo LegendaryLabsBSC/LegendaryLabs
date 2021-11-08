@@ -45,7 +45,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         _setupRole(LAB_ADMIN, msg.sender);
         _setupRole(LAB_TECH, msg.sender); // maybe dont give both ACs ?
 
-        // _setRoleAdmin(LAB_ADMIN, LAB_ADMIN);
         _setRoleAdmin(LAB_TECH, LAB_ADMIN);
     }
 
@@ -72,7 +71,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     }
 
     /**
-     * @notice Creates A New Legendary Labs' Promo Event!
+     * @notice Create A New Legendary Labs Promo Event
      *
      * @dev Calls `_createPromoEvent` from [`TicketMachine`](/docs/TicketMachine). Can only be called by a `LAB_TECH`.
      *
@@ -282,7 +281,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     function isPromoIncubated(uint256 promoId) public view returns (bool) {
         return _promoIncubated[promoId];
     }
-
 
     /**
      * @dev Queries whether a Legend is blendable or not, [`isBlendable`](/docs/LegendsNFT#isBlendable).
@@ -643,7 +641,9 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     mapping(uint256 => uint256) private _reportCount;
 
     /* legendId => reporterAddress => hasReported */
-    mapping(uint256 => mapping(address => bool)) private _reported;
+    mapping(uint256 => mapping(address => bool)) private _hasReported;
+
+    event NameReported(uint256 indexed legendId, uint256 reportCount);
 
     /**
      * @notice Report A Legend ONLY Because It's Name Is Vulgar
@@ -662,15 +662,17 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      */
     function reportVulgarLegend(uint256 legendId) public {
         require(
-            !_reported[legendId][msg.sender],
+            !_hasReported[legendId][msg.sender],
             "You Have Already Reported This Legend's Name"
         );
 
         // require(_checkRole(_, msg.sender));
 
-        _reported[legendId][msg.sender] = true;
+        _hasReported[legendId][msg.sender] = true;
 
         _reportCount[legendId] += 1;
+
+        emit NameReported(legendId, _reportCount[legendId]);
     }
 
     /**
@@ -700,7 +702,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      */
     function setReportThreshold(uint256 newReportThreshold)
         public
-        onlyRole(LAB_TECH)
+        onlyRole(LAB_ADMIN)
     {
         _reportThreshold = newReportThreshold;
     }

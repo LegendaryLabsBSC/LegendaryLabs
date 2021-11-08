@@ -8,20 +8,20 @@ pragma solidity 0.8.4;
 interface ILegendMetadata {
     
     /**
-     * :::note Legend Metadata:
+     * :::note Info
      *
-     * * `id` => Numerical ID of a Legend NFT
-     * * `season` => Season Legend NFT was created during
-     * * `prefix` => First element of Legend NFT naming scheme
-     * * `postfix` => Second element of Legend NFT naming scheme
-     * * `parents[2]` => IDs of Legend NFTs used to create *this* Legend
-     * * `birthday` => Time Legend NFT was minted, in Block/UNIX time
-     * * `blendingInstancesUsed` => *Blending Slots* used by a Legend. Can be decreased in the [**LegendsRejuvenation*](docs/contracts/rejuvenation/LegendsRejuvenation#restoreBlendingSlot)
-     * * `totalOffspring` => Total number of times a Legend NFT has created a *child Legend*. Can never be decreased.
-     * * `legendCreator` => Address of Legend NFT creator. Legends created via a *promo event* will be assigned the *zero address*.
-     * * `isLegendary` => Indicates if a Legend NFT is Legendary or not
-     * * `isHatched` => Indicates if a Legend NFT has been *hatched* or not
-     * * `isDestroyed` => Indicates if a Legend NFT has been sent to the burn address, destroyed for eternity, or not
+     * * `id` &rarr; Numerical ID of a Legend NFT
+     * * `season` &rarr; Season Legend NFT was created during
+     * * `prefix` &rarr; First element of Legend NFT naming scheme
+     * * `postfix` &rarr; Second element of Legend NFT naming scheme
+     * * `parents[2]` &rarr; IDs of Legend NFTs used to create *this* Legend
+     * * `birthday` &rarr; Time Legend NFT was minted, in Block/UNIX time
+     * * `blendingInstancesUsed` &rarr; *Blending Slots* used by a Legend. Can be decreased in the [**LegendsRejuvenation*](docs/contracts/rejuvenation/LegendsRejuvenation#restoreBlendingSlot)
+     * * `totalOffspring` &rarr; Total number of times a Legend NFT has created a *child Legend*. Can never be decreased.
+     * * `legendCreator` &rarr; Address of Legend NFT creator. Legends created via a *promo event* will be assigned the *zero address*.
+     * * `isLegendary` &rarr; Indicates if a Legend NFT is Legendary or not
+     * * `isHatched` &rarr; Indicates if a Legend NFT has been *hatched* or not
+     * * `isDestroyed` &rarr; Indicates if a Legend NFT has been sent to the burn address, destroyed for eternity, or not
      *
      * :::
      *

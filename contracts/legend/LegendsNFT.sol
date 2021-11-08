@@ -252,7 +252,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
         _setLegendURI(legendId, ipfsHash);
 
-        _legendMetadata[legendId].birthday = block.timestamp;
+        // _legendMetadata[legendId].birthday = block.timestamp;
 
         emit LegendHatched(legendId, block.timestamp);
     }
@@ -309,8 +309,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     {
         _legendMetadata[legendId].blendingInstancesUsed -= regainedSlots;
     }
-
-
 
     /**
      * @dev Formats a string to be used as the *incubation URI*
@@ -380,13 +378,14 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             /**
              * @dev To accommodate Matching, `creator` is Legend's second parent (breeder address)
              */
-            creator = payable(_legendMetadata[parents[1]].legendCreator);
+            creator = payable(recipient); // doesnt work properly
         }
 
         LegendMetadata storage m = _legendMetadata[newLegendId];
         m.id = newLegendId;
         m.season = _lab.fetchSeason();
         m.parents = parents;
+        m.birthday = block.timestamp;
         m.legendCreator = creator;
         m.isLegendary = isLegendary;
 
@@ -443,7 +442,6 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
 
         return true;
     }
-
 
     /**
      * @dev Queries whether a Legend can be used to create a *child Legend* or not, based on

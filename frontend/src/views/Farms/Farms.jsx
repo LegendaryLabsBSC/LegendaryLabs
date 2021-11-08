@@ -76,7 +76,7 @@ function App() {
   async function hasRole() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const role = LAB_ADMIN
+      const role = LAB_TECH
       const checkRole = await contract.lab.read.hasRole(role, account)
 
       console.log(checkRole)
@@ -259,9 +259,9 @@ function App() {
     }
   }
 
-  async function setBaseBreedingCost() {
+  async function setBaseBlendingCost() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.lab.write.setBaseBreedingCost(value)
+      await contract.lab.write.setBaseBlendingCost(value)
     }
   }
 
@@ -291,7 +291,8 @@ function App() {
   }
   async function setAuctionDurations() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.lab.write.setOffspringLimit(value)
+      const newDurations = [3, 4, 5]
+      await contract.lab.write.setAuctionDurations(newDurations)
     }
   }
 
@@ -345,43 +346,19 @@ function App() {
   }
   async function fetchLegendComposition() {
     if (typeof window.ethereum !== 'undefined') {
-      // const legendMeta = await contract.nft.read.legendMetadata(id) // doesn't return parents for some reason
       const legendMeta = await contract.nft.read.fetchLegendMetadata(id)
-      // const legendGenetics = await contract.nft.read.legendGenetics(id)
-      // const legendStats = await contract.nft.read.legendStats(id)
-      console.log('META:')
       console.log(`id: ${legendMeta.id}`)
       console.log(`season: ${legendMeta.season}`)
       console.log(`prefix: ${legendMeta.prefix}`)
       console.log(`postfix: ${legendMeta.postfix}`)
       console.log(`parents: ${legendMeta.parents}`)
-      console.log(`birthday: ${legendMeta.birthDay}`)
-      console.log(`blending cost: ${legendMeta.blendingCost}`)
+      console.log(`birthday: ${legendMeta.birthday}`)
       console.log(`blending instances used: ${legendMeta.blendingInstancesUsed}`)
-      console.log(`total offspring: ${legendMeta.offspringLimit}`)
+      console.log(`total offspring: ${legendMeta.totalOffspring}`)
       console.log(`legend creator: ${legendMeta.legendCreator}`)
-      console.log(`breeding cooldown: ${legendMeta.breedingCooldown}`)
       console.log(`is legendary: ${legendMeta.isLegendary}`)
       console.log(`is hatched: ${legendMeta.isHatched}`)
-      // console.log('GENES:')
-      // console.log(`CdR1: ${legendGenetics.CdR1}`)
-      // console.log(`CdG1: ${legendGenetics.CdG1}`)
-      // console.log(`CdB1: ${legendGenetics.CdB1}`)
-      // console.log(`CdR2: ${legendGenetics.CdR2}`)
-      // console.log(`CdG2: ${legendGenetics.CdG2}`)
-      // console.log(`CdB2: ${legendGenetics.CdB2}`)
-      // console.log(`CdR3: ${legendGenetics.CdR3}`)
-      // console.log(`CdG3: ${legendGenetics.CdG3}`)
-      // console.log(`CdB3: ${legendGenetics.CdB3}`)
-      // console.log('STATS:')
-      // console.log(`level: ${legendStats.level}`)
-      // console.log(`health: ${legendStats.health}`)
-      // console.log(`strength: ${legendStats.strength}`)
-      // console.log(`defense: ${legendStats.defense}`)
-      // console.log(`agility: ${legendStats.agility}`)
-      // console.log(`speed: ${legendStats.speed}`)
-      // console.log(`accuracy: ${legendStats.accuracy}`)
-      // console.log(`destruction: ${legendStats.destruction}`)
+      console.log(`is destroyed: ${legendMeta.isDestroyed}`)
     }
   }
   async function fetchGenetics() {
@@ -390,27 +367,27 @@ function App() {
       console.log(`Genetics: ${legendGenetics}`)
     }
   }
-  async function fetchStats() {
-    if (typeof window.ethereum !== 'undefined') {
-      const legendStats = await contract.nft.read.legendStats(id)
-      console.log(`Stats: ${legendStats}`)
-    }
-  }
   async function isHatchable() {
     if (typeof window.ethereum !== 'undefined') {
-      legends.forEach((legend) => {
-        contract.nft.read.legendMetadata(legend.tokenID).then((legendMeta) => {
-          if (!legendMeta.isHatched) {
-            const testToggle = true // hatching test toggle
-            contract.nft.read.isHatchable(legendMeta.id, testToggle).then((res) => {
-              console.log(res.toString())
-            })
-            console.log(`Legend ${legendMeta.id} is hatched: ${legendMeta.isHatched}`)
-          }
-        })
-      })
+      const ans = await contract.nft.read.isHatchable(1)
+      console.log(ans)
     }
   }
+  // async function isHatchable() {
+  //   if (typeof window.ethereum !== 'undefined') {
+  //     legends.forEach((legend) => {
+  //       contract.nft.read.legendMetadata(legend.tokenID).then((legendMeta) => {
+  //         if (!legendMeta.isHatched) {
+  //           const testToggle = true // hatching test toggle
+  //           contract.nft.read.isHatchable(legendMeta.id, testToggle).then((res) => {
+  //             console.log(res.toString())
+  //           })
+  //           console.log(`Legend ${legendMeta.id} is hatched: ${legendMeta.isHatched}`)
+  //         }
+  //       })
+  //     })
+  //   }
+  // }
   async function hatch() {
     await axios.post('http://localhost:3001/api/retrieve', { id }).then((res) => {
       console.log(res.data)
@@ -937,19 +914,20 @@ function App() {
           <button type="submit" onClick={setIncubationPeriod}>
             Set Base Incubation Duration
           </button>
-          <button type="submit" onClick={setBreedingCooldown}>
-            Set Base Breeding Cooldown
+
+          <button type="submit" onClick={setIncubationViews}>
+            Set Incubation Views
           </button>
-          <button type="submit" onClick={setOffspringLimit}>
-            Set Offspring Limit
-          </button>
-          <button type="submit" onClick={setBaseBreedingCost}>
+          <button type="submit" onClick={setBaseBlendingCost}>
             Set Base Breeding Cost
           </button>
           <br />
           <input type="text" placeholder="Season" onChange={(e) => setSeasonValue(e.target.value)} />
           <button type="submit" onClick={setSeason}>
             Set Season
+          </button>
+          <button type="submit" onClick={setAuctionDurations}>
+            Set Auction Durations
           </button>
         </div>
         <br />
@@ -1000,9 +978,7 @@ function App() {
           <button type="submit" onClick={fetchGenetics}>
             Fetch IPFS Genetics
           </button>
-          <button type="submit" onClick={fetchStats}>
-            Fetch Legend Stats
-          </button>
+
         </div>
         <div>
           <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setParent1(e.target.value)} />
