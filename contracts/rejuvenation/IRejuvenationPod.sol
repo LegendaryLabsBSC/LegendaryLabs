@@ -11,7 +11,7 @@ interface IRejuvenationPod {
      *
      * * `nftContract` &rarr; Address of the ERC721 contract
      * * `depositedBy` &rarr; Address that entered the Legend into its *rejuvenation pod*
-     * * `depositBlock` &rarr; Block the Legend was entered into its *rejuvenation pod*
+     * * `checkpointBlock` &rarr; -!- 
      * * `blendingInstancesUsed` &rarr; Current number of *blending slots* a Legend has used
      * * `tokenAmountSecured` &rarr; Number of LGND secured with the Legend in its *rejuvenation pod*
      * * `multiplier` &rarr; `totalAmountSecured / minimumSecure = multiplier`
@@ -23,10 +23,11 @@ interface IRejuvenationPod {
     struct RejuvenationPod {
         address nftContract;
         address depositedBy;
-        uint256 depositBlock;
+        uint256 checkpointBlock;
         uint256 blendingInstancesUsed;
         uint256 tokenAmountSecured;
         uint256 multiplier;
+        uint256 rolloverReju;
         bool occupied;
     }
 

@@ -91,7 +91,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         r.nftContract = nftContract;
 
         r.depositedBy = msg.sender;
-        r.depositBlock = block.number;
+        r.checkpointBlock = block.number;
         r.blendingInstancesUsed = _lab.fetchBlendingCount(legendId);
         r.tokenAmountSecured = tokensToSecure;
         r.multiplier = _calculateMultiplier(tokensToSecure);
@@ -117,6 +117,8 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         r.occupied = false;
 
         removeSecuredTokens(legendId, r.tokenAmountSecured);
+
+        r.rolloverReju = 0;
 
         IERC721(r.nftContract).transferFrom(
             address(this),
@@ -154,7 +156,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
 
         require(r.occupied, "Legend Is Not Occupying Pod");
         require(msg.sender == r.depositedBy, "Caller Did Not Enter Legend");
-        
+
         require(amountToRemove != 0, "Amount Can Not Be 0");
 
         if (amountToRemove > r.tokenAmountSecured) {
@@ -231,11 +233,22 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     }
 
     function _restoreBlendingSlots(uint256 legendId) private {
-        uint256 restoredSlots = _calculateRestoredSlots(legendId);
+        RejuvenationPod storage r = _rejuvenationPod[legendId];
 
-        _lab.restoreBlendingSlots(legendId, restoredSlots);
+        (
+            uint256 restoredSlots,
+            uint256 remainderReJu
+        ) = _calculateRestoredSlots(legendId);
 
-        _rejuvenationPod[legendId].blendingInstancesUsed -= restoredSlots;
+        r.checkpointBlock = block.number;
+
+        if (restoredSlots > 0) {
+            _lab.restoreBlendingSlots(legendId, restoredSlots);
+
+            r.blendingInstancesUsed -= restoredSlots;
+        }
+
+        r.rolloverReju = remainderReju;
 
         emit BlendingSlotsRestored(legendId, restoredSlots);
     }
@@ -261,13 +274,16 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     function _calculateRestoredSlots(uint256 legendId)
         private
         view
-        returns (uint256)
+        returns (uint256, uint256)
     {
         uint256 earnedReJu = _calculateEarnedReju(legendId);
 
-        uint256 restoredSlots = earnedReJu / _reJuNeededPerSlot; // make sure rounds down
+        uint256 restoredSlots = earnedReJu / _reJuNeededPerSlot; // testing: make sure rounds down
 
-        return restoredSlots;
+        uint256 remainderReju = earnedReju -
+            (restoredSlots * _reJuNeededPerSlot);
+
+        return (restoredSlots, remainderReJu);
     }
 
     function _calculateEarnedReju(uint256 legendId)
@@ -277,11 +293,15 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     {
         RejuvenationPod memory r = _rejuvenationPod[legendId];
 
+        uint256 multipliedEmissionRate = _reJuPerBlock * r.multiplier;
+
+        uint256 rejuvenationBlockDuration = block.number - r.checkpointBlock;
+
+        uint256 earnedReJu = (multipliedEmissionRate *
+            rejuvenationBlockDuration) + r.rolloverReju;
+
         uint256 maxEarnableReJu = (_reJuNeededPerSlot *
             r.blendingInstancesUsed);
-
-        uint256 earnedReJu = ((_reJuPerBlock * r.multiplier) *
-            (block.number - r.depositBlock));
 
         if (earnedReJu > maxEarnableReJu) {
             earnedReJu = maxEarnableReJu;
@@ -330,11 +350,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     function fetchRejuvenationProgress(uint256 legendId)
         public
         view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
+        returns (uint256, uint256)
     {
         require(
             _rejuvenationPod[legendId].occupied,
@@ -346,9 +362,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         uint256 maxEarnableReJu = (_reJuNeededPerSlot *
             _rejuvenationPod[legendId].blendingInstancesUsed);
 
-        uint256 restoredSlots = _calculateRestoredSlots(legendId);
-
-        return (earnedReJu, maxEarnableReJu, restoredSlots);
+        return (earnedReJu, maxEarnableReJu);
     }
 
     /**
