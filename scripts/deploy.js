@@ -1,25 +1,46 @@
+const fs = require('fs')
+const path = require('path')
 
+
+// TODO: have settable values set on deploy
 async function main() {
+  const LegendsLaboratory = await hre.ethers.getContractFactory("LegendsLaboratory");
+  const legendsLaboratory = await LegendsLaboratory.deploy();
+  await legendsLaboratory.deployed();
+  console.log("LegendsLaboratory deployed to:", legendsLaboratory.address);
+  const contract = legendsLaboratory.attach(legendsLaboratory.address)
+  const children = await contract.getChildContracts()
+  console.log(children)
 
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
-  await greeter.deployed();
-  console.log("Greeter deployed to:", greeter.address);
+  const contract_config = path.join(__dirname, '../frontend/src/contract_config/contract-config.js')
+  fs.readFile(contract_config, 'utf-8', (err, data) => {
+    if (err)
+      return (console.log(err))
+    const re = `
+    const legendsLaboratory = "${legendsLaboratory.address}"
+    const legendsNFT = "${children[0]}"
+    const legendsToken = "${children[1]}"
+    const legendsRejuvination = "${children[2]}"
+    const legendsMarketplace = "${children[3]}"
+    const legendsMatchingBoard = "${children[4]}"
 
-  const Token = await hre.ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
-  console.log("Token deployed to:", token.address);
+    export { legendsLaboratory, legendsNFT, legendsToken, legendsRejuvination, legendsMarketplace, legendsMatchingBoard }
+    `
+    fs.writeFile(contract_config, re, 'utf-8', (err) => {
+      if (err) console.log(err)
 
-  const LegendNFT = await hre.ethers.getContractFactory("LegendNFT");
-  const legendnft = await LegendNFT.deploy();
-  await legendnft.deployed();
-  console.log("LegendNFT deployed to:", legendnft.address);
+      console.log('New Addresses Loaded')
+    })
+
+  })
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+  // .then(res => {
+  // loadNewAddresses(res)
+  // })
+  // .then(() => process.exit(0))
+  // .catch((error) => {
+    // console.error(error);
+    // process.exit(1);
+  // });

@@ -28,5 +28,13 @@ node_modules
 #Hardhat files
 cache
 artifacts
-contracts/old*
+oldcontracts
 
+#
+*-rc*.*
+Notes
+axie.solcontracts/LegendaryTests.sol
+contracts/other
+.vscode
+.VSCodeCounter
+docs
