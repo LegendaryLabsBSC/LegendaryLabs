@@ -78,8 +78,14 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         if (tokensToSecure < _minimumSecure) {
             revert(
                 "LGND Token Amount Must Meet The Minimum To Rejuvenate Legend"
-            ); // can put in more than max multiplier but will not increase reju, will raise odds of no-loss-lottery win
+            );
         }
+
+        uint256 maxSecure = _minimumSecure * _maxMultiplier;
+        if (tokensToSecure > maxSecure) {
+            revert("LGND Token Amount Can Not Exceed Max Allowed");
+        }
+
         legendsNFT.transferFrom(msg.sender, address(this), legendId);
 
         _lab.legendToken().transferFrom(
@@ -105,6 +111,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
      * @notice Retrieve Your Legend From Rejuvenation
      *
      * @dev Removes a Legend NFT from its *rejuvenation pod* along with all LGND tokens currently secured in the pod.
+     * If a Legend NFT is removed from its *rejuvenation pod* any rollover *ReJu* will be lost.
      *
      * @param legendId ID of Legends leaving its *rejuvenation pod
      */
@@ -137,12 +144,6 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
      * Any time a *rejuvenation pod* has its secured LGND token amount increase or decrease, the Legend NFT will be automatically
      * rejuvenated and the `_rejuvenationPod.multiplier` recalculated.
      *
-     * :::note
-     *
-     * Legends created by this method will be assigned a (0) for both elements in `_legendMetadata.parents[2]`. Any Legend NFT
-     * with (0)s in it's `_legendMetadata.parents[2]` will not be eligible to receive [**Royalties**](docs/info/royalties)
-     *
-     * :::
      *
      *
      * @param legendId ID of Legends occupying its *rejuvenation pod
@@ -190,15 +191,13 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     /**
      * @notice Add To Your Rejuvenation Pod LGND Tokens
      *
-     * @dev Creates a new Legend NFT via redemption of a *promo ticket*.
-     * Called by [`redeemPromoTicket`](docs/lab/LegendsLaboratory#redeemPromoTicket)
+     * @dev Adds LGND tokens to a Legend's *rejuvenation pod*.
      *
-     * :::note
+     * :::tip Note
      *
-     * Legends created by this method will be assigned a (0) for both elements in `_legendMetadata.parents[2]`. Any Legend NFT
-     * with (0)s in it's `_legendMetadata.parents[2]` will not be eligible to receive [**Royalties**](docs/info/royalties)
-     *
-     * :::
+     * `tokenAmountSecured` can not exceed `_minimumSecure` * `_maxMultiplier`. There are checks
+     * in place preventing this during `enterRejuvenationPod` & `increaseSecuredTokens`. Additionally,
+     * `_calculateMultiplier` will not allow `_rejuvenationPod.multiplier` to exceed `_maxMultiplier`.
      *
      *
      * @param legendId ID of Legends occupying its *rejuvenation pod
@@ -212,7 +211,15 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
 
         require(r.occupied, "Legend Is Not Occupying Pod");
         require(msg.sender == r.depositedBy, "Caller Did Not Enter Legend");
+
         require(amountToSecure != 0, "Amount Can Not Be 0");
+
+        uint256 newAmount = r.tokenAmountSecured + amountToSecure;
+
+        uint256 maxSecure = _minimumSecure * _maxMultiplier;
+        if ((amountToSecure + r.tokenAmountSecured) > maxSecure) {
+            revert("LGND Token Amount Can Not Exceed Max Allowed");
+        }
 
         if (r.blendingInstancesUsed != 0) {
             _restoreBlendingSlots(legendId);
@@ -224,14 +231,17 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             amountToSecure
         );
 
-        uint256 newAmount = r.tokenAmountSecured + amountToSecure;
-
         r.tokenAmountSecured = newAmount;
         r.multiplier = _calculateMultiplier(newAmount);
 
         emit PodTokensIncreased(legendId, newAmount);
     }
 
+    /**
+     * @dev Formats a string to be used as the *incubation URI*
+     *
+     * @param legendId ID of Legend NFT having *blending slots* restored
+     */
     function _restoreBlendingSlots(uint256 legendId) private {
         RejuvenationPod storage r = _rejuvenationPod[legendId];
 
@@ -248,20 +258,22 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             r.blendingInstancesUsed -= restoredSlots;
         }
 
-        r.rolloverReju = remainderReju;
+        r.rolloverReju = remainderReJu;
 
         emit BlendingSlotsRestored(legendId, restoredSlots);
     }
 
+    /**
+     * @dev Calculates the multiplier for a Legend NFT in a *rejuvenation pod*. Every time the
+     * *rejuvenation pod* has its LGND token balance modified, the multiplier will need to be recalculated.
+     *
+     * @param amount Number of LGND tokens secured in a *rejuvenation pod*
+     */
     function _calculateMultiplier(uint256 amount)
         private
         view
         returns (uint256)
     {
-        // if (amount < _minimumSecure) {
-        //     return 0;
-        // }
-
         uint256 multiplier = amount / _minimumSecure;
 
         if (multiplier > _maxMultiplier) {
@@ -271,22 +283,34 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
         return (multiplier);
     }
 
+    /**
+     * @dev Calculates the number of *blending slots* the Legend NFT has regained from
+     * being inside the *rejuvenation pod*. The value for any remaining *ReJu* not used in the restoration
+     * will be returned as well.
+     *
+     * @param legendId ID of Legend NFT requesting calculations
+     */
     function _calculateRestoredSlots(uint256 legendId)
         private
         view
         returns (uint256, uint256)
     {
-        uint256 earnedReJu = _calculateEarnedReju(legendId);
+        uint256 earnedReJu = _calculateEarnedReJu(legendId);
 
         uint256 restoredSlots = earnedReJu / _reJuNeededPerSlot; // testing: make sure rounds down
 
-        uint256 remainderReju = earnedReju -
+        uint256 remainderReJu = earnedReJu -
             (restoredSlots * _reJuNeededPerSlot);
 
         return (restoredSlots, remainderReJu);
     }
 
-    function _calculateEarnedReju(uint256 legendId)
+    /**
+     * @dev Formats a string to be used as the *incubation URI*
+     *
+     * @param legendId ID of Legend NFT requesting calculations
+     */
+    function _calculateEarnedReJu(uint256 legendId)
         private
         view
         returns (uint256)
@@ -357,7 +381,7 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
             "Legend Is Not Occupying Pod"
         );
 
-        uint256 earnedReJu = _calculateEarnedReju(legendId);
+        uint256 earnedReJu = _calculateEarnedReJu(legendId);
 
         uint256 maxEarnableReJu = (_reJuNeededPerSlot *
             _rejuvenationPod[legendId].blendingInstancesUsed);

@@ -173,6 +173,7 @@ function App() {
         `)
     }
   }
+  
 
   async function createPromoEvent() {
     if (typeof window.ethereum !== 'undefined') {
