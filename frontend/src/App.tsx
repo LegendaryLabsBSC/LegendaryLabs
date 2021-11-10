@@ -1,34 +1,12 @@
-import React, { useEffect, Suspense, lazy } from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { useWallet } from '@binance-chain/bsc-use-wallet'
-import { ResetCSS } from '@legendarylabs/uikit'
-import BigNumber from 'bignumber.js'
 import { useFetchPriceList, useFetchPublicData } from 'state/hooks'
-import useGetDocumentTitlePrice from './hooks/useGetDocumentTitlePrice'
-import GlobalStyle from './style/Global'
-import Menu from './components/Menu'
-import PageLoader from './components/PageLoader'
-// import Pools from './views/Pools'
-// import NftGlobalNotification from './views/Nft/components/NftGlobalNotification'
-// import XBLZD from './views/XBLZD'
-import FarmsApp from './views/Farms'
+import AllLegends from 'components/all-legends/all-legends'
 import ComingSoon from './components/coming-soon/coming-soon';
-
-// Route-based code splitting
-// Only pool is included in the main bundle because of it's the most visited page'
-// const Home = lazy(() => import('./views/Home'))
-// const Farms = lazy(() => import('./views/Farms'))
-// const Lottery = lazy(() => import('./views/Lottery'))
-// const Pools = lazy(() => import('./views/Pools'))
-// const Ifos = lazy(() => import('./views/Ifos'))
-// const NotFound = lazy(() => import('./views/NotFound'))
-// const Nft = lazy(() => import('./views/Nft'))
-
-// This config is required for number formatting
-// BigNumber.config({
-//   EXPONENTIAL_AT: 1000,
-//   DECIMAL_PLACES: 80,
-// })
+import useGetDocumentTitlePrice from './hooks/useGetDocumentTitlePrice'
+// import Menu from './components/Menu'
+// import FarmsApp from './views/Farms'
 
 const App: React.FC = () => {
   const { account, connect } = useWallet()
@@ -44,55 +22,22 @@ const App: React.FC = () => {
 
   return (
       <Router>
-        <Switch>
-          <Route path={["/legends.html", "/marketplace.html", "/arena.html"]} exact>
-            <ComingSoon />
-          </Route>
-          <Route path="/" exact>
-            {/* <Home /> */}
-            <FarmsApp />
-          </Route>
-        </Switch>
+        {/* Use Menu component to connect wallet when testing. import on line 8 */}
+        {/* <Menu > */}
+          <Switch>
+            <Route path={["/legends.html", "/marketplace.html", "/arena.html"]} exact>
+              <ComingSoon />
+            </Route>
+            {/* <Route path={["/legends.html"]} exact>
+              <AllLegends />
+            </Route> */}
+            {/* Use FarmsApp for contract testing. import on line 9 */}
+            {/* <Route path="/" exact>
+              <FarmsApp />
+            </Route> */}
+          </Switch>
+        {/* </Menu> */}
       </Router>
-    // <Router>
-    //   <ResetCSS />
-    //   <GlobalStyle />
-    //     <Suspense fallback={<PageLoader />}>
-    //       <Switch>
-    //         <Route path="/farms">
-    //           <Farms />
-    //         </Route>
-    //         <Route path="/caves">
-    //           <Lottery />
-    //         </Route>
-    //         <Route path="/pools">
-    //           <Pools />
-    //         </Route>
-    //         <Route path="/xBLZD">
-    //           <XBLZD />
-    //         </Route>
-    //         {/* <Route path="/lottery"> */}
-    //         {/*  <Lottery /> */}
-    //         {/* </Route> */}
-    //         {/* <Route path="/ifo"> */}
-    //         {/*  <Ifos /> */}
-    //         {/* </Route> */}
-    //         {/* <Route path="/nft"> */}
-    //         {/*  <Nft /> */}
-    //         {/* </Route> */}
-    //         {/* Redirect */}
-    //         {/* <Route path="/staking"> */}
-    //         {/*  <Redirect to="/pools" /> */}
-    //         {/* </Route> */}
-    //         {/* <Route path="/syrup"> */}
-    //         {/*  <Redirect to="/pools" /> */}
-    //         {/* </Route> */}
-    //         {/* 404 */}
-    //         <Route component={NotFound} />
-    //       </Switch>
-    //     </Suspense>
-    //   {/* <NftGlobalNotification /> */}
-    // </Router>
   )
 }
 

@@ -70,7 +70,7 @@ function FarmsApp() {
    */
   async function createPromoEvent() {
     if (typeof window.ethereum !== 'undefined') {
-      await contract.lab.write.createPromoEvent(promoName, 86400, true, false)
+      await contract.lab.write.createPromoEvent(promoName, 86400, false, 0, false)
     }
   }
   async function fetchPromoDetails() {
@@ -171,7 +171,7 @@ function FarmsApp() {
    */
   async function fetchURI() {
     if (typeof window.ethereum !== 'undefined') {
-      const legendURI = await contract.nft.read.tokenURI(id)
+      const legendURI = await contract.nft.read.fetchLegendURI(id)
       console.log('IPFS URI: ', legendURI)
     }
   }
@@ -287,7 +287,7 @@ function FarmsApp() {
     }
   }
   async function loadLegends(tokenID) {
-    const imgURL = await contract.nft.read.tokenURI(tokenID)
+    const imgURL = await contract.nft.read.fetchLegendURI(tokenID)
     console.log(`Legend ID: ${tokenID} Image URL: ${imgURL}`)
     return { tokenID, imgURL }
     // Logic for rendering Legend Card Component here from pinata ?
@@ -713,24 +713,24 @@ function FarmsApp() {
    * Matching End
    */
 
-  // const NftContainer = styled.div`
-  //   & {
-  //     padding: 25px;
-  //     display: inline-flex;
-  //     flex-wrap: wrap;
-  //     width: 100%;
-  //     justify-content: center;
-  //     div {
-  //       margin: 25px;
-  //     }
-  //   }
-  // `
+  const NftContainer = styled.div`
+    & {
+      padding: 25px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      width: 100%;
+      justify-content: center;
+      div {
+        margin: 25px;
+      }
+    }
+  `
 
-  // const pinataGeteway = 'https://gateway.pinata.cloud/ipfs/'
+  const pinataGeteway = 'https://gateway.pinata.cloud/ipfs/'
 
-  // const cidToUrl = (cid) => {
-  //   return pinataGeteway + cid.split('//')[1]
-  // }
+  const cidToUrl = (cid) => {
+    return pinataGeteway + cid.split('//')[1].split(',')[0]
+  }
 
   return (
     <div>
@@ -792,6 +792,22 @@ function FarmsApp() {
             Mint Promotional NFT
           </button>
         </div>
+      <NftContainer>
+        {gettingLegends &&
+          (legends.length > 0 ? (
+            legends.map((legend) => {
+              console.log(legends)
+              return (
+                <NftCard>
+                  <h3>Legend ID: {legend.tokenID}</h3>
+                  <img width="200px" alt="legend" src={cidToUrl(legend.imgURL)} />
+                </NftCard>
+              )
+            })
+          ) : (
+            <img alt="eater" src={gif} />
+          ))}
+      </NftContainer>
         <div>
           <input type="number" placeholder="Token ID" onChange={(e) => setID(e.target.value)} />
           <button type="submit" onClick={fetchURI}>
@@ -967,22 +983,6 @@ function FarmsApp() {
           </button>
         </div>
       </header>
-      {/* <NftContainer>
-        {gettingLegends &&
-          (legends.length > 0 ? (
-            legends.map((legend) => {
-              console.log(legends)
-              return (
-                <NftCard>
-                  <h3>Legend ID: {legend.tokenID}</h3>
-                  <img alt="legend" src={cidToUrl(legend.imgURL)} />
-                </NftCard>
-              )
-            })
-          ) : (
-            <img alt="eater" src={gif} />
-          ))}
-      </NftContainer> */}
     </div>
   )
 }

@@ -2,7 +2,7 @@ import React from 'react'
 
 function ComingSoon() {
   return (
-    <div className="container">
+    <div className="container pt-10pct">
         <div className="text-center">
             <h2 className="nk-title display-4">Coming Soon</h2>
             <div className="nk-title-sep-icon">

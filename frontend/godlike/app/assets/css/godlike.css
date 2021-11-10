@@ -2137,6 +2137,10 @@ img.rounded {
     padding-bottom: 100px !important;
 }
 
+.pt-10pct {
+    padding-top: 10% !important;
+}
+
 /*
  * Margins Helper
  */
@@ -5016,7 +5020,10 @@ img.rounded {
 
  -------------------------------------------------------------------*/
 .nk-footer {
-    position: relative;
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
+    left: 0px;
     color: #eee;
     background-color: #000;
     z-index: 1;

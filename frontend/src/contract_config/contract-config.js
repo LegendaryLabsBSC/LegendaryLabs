@@ -1,10 +1,10 @@
 
-    const legendsLaboratory = "0x6940E21D115aeC0926AeD195BaC06E16cD03185a"
-    const legendsNFT = "0xb62259FF43F55d49A52BF9435b5F1fF51cD2C3FB"
-    const legendsToken = "0x37a1F2F6535d77Be1a6578d76dB702e93855ce37"
-    const legendsRejuvination = "0xC9ADCA5067350bF4ded681C392C0915267A17D6D"
-    const legendsMarketplace = "0xb47acf65d0dDD670CA89CEcCac8F2D2e1600bB43"
-    const legendsMatchingBoard = "0xBccbe2762dAce90C0ecc485357dDca70d9CCA151"
+    const legendsLaboratory = "0xE2c1B3afF5D45A45A6bf20eF0476eB780055Dbc3"
+    const legendsNFT = "0xb41B3b60573D109f491EA99a73Ab423B8A868BbB"
+    const legendsToken = "0x6F84E7ACdCeE6e27BCd51480E3f73B0f5df361A5"
+    const legendsRejuvination = "0xA9127b2d9C3241e0A2191aa0C8E9f12453841bc0"
+    const legendsMarketplace = "0x8226E3BAAa20AC9C0BDB1E2fe14EA0BC4DAf3c58"
+    const legendsMatchingBoard = "0x16f85C3dB0e5d2dcc197cA94FBEe7e5F66A91455"
 
     export { legendsLaboratory, legendsNFT, legendsToken, legendsRejuvination, legendsMarketplace, legendsMatchingBoard }
     
