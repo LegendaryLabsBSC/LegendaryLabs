@@ -37,7 +37,7 @@ module.exports = {
     enabled: (process.env.REPORT_GAS) ? true : false
   },
   spdxLicenseIdentifier: {
-    overwrite: true,
+    overwrite: false,
     runOnCompile: true,
   },
   networks: {
@@ -60,6 +60,6 @@ module.exports = {
   docgen: {
     path: './docs',
     clear: true,
-    runOnCompile: true,
+    runOnCompile: false,
   }
 };
