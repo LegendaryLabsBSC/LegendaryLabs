@@ -8,9 +8,9 @@ services:
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
             - ./godlike/app:/usr/share/nginx/html
-        php:
+    php:
         image: php:fpm
         volumes:
             - ./godlike:/app
-    cloudflare:
-        image: cloudflare/cloudflared:2021.11.0-amd64
+    # cloudflare:
+    #     image: cloudflare/cloudflared:2021.11.0-amd64
