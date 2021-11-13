@@ -3,7 +3,7 @@
 pragma solidity 0.8.4;
 
 /**
- * @dev Interface used by [**LegendsRejuvenation*](./LegendsRejuvenation). Outlines the *Rejuvenation Pod* functionality. 
+ * @dev Interface used by [**LegendsRejuvenation*](./LegendsRejuvenation). Outlines the *Rejuvenation Pod* functionality.
  */
 interface IRejuvenationPod {
     /**
@@ -11,10 +11,12 @@ interface IRejuvenationPod {
      *
      * * `nftContract` &rarr; Address of the ERC721 contract
      * * `depositedBy` &rarr; Address that entered the Legend into its *rejuvenation pod*
-     * * `checkpointBlock` &rarr; -!- 
+     * * `checkpointBlock` &rarr; Saved `block` number when a Legend enters a *rejuvenation pod* or has *blending slots* restored.
      * * `blendingInstancesUsed` &rarr; Current number of *blending slots* a Legend has used
      * * `tokenAmountSecured` &rarr; Number of LGND secured with the Legend in its *rejuvenation pod*
      * * `multiplier` &rarr; `totalAmountSecured / minimumSecure = multiplier`
+     * *`rolloverReju` &rarr; Remainder *reJu* stored in a *rejuvenation pod* after a Legend undergoes *blending slot* restoration*.
+     *   Any `rolloverReju` will reset to `(0)` after a Legend is removed from their *pod*.
      * * `occupied` &rarr; Indicates if a Legend NFT is currently in its * rejuvenation pod* or not
      *
      * :::

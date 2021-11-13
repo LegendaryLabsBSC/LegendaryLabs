@@ -37,7 +37,6 @@ import "./ILegendMetadata.sol";
  * :::
  *
  */
-
 contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
     using Counters for Counters.Counter;
     using Strings for uint256;
@@ -157,13 +156,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
         address recipient,
         uint256 parent1,
         uint256 parent2
-    )
-        external
-        returns (
-            // bool skipIncubation
-            uint256
-        )
-    {
+    ) external returns (uint256) {
         require(
             ownerOf(parent1) == msg.sender && ownerOf(parent2) == msg.sender
         );
@@ -376,7 +369,7 @@ contract LegendsNFT is ERC721Enumerable, ILegendMetadata {
             creator = payable(address(0));
         } else {
             /**
-             * @dev To accommodate Matching, `creator` is Legend's second parent (breeder address)
+             * @dev To accommodate Matching, `creator` is Legend's second parent (blender address)
              */
             creator = payable(recipient); // doesnt work properly
         }
