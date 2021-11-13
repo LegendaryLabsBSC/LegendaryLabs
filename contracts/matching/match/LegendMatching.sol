@@ -29,7 +29,7 @@ abstract contract LegendMatching is ILegendMatch {
     /* playerAddress => amount */
     mapping(address => uint256) internal _tokensPending;
 
-    /* matchingId => playerAddress => childId */
+    /* matchingId => blenderAddress => childId */
     mapping(uint256 => mapping(address => uint256)) internal _eggPending;
 
     /**
@@ -52,7 +52,7 @@ abstract contract LegendMatching is ILegendMatch {
      * @dev Emitted when a `surrogateLegend` is relisted on the **LegendsMatchingBoard** rather than immediately returned to the owner.
      * [`decideMatchingRelist`](./LegendsMatchingBoard#decidematchrelist)
      */
-    event Relisting(
+    event DecideRelisting(
         uint256 indexed matchingId,
         uint256 indexed legendId,
         bool isRelisted

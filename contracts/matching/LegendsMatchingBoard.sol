@@ -9,9 +9,8 @@ import "../token/LegendToken.sol";
 import "./match/LegendMatching.sol";
 
 /**
- * @dev The **LegendMatching** inherits from [**ILegendMatch**](./ILegendMatch) to define a Legend NFT *matching listing*.
- * This contract acts as a ledger for a *matching listing*, recording important data and events during the lifecycle of a *matching listing*.
- * This contract is inherited by the [**LegendsMatchingBoard**](./LegendsMatchingBoard).
+ * The **LegendMatchingBoard** contract establishes a marketplace for Legend NFTs to be listed for the purpose of *blending* with.
+ * This contracts inherits [**LegendMatching**](./match/LegendMatching) to implement *matching listings*.
  */
 contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -256,7 +255,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
             );
         }
 
-        emit Relisting(matchingId, m.surrogateLegend, isRelisted);
+        emit DecideRelisting(matchingId, m.surrogateLegend, isRelisted);
     }
 
     /**
