@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 /**
  * Original contract by OpenZeppelin (Escrow)
- * Slightly modified to fit Legendary Labs needs
+ * Modified to fit Legendary Labs needs
  * These changes were made primarily to facilitate auctions
  */
 
@@ -23,29 +23,58 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * transfers in the inheritance tree. The contract that uses the escrow as its
  * payment method should be its owner, and provide public methods redirecting
  * to the escrow's deposit and withdraw.
+ *
+ *
+ * @dev Contract which holds payments and bids until the right condition is triggered. This contract is isolated from
+ * the rest of the *Laboratory Contracts Ecosystem*. The functions within this contract can only be called by the functions
+ * within the [**LegendsMarketClerk**] contract, and only when certain conditions are met.
  */
 contract LegendsEscrow is Ownable {
     using Address for address payable;
 
     address payable _marketplace;
 
-    /** @dev payeeAddress => paymentAmount */
+    /** payeeAddress => paymentAmount */
     mapping(address => uint256) private _paymentPending;
 
-    /** @dev listingId => bidderAddress => bidAmount  */
+    /** listingId => bidderAddress => bidAmount  */
     mapping(uint256 => mapping(address => uint256)) private _bidPlaced;
 
-    /** @dev legendCreator => royaltiesAmount */
+    /** legendCreator => royaltiesAmount */
     mapping(address => uint256) private _royaltiesAccrued;
 
+    /**
+     * @dev Emitted when a *payment* is credited to an address.
+     * [`depositPayment`](#depositPayment)
+     */
     event PaymentDeposited(address indexed payee, uint256 amount);
+
+    /**
+     * @dev Emitted when an address collects *payments* owed to them.
+     * [`withdrawPayments`](#withdrawPayments)
+     */
     event PaymentsWithdrawn(address indexed payee, uint256 amount);
+
+    /**
+     * @dev Emitted when an address collects *royalties* owed to them.
+     * [`withdrawRoyalties`](#withdrawRoyalties)
+     */
     event RoyaltiesWithdrawn(address indexed payee, uint256 amount);
+
+    /**
+     * @dev Emitted when a bid is placed on a Legend *auction* or *offer listing* .
+     * [`depositBid`](#depositBid)
+     */
     event BidPlaced(
         uint256 indexed listingId,
         address indexed payer,
         uint256 amount
     );
+
+    /**
+     * @dev Emitted when a bid is refunded to the bidder.
+     * [`refundBid`](#refundBid)
+     */
     event BidRefunded(
         uint256 indexed listingId,
         address indexed payer,
@@ -76,13 +105,15 @@ contract LegendsEscrow is Ownable {
         address payable legendCreator,
         address payable payee
     ) public payable virtual onlyOwner {
-        _marketplace.call{value: marketplaceFee}; // send to marketplace ; would need a lab withdraw getter ;; or can send to lab directly ? ; make state var here to hold lab address and setter in marketplace
+        // _marketplace.call{value: marketplaceFee}; // send to marketplace ; would need a lab withdraw getter ;; or can send to lab directly ? ; make state var here to hold lab address and setter in marketplace
+
+        _paymentPending[_marketplace] += marketplaceFee; // credit to marketplace ; would need a lab withdraw getter ;; or can send to lab directly ? ; make state var here to hold lab address and setter in marketplace
 
         if (royaltyFee != 0) {
             _royaltiesAccrued[legendCreator] += royaltyFee;
         }
 
-        /** @param payment Amount owed to payee after fees have been collected */
+        /**  Amount owed to payee after fees have been collected */
         uint256 payment = msg.value - (marketplaceFee + royaltyFee);
 
         _paymentPending[payee] += payment;

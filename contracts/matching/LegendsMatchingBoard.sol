@@ -36,7 +36,7 @@ contract LegendsMatchingBoard is LegendMatching, ReentrancyGuard {
      *
      * * Legend must be considered [*listable*](../lab/LegendsLaboratory#islistable)
      * * Legend must be considered [*blendable*](../lab/LegendsLaboratory#isblendable)
-     * * `price` can not be `(0)`
+     * * `price` must not be `(0)`
      *
      * :::
      *

@@ -132,7 +132,7 @@ abstract contract LegendMatching is ILegendMatch {
      * @dev Changes the state of a *matching listing* to `Cancelled`.
      * Called from [**LegendsMatchingBoard**](./LegendsMatchingBoard#cancellegendmatching)
      *
-     * @param matchingId ID of *matching listings*.
+     * @param matchingId ID of *matching listing*.
      */
     function _cancelLegendMatching(uint256 matchingId) internal {
         _legendMatching[matchingId].status = MatchingStatus.Cancelled;
@@ -166,6 +166,8 @@ abstract contract LegendMatching is ILegendMatch {
 
     /**
      * @dev Implemented in [**LegendsMatchingBoard**](./LegendsMatchingBoard#fetcheggowed)
+     *
+     * * @param matchingId ID of *matching listing*.
      */
     function fetchEggOwed(uint256 matchingId)
         public

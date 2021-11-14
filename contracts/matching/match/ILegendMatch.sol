@@ -26,7 +26,7 @@ interface ILegendMatch {
      * * `childId` &rarr; ID of Legend NFT offspring created via the *matching listing*.
      * * `price` &rarr; Amount of LGND tokens the `surrogate` request in order for a player to blend with their `surrogateLegend`.
      * *    This price does not factor in the LGND token burn associated with *blending*.
-     * * `status` &rarr; Indicates whether a given *matching listing* is either `Open`, `Closed`, or `Cancelled`.
+     * * `status` &rarr; Indicates whether a given *matching listing* is either `Null`, `Open`, `Closed`, or `Cancelled`.
      *
      * :::
      *

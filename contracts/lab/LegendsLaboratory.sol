@@ -584,6 +584,23 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     }
 
     /**
+     * @dev Allows `LAB_ADMIN` to collect accumulated marketplace fees.
+     *
+     *
+     * :::important
+     *
+     * Prior to deploying for MVP, a dedicated address for handling funds acquired through the
+     * project, and to only be used for the project, could be added in for further project transparency.
+     *
+     * :::
+     *
+     *
+     */
+    function withdrawMarketplaceFees() public onlyRole(LAB_ADMIN) {
+        legendsMarketplace.withdrawMarketplaceFees();
+    }
+
+    /**
      * @notice There Can Only Be One..
      *
      * @dev Only callable by *the* `LAB_ADMIN`. Function calls *this* contract to revoke the current `LAB_ADMIN`'s
