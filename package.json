@@ -32,6 +32,7 @@
   },
   "scripts": {
     "hh:load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
+    "hh:loadf": "npx hardhat compile && npx hardhat run --network ftmtest scripts/deploy.js",
     "hh:com": "npx hardhat compile",
     "hh:size": "npx hardhat compile && hardhat size-contracts",
     "hh:lint": "npx hardhat check",

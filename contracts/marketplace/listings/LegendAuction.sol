@@ -46,7 +46,7 @@ abstract contract LegendAuction is LegendSale {
     /** listingId => bidderAddresses */
     mapping(uint256 => address[]) internal _bidders;
 
-    /** listingId => bidderAddress => previouslyPlacedBid */
+    /** listingId => bidderAddress => previouslyBidExist */
     mapping(uint256 => mapping(address => bool)) internal _exists; //TODO: change var name ?
 
     // /** listingId => bidderAddress => bidAmount */
