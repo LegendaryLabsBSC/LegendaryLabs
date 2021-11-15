@@ -3,7 +3,6 @@
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-// import "./LaboratoryGovernor.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
@@ -25,8 +24,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
-    // LaboratoryGovernor public laboratoryGovernor =
-    //     new LaboratoryGovernor(legendToken);
 
 
     bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
