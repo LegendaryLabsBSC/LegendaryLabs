@@ -8,6 +8,12 @@ import "./IRejuvenationPod.sol";
 
 pragma solidity 0.8.4;
 
+/**
+ * @dev The **LegendRejuvenation** contract allows a Legend NFT to restore decrease the value of its `_legendMetadata.blendingSlotsUsed`.
+ * Inherits from [**ILegendRejuvenation**](./IRejuvenationPod) to define a *Rejuvenation Pod*.
+ *
+ *
+ */
 contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     using Counters for Counters.Counter;
 
@@ -238,7 +244,17 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     }
 
     /**
-     * @dev Formats a string to be used as the *incubation URI*
+     * @dev Calculates the number of *blending slots* to be restored and calls on
+     * [**LegendsLaboratory**](../lab/LegendsLaboratory#restoreblendingslots) to do the
+     * actual restoring.
+     *
+     * :::tip Note
+     *
+     * Any *reJu* not used in restoring *blending slots* will be rolled-over. However, if this function
+     * was called by `leaveRejuvenationPool` then `_rejuvenationPod.rollover` will be reset to `(0)` upon
+     * leaving the *pod*.
+     *
+     * :::
      *
      * @param legendId ID of Legend NFT having *blending slots* restored
      */
@@ -306,7 +322,9 @@ contract LegendRejuvenation is IRejuvenationPod, ReentrancyGuard {
     }
 
     /**
-     * @dev Formats a string to be used as the *incubation URI*
+     * @dev Calculates the current amount of `earnedReju. The rate at which `reJu` is earned for
+     * a given Legend is `_reJuPerBlock * _rejuvenationPod.multiplier`. This is this multiplied by
+     * the number of `blocks` the Legends has been in their *pod* for, plus any *rollover reJu*.
      *
      * @param legendId ID of Legend NFT requesting calculations
      */

@@ -2,7 +2,7 @@
 
 /**
  * Original contract by OpenZeppelin (Pull Payments)
- * Slightly modified to fit Legendary Labs needs
+ * Modified to fit Legendary Labs needs
  * These changes were made primarily to facilitate auctions
  */
 
@@ -27,11 +27,18 @@ import "./LegendsEscrow.sol";
  * To use, derive from the `PullPayment` contract, and use {_asyncTransfer}
  * instead of Solidity's `transfer` function. Payees can query their due
  * payments with {payments}, and retrieve them with {withdrawPayments}.
+ *
+ *
+ * @dev The **LegendsMarketClerk** contract is used by the [**Legends Marketplace**](../LegendsMarketplace) to handle
+ * transfers of bids and payments to the [**LegendsEscrow**](./LegendsEscrow) contract. The functions inside this contract
+ * can only be called when certain conditions are met. Additionally, the functions inside this contract are the only
+ * functions capable of calling functions inside the **LegendsEscrow** contract.
  */
+
 abstract contract LegendsMarketClerk {
     LegendsEscrow private immutable _escrow;
 
-    /** @dev listingId => bidderAddress => canWithdrawBid? */
+    /** listingId => bidderAddress => canWithdrawBid */
     mapping(uint256 => mapping(address => bool)) internal _isBidRefundable;
 
     constructor() {
@@ -43,7 +50,7 @@ abstract contract LegendsMarketClerk {
      * Funds sent in this way are stored in an intermediate {Escrow} contract, so
      * there is no danger of them being spent before withdrawal. --OpenZeppelin
      *
-     * @dev Calls the {depositPayment} function in the {LegendsEscrow} contract.
+     * @dev Calls `depositPayment` from [**LegendsEscrow**](./LegendsEscrow).
      *
      * @param price The amount the payee wants for the Legend, in BNB.
      * @param marketplaceFee The amount collected from the sale, to be used for further project development.
@@ -130,11 +137,21 @@ abstract contract LegendsMarketClerk {
      *
      * @param payee Whose payments will be withdrawn.
      */
-
     function _withdrawPayments(address payable payee) internal {
+        uint256 amount = fetchPaymentsPending(payee);
+        require(
+            amount != 0
+            // , "Address is owed 0"
+        );
+
         _escrow.withdrawPayments(payee);
     }
 
+    /**
+     * @dev Withdraw accumulated royalties, forwarding all gas to the recipient.
+     *
+     * @param payee Whose payments will be withdrawn.
+     */
     function _withdrawRoyalties(address payable payee) internal {
         _escrow.withdrawRoyalties(payee);
     }

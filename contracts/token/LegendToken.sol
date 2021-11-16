@@ -3,12 +3,10 @@
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-// import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "../lab/LegendsLaboratory.sol";
 
-contract LegendToken is
-    ERC20
-    // , ERC20Permit, ERC20Votes
+contract LegendToken is ERC20 
+
 {
     LegendsLaboratory _lab;
 
@@ -35,7 +33,6 @@ contract LegendToken is
 
     constructor(address owner)
         ERC20("Legends", "LGND")
-    // ERC20Permit("Legends")
     {
         _lab = LegendsLaboratory(msg.sender);
         _mint(owner, 100 * 1e24); // 100 Million
@@ -81,27 +78,4 @@ contract LegendToken is
         _burn(msg.sender, amount);
     }
 
-    // The functions below are overrides required by Solidity.
-
-    // function _afterTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 amount
-    // ) internal override(ERC20, ERC20Votes) {
-    //     super._afterTokenTransfer(from, to, amount);
-    // }
-
-    // function _mint(address to, uint256 amount)
-    //     internal
-    //     override(ERC20, ERC20Votes)
-    // {
-    //     super._mint(to, amount);
-    // }
-
-    // function _burn(address account, uint256 amount)
-    //     internal
-    //     override(ERC20, ERC20Votes)
-    // {
-    //     super._burn(account, amount);
-    // }
 }

@@ -2,12 +2,7 @@
 
 pragma solidity 0.8.4;
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-
-// import "@openzeppelin/contracts/governance/TimelockController.sol";
-
-// import "./LaboratoryGovernor.sol";
 import "../legend/LegendsNFT.sol";
 import "../token/LegendToken.sol";
 import "../rejuvenation/LegendRejuvenation.sol";
@@ -29,8 +24,7 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsMarketplace public legendsMarketplace = new LegendsMarketplace();
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
-    // LaboratoryGovernor public laboratoryGovernor =
-    //     new LaboratoryGovernor(legendToken);
+
 
     bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
     bytes32 public constant LAB_TECH = keccak256("LAB_TECH");
@@ -46,28 +40,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         _setupRole(LAB_TECH, msg.sender); // maybe dont give both ACs ?
 
         _setRoleAdmin(LAB_TECH, LAB_ADMIN);
-    }
-
-    // for testing, remove before MVP launch
-    function getChildContracts()
-        public
-        view
-        virtual
-        returns (
-            LegendsNFT,
-            LegendToken,
-            LegendRejuvenation,
-            LegendsMarketplace,
-            LegendsMatchingBoard
-        )
-    {
-        return (
-            legendsNFT,
-            legendToken,
-            legendRejuvenation,
-            legendsMarketplace,
-            legendsMatchingBoard
-        );
     }
 
     /**
@@ -271,6 +243,57 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
      */
     function labBurn(uint256 amount) public onlyRole(LAB_ADMIN) {
         legendToken.labBurn(amount);
+    }
+
+    /**
+     * @dev Allows `LAB_ADMIN` to collect accumulated marketplace fees.
+     *
+     *
+     * :::important
+     *
+     * Prior to deploying for MVP, a dedicated address for handling funds acquired through the
+     * project, and to only be used for the project, could be added in for further project transparency.
+     *
+     * :::
+     *
+     *
+     */
+    function withdrawMarketplaceFees() public onlyRole(LAB_ADMIN) {
+        legendsMarketplace.withdrawMarketplaceFees();
+    }
+
+    /**
+     * @notice There Can Only Be One..
+     *
+     * @dev Only callable by *the* `LAB_ADMIN`. Function calls *this* contract to revoke the current `LAB_ADMIN`'s
+     * authorization and grant authorization to the incoming admin in the same block.
+     *
+     * :::note
+     *
+     * Many of the functions the `LAB_ADMIN` has authorization to call should only be called rarely, if ever.
+     * In order to prevent more than (1) `LAB_ADMIN` existing at one time, *this* contract is given sole ability
+     * to revoke and grant `LAB_ADMIN` access. This should be the only way a `LAB_ADMIN` role can be granted.
+     *
+     * :::
+     *
+     * :::warning
+     *
+     * By calling this function you will give up you privileges as `Lab_ADMIN`. If the `newAdmin`is supplied the *0 address*,
+     * a burn address, or any otherwise inaccessible address, full control over the Legendary Labs project would be renounced.
+     *
+     * :::
+     *
+     *
+     * @param newAdmin Address of incoming `LAB_ADMIN`
+     */
+    function transferLaboratoryAdmin(address newAdmin)
+        public
+        onlyRole(LAB_ADMIN)
+    {
+        this.revokeRole(LAB_ADMIN, msg.sender);
+        this.grantRole(LAB_ADMIN, newAdmin);
+
+        // work in black list
     }
 
     /**
@@ -581,40 +604,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
         onlyRole(LAB_ADMIN)
     {
         legendRejuvenation.setReJuNeededPerSlot(newReJuNeededPerSlot);
-    }
-
-    /**
-     * @notice There Can Only Be One..
-     *
-     * @dev Only callable by *the* `LAB_ADMIN`. Function calls *this* contract to revoke the current `LAB_ADMIN`'s
-     * authorization and grant authorization to the incoming admin in the same block.
-     *
-     * :::note
-     *
-     * Many of the functions the `LAB_ADMIN` has authorization to call should only be called rarely, if ever.
-     * In order to prevent more than (1) `LAB_ADMIN` existing at one time, *this* contract is given sole ability
-     * to revoke and grant `LAB_ADMIN` access. This should be the only way a `LAB_ADMIN` role can be granted.
-     *
-     * :::
-     *
-     * :::warning
-     *
-     * By calling this function you will give up you privileges as `Lab_ADMIN`. If the `newAdmin`is supplied the *0 address*,
-     * a burn address, or any otherwise inaccessible address, full control over the Legendary Labs project would be renounced.
-     *
-     * :::
-     *
-     *
-     * @param newAdmin Address of incoming `LAB_ADMIN`
-     */
-    function transferLaboratoryAdmin(address newAdmin)
-        public
-        onlyRole(LAB_ADMIN)
-    {
-        this.revokeRole(LAB_ADMIN, msg.sender);
-        this.grantRole(LAB_ADMIN, newAdmin);
-
-        // work in black list
     }
 
     /**
