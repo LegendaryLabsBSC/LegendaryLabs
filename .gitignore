@@ -41,3 +41,5 @@ docs
 hold_config
 scans
 phoenixGenerator_1.1
+hold_front
+.yarnclean
