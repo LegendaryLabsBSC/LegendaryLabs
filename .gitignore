@@ -38,3 +38,5 @@ contracts/other
 .vscode
 .VSCodeCounter
 docs
+hold_config
+scans

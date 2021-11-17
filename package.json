@@ -14,7 +14,8 @@
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-spdx-license-identifier": "^2.0.3",
     "hardhat-storage-layout": "^0.1.6",
-    "solc-0.8": "npm:solc@0.8.4"
+    "solc-0.8": "npm:solc@0.8.4",
+    "ts-node": "^10.4.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
@@ -31,13 +32,12 @@
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "hh:load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
-    "hh:loadf": "npx hardhat compile && npx hardhat run --network ftmtest scripts/deploy.js",
-    "hh:com": "npx hardhat compile",
-    "hh:size": "npx hardhat compile && hardhat size-contracts",
-    "hh:lint": "npx hardhat check",
+    "deploy": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
+    "compile": "npx hardhat compile",
+    "size": "npx hardhat compile && hardhat size-contracts",
+    "lint": "npx hardhat check",
     "gendocs": "npx solidity-docgen --solc-module solc-0.8",
-    "hh:scanfunct": "npx hardhat compile && yarn run hardhat docgen",
+    "scanfunctions": "npx hardhat compile && yarn run hardhat docgen",
     "start:api": "nodemon scripts/generateLegend.js"
   }
 }

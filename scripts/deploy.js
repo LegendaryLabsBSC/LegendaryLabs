@@ -6,41 +6,42 @@ const path = require('path')
 async function main() {
   const LegendsLaboratory = await hre.ethers.getContractFactory("LegendsLaboratory");
   const legendsLaboratory = await LegendsLaboratory.deploy();
+
   await legendsLaboratory.deployed();
   console.log("LegendsLaboratory deployed to:", legendsLaboratory.address);
-  const contract = legendsLaboratory.attach(legendsLaboratory.address)
-  // const children = await contract.getChildContracts()
 
-  // const LaboratoryGovernor = await hre.ethers.getContractFactory("LaboratoryGovernor");
-  // const laboratoryGovernor = await LaboratoryGovernor.deploy(legendsLaboratory.legendsToken);
-  // await laboratoryGovernor.deployed();
-  // console.log("LaboratoryGovernor deployed to:", laboratoryGovernor.address);
-
-  const legendsNFT = await contract.legendsNFT()
-  const legendToken = await contract.legendToken()
-  const legendRejuvenation = await contract.legendRejuvenation()
-  const legendsMarketplace = await contract.legendsMarketplace()
-  const legendsMatchingBoard = await contract.legendsMatchingBoard()
+  const contracts = {
+    lab: legendsLaboratory.address,
+    nft: await legendsLaboratory.legendsNFT(),
+    token: await legendsLaboratory.legendToken(),
+    rejuvenation: await legendsLaboratory.legendRejuvenation(),
+    marketplace: await legendsLaboratory.legendsMarketplace(),
+    matching: await legendsLaboratory.legendsMatchingBoard()
+  }
 
   console.log(`
-  legendsNFT: ${legendsNFT},
-  legendToken: ${legendToken},
-  legendRejuvenation: ${legendRejuvenation},
-  legendsMarketplace: ${legendsMarketplace},
-  legendsMatchingBoard: ${legendsMatchingBoard}
+  legendsNFT: ${contracts.nft},
+  legendToken: ${contracts.token},
+  legendRejuvenation: ${contracts.rejuvenation},
+  legendsMarketplace: ${contracts.marketplace},
+  legendsMatchingBoard: ${contracts.matching}
   `)
 
+  return { contracts };
+}
+
+function loadNewAddresses(contracts) {
   const contract_config = path.join(__dirname, '../frontend/src/contract_config/contract-config.js')
   fs.readFile(contract_config, 'utf-8', (err, data) => {
     if (err)
       return (console.log(err))
     const re = `
-    const legendsLaboratory = "${legendsLaboratory.address}"
-    const legendsNFT = "${legendsNFT}"
-    const legendToken = "${legendToken}"
-    const legendRejuvenation = "${legendRejuvenation}"
-    const legendsMarketplace = "${legendsMarketplace}"
-    const legendsMatchingBoard = "${legendsMatchingBoard}"
+    const legendsLaboratory = "${contracts.lab}"
+    const legends1NFT = "${contracts.nft}"
+    const legendToken = "${contracts.token}"
+    const legendRejuvenation = "${contracts.rejuvenation}"
+    const legendsMarketplace = "${contracts.marketplace}"
+    const legendsMatchingBoard = "${contracts.matching}"
 
     export { legendsLaboratory, legendsNFT, legendToken, legendRejuvenation, legendsMarketplace, legendsMatchingBoard }
     
@@ -55,12 +56,12 @@ async function main() {
   })
 }
 
+
 main()
-  // .then(res => {
-  // loadNewAddresses(res)
-  // })
-  // .then(() => process.exit(0))
-  // .catch((error) => {
-    // console.error(error);
-    // process.exit(1);
-  // });
+  .then((res) => {
+    loadNewAddresses(res.contracts)
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
