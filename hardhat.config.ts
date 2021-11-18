@@ -69,12 +69,12 @@ export default {
       chainId: 43113,
       accounts: [`0x${PRIVATEKEY}`],
     },
-    mainnet: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
-      gasPrice: 225000000000,
-      chainId: 43114,
-      accounts: [],
-    },
+    // mainnet: {
+    //   url: "https://api.avax.network/ext/bc/C/rpc",
+    //   gasPrice: 225000000000,
+    //   chainId: 43114,
+    //   accounts: [],
+    // },
     ftmtest: {
       url: "https://rpc.testnet.fantom.network/",
       chainId: 0xfa2,
@@ -85,6 +85,12 @@ export default {
       url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
       // gasLimit: 25000000,
       chainId: 97,
+      accounts: [`0x${PRIVATEKEY}`],
+    },
+    onetest: {
+      url: "https://api.s0.b.hmny.io",
+      // gasLimit: 25000000,
+      chainId: 1666700000,
       accounts: [`0x${PRIVATEKEY}`],
     },
   },

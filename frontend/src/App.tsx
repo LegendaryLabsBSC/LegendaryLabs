@@ -1,8 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { legendaryLabs } from "./contract_config/ethers_config";
 
-function App() {
+const App: React.FC = () => {
+  async function createPromoEvent() {
+    if (typeof window.ethereum !== "undefined") {
+      await legendaryLabs.lab.write.createPromoEvent(
+        "1",
+        86400,
+        true,
+        0,
+        false
+      );
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -18,9 +31,12 @@ function App() {
         >
           Learn React
         </a>
+        <button type="submit" onClick={createPromoEvent}>
+          Create Promo Event
+        </button>
       </header>
     </div>
   );
-}
+};
 
 export default App;
