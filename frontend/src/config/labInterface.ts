@@ -14,7 +14,7 @@ import {
   legendRejuvenation,
   legendsMarketplace,
   legendsMatchingBoard,
-} from "./contract-config";
+} from "./contracts";
 
 // export default {
 

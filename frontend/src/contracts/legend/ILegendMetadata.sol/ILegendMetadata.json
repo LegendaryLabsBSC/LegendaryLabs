@@ -1,0 +1,193 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ILegendMetadata",
+  "sourceName": "contracts/legend/ILegendMetadata.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "legendId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        }
+      ],
+      "name": "LegendCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "legendId",
+          "type": "uint256"
+        }
+      ],
+      "name": "LegendDestroyed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "legendId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "birthday",
+          "type": "uint256"
+        }
+      ],
+      "name": "LegendHatched",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "legendId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "prefix",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "postfix",
+          "type": "string"
+        }
+      ],
+      "name": "LegendNamed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "parent1",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "parent2",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "childId",
+          "type": "uint256"
+        }
+      ],
+      "name": "LegendsBlended",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "legendId",
+          "type": "uint256"
+        }
+      ],
+      "name": "fetchLegendMetadata",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "season",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "prefix",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "postfix",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256[2]",
+              "name": "parents",
+              "type": "uint256[2]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "birthday",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "blendingInstancesUsed",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalOffspring",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address payable",
+              "name": "legendCreator",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "isLegendary",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isHatched",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isDestroyed",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ILegendMetadata.LegendMetadata",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

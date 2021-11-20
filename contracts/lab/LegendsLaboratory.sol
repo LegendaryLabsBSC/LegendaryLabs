@@ -25,7 +25,6 @@ contract LegendsLaboratory is AccessControlEnumerable, TicketMachine {
     LegendsMatchingBoard public legendsMatchingBoard =
         new LegendsMatchingBoard();
 
-
     bytes32 public constant LAB_ADMIN = keccak256("LAB_ADMIN");
     bytes32 public constant LAB_TECH = keccak256("LAB_TECH");
 

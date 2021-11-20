@@ -1,40 +1,27 @@
-import React, { useState } from "react";
-import logo from "./logo.svg";
+import React, { useState, useEffect } from "react";
 import "./App.css";
-import { legendaryLabs } from "./contract_config/ethers_config";
+import { legendaryLabs } from "./config/labInterface";
+import ManageApp from "./_tests/ManageApp";
+import Element from "./components/InputForm/InputElement";
+import formJSON from "./_tests/formElement.json";
+import { Grid, Box } from "@chakra-ui/react";
+import InputForm from "./components/InputForm/InputForm";
 
-const App: React.FC = () => {
-  async function createPromoEvent() {
-    if (typeof window.ethereum !== "undefined") {
-      await legendaryLabs.lab.write.createPromoEvent(
-        "1",
-        86400,
-        true,
-        0,
-        false
-      );
-    }
-  }
+// async function requestAccount() {
+//   try {
+//     await window.ethereum.request({ method: 'eth_requestAccounts' });
+//   } catch (error) {
+//     console.log("error");
+//     console.error(error);
 
+//     alert("Login to Metamask first");
+//   }
+// }
+
+const App = () => {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <button type="submit" onClick={createPromoEvent}>
-          Create Promo Event
-        </button>
-      </header>
+      <InputForm />
     </div>
   );
 };
