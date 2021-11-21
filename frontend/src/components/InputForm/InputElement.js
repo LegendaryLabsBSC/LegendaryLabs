@@ -3,15 +3,13 @@ import {
   Input, Select, Radio, RadioGroup,
   Switch, Stack, FormControl, FormLabel,
   Slider, SliderTrack, SliderFilledTrack,
-  SliderThumb, NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
+  SliderThumb, NumberInput, NumberInputField,
+  NumberInputStepper, NumberIncrementStepper,
+  NumberDecrementStepper, Heading
 } from "@chakra-ui/react";
 
 
-const Element = ({
+const InputElement = ({
   field: {
     field_type, field_id,
     field_label, field_placeholder,
@@ -24,12 +22,14 @@ const Element = ({
 
   switch (field_type) {
     case "text":
-      return <Input
-        id={field_id}
-        label={field_label}
-        placeholder={field_placeholder}
-        values={field_values}
-      />;
+      return (
+          <Input
+            id={field_id}
+            label={field_label}
+            placeholder={field_placeholder}
+            values={field_values}
+          />
+      );
     case "select":
       return (
         <Select placeholder={field_placeholder}>
@@ -75,4 +75,4 @@ const Element = ({
   }
 };
 
-export default Element;
+export default InputElement;
