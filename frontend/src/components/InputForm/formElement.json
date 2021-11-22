@@ -1,10 +1,11 @@
 [
   {
-    "page_label": "Job Application Form",
+    "page_label": "createPromoEvent",
+    "colorScheme": "red",
     "fields": [
       {
         "field_id": "eventName",
-        "field_label": "Name",
+        "field_label": "Promo Name",
         "field_mandatory": "yes",
         "field_placeholder": "Enter Promo Name",
         "field_type": "text",
@@ -16,51 +17,56 @@
         "field_mandatory": "yes",
         "field_placeholder": "Select Event Duration",
         "field_type": "slider",
-        "field_options": [
-          {
-            "label": "1 Day",
-            "value": "86400"
-          },
-          {
-            "label": "1 Week",
-            "value": "604800"
-          }
-        ]
+        "field_value": "",
+        "field_options": {
+          "default": "7",
+          "min": "1",
+          "max": "365"
+        }
       },
       {
         "field_id": "isUnrestricted",
         "field_label": "Player Dispensed Promo",
         "field_mandatory": "yes",
-        "field_type": "switch"
+        "field_type": "radio",
+        "field_value": "",
+        "field_options": [
+          { "label": "Yes", "value": "1" },
+          { "label": "No", "value": "0" },
+          { "label": "Maybe", "value": "2" }
+        ]
       },
       {
         "field_id": "maxTickets",
         "field_label": "Max Ticket Limit",
         "field_mandatory": "yes",
-        "field_type": "switch"
+        "field_type": "switch",
+        "field_value": ""
       },
       {
         "field_id": "skipIncubation",
         "field_label": "Incubation Required",
         "field_mandatory": "yes",
         "field_type": "switch",
+        "field_value": "",
         "field_default": "true"
       }
     ]
   },
   {
-    "page_label": "Job Application Form",
+    "page_label": "dispensePromoTicket",
+    "colorScheme": "orange",
     "fields": [
       {
-        "field_id": "eventName",
-        "field_label": "Name",
-        "field_mandatory": "yes",
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "",
         "field_placeholder": "Enter Promo Name",
         "field_type": "text",
         "field_value": ""
       },
       {
-        "field_id": "duration",
+        "field_id": "recipient",
         "field_label": "Promo Duration",
         "field_mandatory": "yes",
         "field_placeholder": "Select Event Duration",
@@ -77,10 +83,422 @@
         ]
       },
       {
-        "field_id": "isUnrestricted",
+        "field_id": "ticketAmount",
         "field_label": "Player Dispensed Promo",
         "field_mandatory": "yes",
         "field_type": "switch"
+      }
+    ]
+  },
+  {
+    "page_label": "redeemPromoTicket",
+    "colorScheme": "orange",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "closePromoEvent",
+    "colorScheme": "red",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "restoreBlendingSlots",
+    "colorScheme": "red",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "mintLegendaryLegend",
+    "colorScheme": "red",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "labBurn",
+    "colorScheme": "red",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "withdrawMarketplaceFees",
+    "colorScheme": "red",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+
+  {
+    "page_label": "isPromoIncubated",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+
+  {
+    "page_label": "isBlendable",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+
+  {
+    "page_label": "isHatched",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+
+  {
+    "page_label": "isListable",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+
+  {
+    "page_label": "fetchSeason",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+
+  {
+    "page_label": "fetchBlendingCount",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "fetchBlendingCost",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "fetchRoyaltyRecipient",
+    "colorScheme": "blue",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setSeason",
+    "colorScheme": "red",
+    "fields": [
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setKinBlendingLevel",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setIncubationViews",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setBlendingLimit",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setBaseBlendingCost",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setIncubationPeriod",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setRoyaltyFee",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setMarketplaceFee",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setOfferDuration",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setAuctionDurations",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setAuctionExtension",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setMinimumSecure",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setMaxMultiplier",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setReJuPerBlock",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
+      }
+    ]
+  },
+  {
+    "page_label": "setReJuNeededPerSlot",
+    "colorScheme": "red",
+    "fields":[
+      {
+        "field_id": "promoId",
+        "field_label": "id",
+        "field_mandatory": "yes",
+        "field_placeholder": "Enter Promo ID",
+        "field_type": "text",
+        "field_value": ""
       }
     ]
   }
