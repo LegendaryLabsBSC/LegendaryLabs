@@ -1,7 +1,7 @@
 [
   {
     "page_label": "createPromoEvent",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "eventName",
@@ -55,7 +55,7 @@
   },
   {
     "page_label": "dispensePromoTicket",
-    "colorScheme": "orange",
+    "theme": "write",
     "fields": [
       {
         "field_id": "promoId",
@@ -92,7 +92,7 @@
   },
   {
     "page_label": "redeemPromoTicket",
-    "colorScheme": "orange",
+    "theme": "write",
     "fields": [
       {
         "field_id": "promoId",
@@ -106,7 +106,7 @@
   },
   {
     "page_label": "closePromoEvent",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "promoId",
@@ -120,7 +120,7 @@
   },
   {
     "page_label": "restoreBlendingSlots",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "promoId",
@@ -134,7 +134,7 @@
   },
   {
     "page_label": "mintLegendaryLegend",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "promoId",
@@ -148,7 +148,7 @@
   },
   {
     "page_label": "labBurn",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "promoId",
@@ -161,8 +161,8 @@
     ]
   },
   {
-    "page_label": "withdrawMarketplaceFees",
-    "colorScheme": "red",
+    "page_label": "collectMarketplaceFees",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "promoId",
@@ -177,7 +177,7 @@
 
   {
     "page_label": "isPromoIncubated",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -192,7 +192,7 @@
 
   {
     "page_label": "isBlendable",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -207,7 +207,7 @@
 
   {
     "page_label": "isHatched",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -222,7 +222,7 @@
 
   {
     "page_label": "isListable",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -237,7 +237,7 @@
 
   {
     "page_label": "fetchSeason",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -252,7 +252,7 @@
 
   {
     "page_label": "fetchBlendingCount",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -266,7 +266,7 @@
   },
   {
     "page_label": "fetchBlendingCost",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -280,7 +280,7 @@
   },
   {
     "page_label": "fetchRoyaltyRecipient",
-    "colorScheme": "blue",
+    "theme": "read",
     "fields": [
       {
         "field_id": "promoId",
@@ -294,7 +294,7 @@
   },
   {
     "page_label": "setSeason",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields": [
       {
         "field_id": "promoId",
@@ -308,7 +308,7 @@
   },
   {
     "page_label": "setKinBlendingLevel",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -322,7 +322,7 @@
   },
   {
     "page_label": "setIncubationViews",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -336,7 +336,7 @@
   },
   {
     "page_label": "setBlendingLimit",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -350,7 +350,7 @@
   },
   {
     "page_label": "setBaseBlendingCost",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -364,7 +364,7 @@
   },
   {
     "page_label": "setIncubationPeriod",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -378,7 +378,7 @@
   },
   {
     "page_label": "setRoyaltyFee",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -392,7 +392,7 @@
   },
   {
     "page_label": "setMarketplaceFee",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -406,7 +406,7 @@
   },
   {
     "page_label": "setOfferDuration",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -420,7 +420,7 @@
   },
   {
     "page_label": "setAuctionDurations",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -434,7 +434,7 @@
   },
   {
     "page_label": "setAuctionExtension",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -448,7 +448,7 @@
   },
   {
     "page_label": "setMinimumSecure",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -462,7 +462,7 @@
   },
   {
     "page_label": "setMaxMultiplier",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -476,7 +476,7 @@
   },
   {
     "page_label": "setReJuPerBlock",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",
@@ -490,7 +490,7 @@
   },
   {
     "page_label": "setReJuNeededPerSlot",
-    "colorScheme": "red",
+    "theme": "write-lab",
     "fields":[
       {
         "field_id": "promoId",

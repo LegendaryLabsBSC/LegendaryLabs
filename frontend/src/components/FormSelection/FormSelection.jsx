@@ -10,14 +10,44 @@ const FormSelection = (props) => {
     props.newPage(pageIndex)
   };
 
+  const setColorScheme = (theme) => {
+    switch (theme) {
+
+      case "write-lab":
+        return {
+          colorScheme: "red",
+          borderColor: "black",
+          borderWidth: 3
+        }
+
+      case "write":
+        return {
+          colorScheme: "red"
+        }
+
+      case "read":
+        return {
+          colorScheme: "blue"
+        }
+
+      default:
+        return {
+          colorScheme: "gray"
+        }
+
+    }
+  }
+
   return (
     <SimpleGrid columns={4} spacing={5} >
       {
+
         formJSON.map((page, i) =>
-          <Button
+
+          < Button
             size="md"
             fontSize={11}
-            colorScheme={page.colorScheme}
+            {...setColorScheme(page.theme)}
             onClick={() => handleOnClick(i)}
           >
             {page.page_label}

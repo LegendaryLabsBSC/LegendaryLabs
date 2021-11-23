@@ -55,6 +55,7 @@ const InputForm = (props) => {
           <Stack spacing={5}>
             <Heading as="h4" size="md">{page_label}</Heading>
             <form>
+              //todo: change key from using index
               {fields ? fields.map((field, i) => <Element key={i} field={field} />) : null}
               <Button type="submit" onClick={(e) => handleSubmit(e)}>Submit</Button>
             </form>
