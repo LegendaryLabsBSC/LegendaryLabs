@@ -3615,7 +3615,7 @@ img.rounded {
  Cookie Alert
 
  -------------------------------------------------------------------*/
-.nk-cookie-alert {
+/** .nk-cookie-alert {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -3624,14 +3624,14 @@ img.rounded {
     margin: 30px;
     background-color: #0e0e0e;
     z-index: 2000;
-}
+} **/
 
-.nk-cookie-alert .nk-cookie-alert-close {
+/** .nk-cookie-alert .nk-cookie-alert-close {
     float: right;
     padding-bottom: 10px;
     padding-left: 10px;
     cursor: pointer;
-}
+} **/
 
 /*------------------------------------------------------------------
 
