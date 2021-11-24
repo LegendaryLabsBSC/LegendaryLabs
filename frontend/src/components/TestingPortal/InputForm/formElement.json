@@ -5,9 +5,9 @@
     "fields": [
       {
         "field_id": "eventName",
-        "field_label": "Promo Name",
+        "field_label": "Enter Promo Name",
         "field_mandatory": "yes",
-        "field_placeholder": "Enter Promo Name",
+        "field_placeholder": "Promo Event Name",
         "field_type": "text",
         "field_value": ""
       },
@@ -15,41 +15,48 @@
         "field_id": "duration",
         "field_label": "Promo Duration",
         "field_mandatory": "yes",
-        "field_placeholder": "Select Event Duration",
         "field_type": "slider",
-        "field_value": "",
+        "field_value": 1,
         "field_options": {
-          "default": "7",
-          "min": "1",
-          "max": "365"
+          "min": 1,
+          "max": 365
         }
       },
       {
         "field_id": "isUnrestricted",
-        "field_label": "Player Dispensed Promo",
+        "field_label": "Promo Event Type",
         "field_mandatory": "yes",
-        "field_type": "radio",
-        "field_value": "",
+        "field_type": "select",
+        "field_value": "false",
+        "checked": "",
         "field_options": [
-          { "label": "Yes", "value": "1" },
-          { "label": "No", "value": "0" },
-          { "label": "Maybe", "value": "2" }
+          { "label": "Admin-Dispensed Event", "value": "false" },
+          { "label": "Player-Dispensed Event", "value": "true" }
         ]
       },
       {
         "field_id": "maxTickets",
         "field_label": "Max Ticket Limit",
         "field_mandatory": "yes",
-        "field_type": "switch",
-        "field_value": ""
+        "field_type": "radio",
+        "field_value": "false",
+        "field_options": [
+          { "label": "No", "value": "false" },
+          { "label": "Yes", "value": "true" }
+        ],
+        "field_conditional": true
       },
       {
         "field_id": "skipIncubation",
         "field_label": "Incubation Required",
         "field_mandatory": "yes",
-        "field_type": "switch",
-        "field_value": "",
-        "field_default": "true"
+        "field_type": "radio",
+        "field_value": "true",
+        "field_options": [
+          { "label": "Yes", "value": "true" },
+          { "label": "No", "value": "false" }
+        ],
+        "field_conditional": false
       }
     ]
   },
@@ -309,7 +316,7 @@
   {
     "page_label": "setKinBlendingLevel",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -323,7 +330,7 @@
   {
     "page_label": "setIncubationViews",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -337,7 +344,7 @@
   {
     "page_label": "setBlendingLimit",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -351,7 +358,7 @@
   {
     "page_label": "setBaseBlendingCost",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -365,7 +372,7 @@
   {
     "page_label": "setIncubationPeriod",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -379,7 +386,7 @@
   {
     "page_label": "setRoyaltyFee",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -393,7 +400,7 @@
   {
     "page_label": "setMarketplaceFee",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -407,7 +414,7 @@
   {
     "page_label": "setOfferDuration",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -421,7 +428,7 @@
   {
     "page_label": "setAuctionDurations",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -435,7 +442,7 @@
   {
     "page_label": "setAuctionExtension",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -449,7 +456,7 @@
   {
     "page_label": "setMinimumSecure",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -463,7 +470,7 @@
   {
     "page_label": "setMaxMultiplier",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -477,7 +484,7 @@
   {
     "page_label": "setReJuPerBlock",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
@@ -491,7 +498,7 @@
   {
     "page_label": "setReJuNeededPerSlot",
     "theme": "write-lab",
-    "fields":[
+    "fields": [
       {
         "field_id": "promoId",
         "field_label": "id",
