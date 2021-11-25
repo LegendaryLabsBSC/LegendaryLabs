@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { Heading } from "@chakra-ui/react";
+import { Heading, Flex } from "@chakra-ui/react";
+import Sidebar from "./components/Sidebar/Sidebar";
 
 import TestingPortal from "./components/TestingPortal/TestingPortal";
 
 const App = () => {
   return (
-    <div className="App">
-      <Heading as="h1" size="2xl">
-        Legendary Labs Testing Portal
-      </Heading>
+    <Flex flexDirection="row">
+      <Sidebar />
       <TestingPortal />
-    </div>
+    </Flex>
   );
 };
 

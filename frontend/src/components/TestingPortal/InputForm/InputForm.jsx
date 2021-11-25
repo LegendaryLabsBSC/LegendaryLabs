@@ -49,7 +49,7 @@ const InputForm = (props) => {
 
   //todo: change key from using index
   return (
-    <GridItem rowSpan={2} colSpan={2}>
+    // <GridItem rowSpan={2} colSpan={2}>
 
       <FormContext.Provider value={{ handleChange }}>
         <Grid
@@ -85,7 +85,7 @@ const InputForm = (props) => {
           </Box>
         </Grid >
       </FormContext.Provider >
-    </GridItem>
+    // </GridItem>
   )
 }
 
