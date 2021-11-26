@@ -22,7 +22,7 @@ const Sidebar = () => {
         p="5%"
         flexDir="column"
         w="100%"
-        alignItem={navSize === "small" ? "center" : "flex-start"}
+        alignItems={navSize === "small" ? "center" : "flex-start"}
         as="nav"
         h="100%"
       >
@@ -47,7 +47,7 @@ const Sidebar = () => {
         p="5%"
         flexDirection="column"
         w="100%"
-        alignItem={navSize === "small" ? "center" : "flex-start"}
+        alignItems={navSize === "small" ? "center" : "flex-start"}
         mb={4}
       >
         <Divider display={navSize === "small" ? "none" : "flex"} />
