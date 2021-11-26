@@ -9,7 +9,7 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 
-const TestingConsole = () => {
+const OutputConsole = () => {
   return (
     <GridItem rowSpan={2} colSpan={2}>
     <Grid>
@@ -19,4 +19,4 @@ const TestingConsole = () => {
   )
 }
 
-export default TestingConsole
+export default OutputConsole

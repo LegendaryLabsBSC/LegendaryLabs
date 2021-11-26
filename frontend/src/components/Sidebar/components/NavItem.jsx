@@ -7,8 +7,10 @@ import {
   Icon,
   Text
 } from '@chakra-ui/react'
+import { Link as ReachLink } from "@reach/router"
 
-const NavItem = ({ navSize, icon, title, active }) => {
+
+const NavItem = ({ navSize, icon, title, active, route }) => {
   return (
     <Flex
       mt={30}
@@ -17,7 +19,7 @@ const NavItem = ({ navSize, icon, title, active }) => {
       alignItems={navSize === "small" ? "center" : "flex-start"}
     >
       <Menu placement="right">
-        <Link
+        <Link as={ReachLink} to={route}
           backgroundColor={active && "blue.500"}
           p={3}
           borderRadius={8}

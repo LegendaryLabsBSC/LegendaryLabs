@@ -1,10 +1,10 @@
 import React from 'react'
-import formJSON from '../InputForm/formElement.json'
+import formJSON from '../../InputForm/formElement.json'
 import { Button, SimpleGrid } from '@chakra-ui/react'
 
 //todo: button color
 
-const FormSelection = (props) => {
+const ElementSelection = (props) => {
 
   const handleOnClick = (pageIndex) => {
     props.newPage(pageIndex)
@@ -17,7 +17,7 @@ const FormSelection = (props) => {
         return {
           colorScheme: "red",
           borderColor: "black",
-          borderWidth: 3
+          borderWidth: 3,
         }
 
       case "write":
@@ -49,6 +49,7 @@ const FormSelection = (props) => {
             fontSize={11}
             {...setColorScheme(page.theme)}
             onClick={() => handleOnClick(i)}
+            boxShadow="0 4px 12px rgba(0,0,0,0.55)"
           >
             {page.page_label}
           </Button>
@@ -58,4 +59,4 @@ const FormSelection = (props) => {
   )
 }
 
-export default FormSelection
+export default ElementSelection
