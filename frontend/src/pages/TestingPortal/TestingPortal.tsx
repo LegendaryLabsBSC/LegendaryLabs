@@ -21,19 +21,8 @@ const TestingPortal = (props: any) => {
       justifyContent="space-between"
       // alignItems="center"
     >
-      {/* <Flex
-        ml="5"
-        // alignItems="center"
-        h="95vh"
-        mt="2.5vh"
-        w="60vw"
-        borderWidth={2} //vis
-      > */}
-        <FormSelection newPage={setPage} />
-      {/* </Flex> */}
-
+      <FormSelection newPage={setPage} />
       <InputForm page={page} />
-      {/* <OutputConsole /> */}
     </Flex>
   );
 };

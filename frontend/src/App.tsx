@@ -1,16 +1,16 @@
 import React, { useState, useEffect, lazy } from "react";
 import { Heading, Flex, Spacer, HStack } from "@chakra-ui/react";
 import Sidebar from "./components/Sidebar/Sidebar";
-import TestingPortal from "./components/TestingPortal/TestingPortal";
+import TestingPortal from "./pages/TestingPortal/TestingPortal";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Link as RouteLink,
 } from "react-router-dom";
-import Home from "./Home";
+import Home from "./pages/Home/Home";
 import ContractSelection from "./pages/ContractSelection/ContractSelection";
-import Settings from "./Settings";
+import Settings from "./pages/Settings/Settings";
 
 const App = () => {
   return (
@@ -18,9 +18,7 @@ const App = () => {
       <Router>
         <Sidebar />
         <Routes>
-          {/* <Route path="/" element={<Home />} /> */}
-          <Route path="/" element={<TestingPortal />} />
-          <Route path="/contract-selection" element={<ContractSelection />} />
+          <Route path="/" element={<Home />} />
           <Route path="/testing-portal" element={<TestingPortal />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

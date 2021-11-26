@@ -10,7 +10,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 import ElementSelection from "./components/ElementSelection";
-import NavItem from "../../Sidebar/components/NavItem";
+import NavItem from "../../../components/Sidebar/components/NavItem";
 import { FiHome } from "react-icons/fi";
 
 const FormSelection = (props) => {
@@ -28,7 +28,10 @@ const FormSelection = (props) => {
 
       <Flex alignItems="center" flexDirection="row" w="100%" >
         <Box>
-          <NavItem icon={FiHome} title="Back" />
+          <NavItem 
+          icon={FiHome} 
+          title="Back" // change to selection of contracts
+           /> 
         </Box>
         <Spacer />
         <Box>

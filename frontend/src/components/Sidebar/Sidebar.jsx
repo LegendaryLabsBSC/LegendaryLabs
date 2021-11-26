@@ -46,24 +46,16 @@ const Sidebar = () => {
               changeNavSize("small")
           }}
         />
+
         <RouteLink to="/">
-
-          <NavItem navSize={navSize} icon={FiHome} title="Home" 
-          // route={"/home"}
-           />
+          <NavItem navSize={navSize} icon={FiHome} title="Home" />
         </RouteLink>
-        <RouteLink to="/contract-selection">
-
-          <NavItem navSize={navSize} icon={FiFileText} title="Contracts" 
-          // route={"/contractselection"} 
-          />
+        <RouteLink to="/testing-portal">
+          <NavItem navSize={navSize} icon={FiFileText} title="Contracts" />
         </RouteLink>
         <Spacer />
         <RouteLink to="settings">
-
-          <NavItem navSize={navSize} icon={FiSettings} title="Settings" 
-          // route={"/settings"}
-           />
+          <NavItem navSize={navSize} icon={FiSettings} title="Settings" />
         </RouteLink>
 
       </Flex>

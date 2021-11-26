@@ -78,37 +78,41 @@ const InputForm = (props) => {
         </Flex>
 
         <Flex
-          borderWidth={2}
+          // borderWidth={2}
           flexDirection="column"
           // justifyContent="center"
-          borderColor="blue"
+          // borderColor="blue"
           h="60%"
           p={5}
         >
           <form>
-            {
-              fields ? fields.map((field, i) =>
-                <FormControl
-                  align="center"
-                  // borderWidth={2}
-                  // borderColor="green"
-                  p={1}
-                >
-                  <FormLabel fontWeight="bold">{field.field_label}:</FormLabel>
-                  <Element key={i} field={field} />
-                </FormControl>
-              ) : null
-            }
+            <Flex flexDirection="column">
+              {
+                fields ? fields.map((field, i) =>
+                  <FormControl
+                    align="center"
+                    // borderWidth={2}
+                    // borderColor="green"
+                    p={1}
+                  >
+                    <FormLabel fontWeight="bold">{field.field_label}:</FormLabel>
+                    <Element key={i} field={field} />
+                  </FormControl>
+                ) : null
+              }
+            </Flex>
+
             <Flex
-              // borderWidth={3}
               flexDirection="column"
               alignItems="center"
-              p={3}
-              mt={5}
+              p={2}
+              mt={3}
             >
+              {/* <Spacer /> */}
               <Button
                 type="submit"
-                // m={3}
+                // w="30%"
+                size="lg"
                 onClick={(e) => handleSubmit(e)}
               >
                 Submit
@@ -116,8 +120,16 @@ const InputForm = (props) => {
             </Flex>
           </form>
         </Flex>
+
+
+
+
+
         <OutputConsole />
-      </Flex>
+
+
+
+      </Flex >
     </FormContext.Provider >
   )
 }

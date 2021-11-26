@@ -22,10 +22,16 @@ const ContractSelection = () => {
 
       <Flex
         ml="5"
+        // flexDirection="column"
+        boxShadow="0 4px 12px rgba(0,0,0,0.15)"
+        borderRadius={30}
         alignItems="center"
-        h="100%"
+        h="90vh"
+        mt="2.5vh"
+        w="77.7vw" // change to flex around the loaded contracts
+        
       >
-        <ContractsLoader />
+        {/* <ContractsLoader /> */}
       </Flex>
 
     </Flex>
