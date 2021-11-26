@@ -53,8 +53,8 @@
         "field_type": "radio",
         "field_value": "true",
         "field_options": [
-          { "label": "Yes", "value": "true" },
-          { "label": "No", "value": "false" }
+          { "label": "No", "value": "false" },
+          { "label": "Yes", "value": "true" }
         ],
         "field_conditional": false
       }

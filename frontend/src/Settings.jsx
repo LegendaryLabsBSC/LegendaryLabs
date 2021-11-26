@@ -1,8 +1,7 @@
 import React from 'react'
 import { Flex } from '@chakra-ui/react'
 
-
-const Home = () => {
+const Settings = () => {
   return (
     <Flex
       pos="sticky"
@@ -22,4 +21,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Settings

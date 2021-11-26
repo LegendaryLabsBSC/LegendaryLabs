@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import Home from "./Home";
 import ContractSelection from "./pages/ContractSelection/ContractSelection";
+import Settings from "./Settings";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
           <Route path="/" element={<TestingPortal />} />
           <Route path="/contract-selection" element={<ContractSelection />} />
           <Route path="/testing-portal" element={<TestingPortal />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Router>
     </Flex>

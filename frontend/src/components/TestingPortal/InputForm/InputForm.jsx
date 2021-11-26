@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Element from "./Element"
 import formJSON from './formElement.json'
-import { Grid, Box, Button, Stack, Heading, HStack, FormLabel, FormControl, GridItem } from '@chakra-ui/react'
+import { Grid, Box, Button, Stack, Heading, HStack, FormLabel, FormControl, GridItem, Flex, Spacer, Divider } from '@chakra-ui/react'
 import { FormContext } from './FormContext';
 
 const InputForm = (props) => {
@@ -48,44 +48,75 @@ const InputForm = (props) => {
   }
 
   //todo: change key from using index
+  //todo: make form header text color match button color
   return (
     // <GridItem rowSpan={2} colSpan={2}>
 
-      <FormContext.Provider value={{ handleChange }}>
-        <Grid
-        //  style={{ padding: "80px 5px 0 5px" }}
-        >
-          <Box
+    <FormContext.Provider value={{ handleChange }}>
+      <Flex
+        boxShadow="0 4px 12px rgba(0,0,0,0.15)"
+        borderRadius={30}
+        flexDirection="column"
+        mr={5}
+        h="90vh"
+        mt="2.5vh"
+        w="25vw"
+      // alignItems="center"
+      >
 
-            style={{
-              maxWidth: 6000,
-              // maxHeight={600}
-              // margin="auto"
-              borderWidth: 5
-            }}
-          >
-            <Stack maxWidth={60}>
-              <Box style={{ margin: "5% 15%", padding: "3%", borderWidth: 3 }}>
-                <Heading as="h4" size="md">{page_label}</Heading>
-              </Box>
-              <form>
-                {
-                  fields ? fields.map((field, i) =>
-                    <FormControl align="center" style={{ margin: "1% 3%" }} >
-                      <FormLabel fontWeight="bold">{field.field_label}:</FormLabel>
-                      <Box maxWidth={300}>
-                        <Element key={i} field={field} />
-                      </Box>
-                    </FormControl>
-                  ) : null
-                }
-                <Button type="submit" style={{ margin: "3% 0" }} onClick={(e) => handleSubmit(e)}>Submit</Button>
-              </form>
-            </Stack>
-          </Box>
-        </Grid >
-      </FormContext.Provider >
-    // </GridItem>
+
+        <Flex
+          flexDirection="row"
+          // borderWidth={3}
+          justify="center"
+          w="100%"
+          mt={4}
+          mb={3}
+        >
+          <Heading as="h4" size="md">{page_label}</Heading>
+        </Flex>
+
+        <Flex
+          borderWidth={2}
+          flexDirection="column"
+          // justifyContent="center"
+          borderColor="blue"
+          h="60%"
+          p={5}
+        >
+          <form>
+            {
+              fields ? fields.map((field, i) =>
+                <FormControl
+                  align="center"
+                  // borderWidth={2}
+                  // borderColor="green"
+                  p={1}
+                >
+                  <FormLabel fontWeight="bold">{field.field_label}:</FormLabel>
+                  <Element key={i} field={field} />
+                </FormControl>
+              ) : null
+            }
+            <Flex
+              // borderWidth={3}
+              flexDirection="column"
+              alignItems="center"
+              p={3}
+              mt={5}
+            >
+              <Button
+                type="submit"
+                // m={3}
+                onClick={(e) => handleSubmit(e)}
+              >
+                Submit
+              </Button>
+            </Flex>
+          </form>
+        </Flex>
+      </Flex>
+    </FormContext.Provider >
   )
 }
 

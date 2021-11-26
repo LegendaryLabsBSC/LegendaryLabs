@@ -19,7 +19,7 @@ const Sidebar = () => {
       pos="sticky"
       left="5"
       h="95vh"
-      marginTop="2.5vh"
+      mt="2.5vh"
       boxShadow="0 4px 12px rgba(0,0,0,0.15)"
       borderRadius={navSize === "small" ? "15px" : "30px"}
       w={navSize === "small" ? "100px" : "200px"}
