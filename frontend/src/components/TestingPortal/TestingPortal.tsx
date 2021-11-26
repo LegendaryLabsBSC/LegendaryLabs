@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import InputForm from "./InputForm/InputForm";
 import FormSelection from "./FormSelection/FormSelection";
 import { Flex } from "@chakra-ui/react";
-import OutputConsole from "./OutputConsole/OutputConsole";
+// import OutputConsole from "./OutputConsole/OutputConsole";
 
 const TestingPortal = (props: any) => {
   const [page, setPage] = useState(0);

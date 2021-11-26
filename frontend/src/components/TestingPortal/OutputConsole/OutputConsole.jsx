@@ -1,21 +1,24 @@
 import React from 'react'
 import {
-  Grid,
-  Box,
-  Button,
-  Stack,
-  Heading,
-  SimpleGrid,
-  GridItem,
+  Container,
+  Flex, Textarea
 } from "@chakra-ui/react";
 
 const OutputConsole = () => {
   return (
-    <GridItem rowSpan={2} colSpan={2}>
-    <Grid>
-      <Box borderWidth={5}></Box>
-    </Grid>
-    </GridItem>
+    <Flex
+      // borderWidth={3}
+      w="24vw"
+      ml=".5vw"
+      h="27vh"
+      mt="1vh"
+      boxShadow="0 4px 12px rgba(0,0,0,0.15) inset"
+      borderRadius={15}
+    >
+      <Container>
+
+      </Container>
+    </Flex>
   )
 }
 

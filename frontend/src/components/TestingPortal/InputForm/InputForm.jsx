@@ -3,6 +3,7 @@ import Element from "./Element"
 import formJSON from './formElement.json'
 import { Grid, Box, Button, Stack, Heading, HStack, FormLabel, FormControl, GridItem, Flex, Spacer, Divider } from '@chakra-ui/react'
 import { FormContext } from './FormContext';
+import OutputConsole from '../OutputConsole/OutputConsole';
 
 const InputForm = (props) => {
 
@@ -115,6 +116,7 @@ const InputForm = (props) => {
             </Flex>
           </form>
         </Flex>
+        <OutputConsole />
       </Flex>
     </FormContext.Provider >
   )
