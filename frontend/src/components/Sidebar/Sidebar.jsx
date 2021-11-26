@@ -2,9 +2,13 @@ import React, { useState, lazy } from 'react'
 import { Avatar, Divider, Flex, Heading, IconButton, Spacer, Text, Box } from '@chakra-ui/react'
 import { FiMenu, FiHome, FiSettings, FiFileText, FiFile } from "react-icons/fi";
 import NavItem from "./components/NavItem"
-import { Router, Link} from "@reach/router";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link as RouteLink
+} from "react-router-dom";
 
-// const Home = lazy(() => import('../../pages/ContractSelection/ContractSelection'))
+// const Home = lazy(() => import('../../Home.jsx'))
 
 
 const Sidebar = () => {
@@ -14,7 +18,7 @@ const Sidebar = () => {
     <Flex
       pos="sticky"
       left="5"
-      // h="95vh"
+      h="95vh"
       marginTop="2.5vh"
       boxShadow="0 4px 12px rgba(0,0,0,0.15)"
       borderRadius={navSize === "small" ? "15px" : "30px"}
@@ -42,11 +46,28 @@ const Sidebar = () => {
               changeNavSize("small")
           }}
         />
-        <NavItem navSize={navSize} icon={FiHome} title="Home" route={"/home"} />
-        <NavItem navSize={navSize} icon={FiFileText} title="Contracts" route={"/contractselection"} />
+        <RouteLink to="/">
+
+          <NavItem navSize={navSize} icon={FiHome} title="Home" 
+          // route={"/home"}
+           />
+        </RouteLink>
+        <RouteLink to="/contract-selection">
+
+          <NavItem navSize={navSize} icon={FiFileText} title="Contracts" 
+          // route={"/contractselection"} 
+          />
+        </RouteLink>
         <Spacer />
-        <NavItem navSize={navSize} icon={FiSettings} title="Settings" route={"/settings"} />
+        <RouteLink to="settings">
+
+          <NavItem navSize={navSize} icon={FiSettings} title="Settings" 
+          // route={"/settings"}
+           />
+        </RouteLink>
+
       </Flex>
+
 
       <Flex
         p="5%"
