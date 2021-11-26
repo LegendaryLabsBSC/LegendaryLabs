@@ -13,6 +13,7 @@ import ElementSelection from "./components/ElementSelection";
 import NavItem from "../../../components/Sidebar/components/NavItem";
 import { FiHome } from "react-icons/fi";
 
+
 const FormSelection = (props) => {
   return (
     <Flex
@@ -28,10 +29,10 @@ const FormSelection = (props) => {
 
       <Flex alignItems="center" flexDirection="row" w="100%" >
         <Box>
-          <NavItem 
-          icon={FiHome} 
-          title="Back" // change to selection of contracts
-           /> 
+          <NavItem
+            icon={FiHome}
+            title="Back" // change to selection of contracts
+          />
         </Box>
         <Spacer />
         <Box>
@@ -48,13 +49,13 @@ const FormSelection = (props) => {
       <Divider />
       <Flex
         mt={16}
-        // alignItems="center"
-        // justify-content='center'
-        // w="100%"
-        // borderWidth={3}
+      // alignItems="center"
+      // justify-content='center'
+      // w="100%"
+      // borderWidth={3}
       >
-      <ElementSelection newPage={props.newPage} />
-    </Flex>
+        <ElementSelection newPage={props.newPage} />
+      </Flex>
     </Flex >
   );
 };

@@ -7,8 +7,8 @@ import {
   Route,
   Link as RouteLink
 } from "react-router-dom";
-
-// const Home = lazy(() => import('../../Home.jsx'))
+import { GrDocumentTest } from "react-icons/gr"
+import { GiMagicPortal } from "react-icons/gi"
 
 
 const Sidebar = () => {
@@ -50,8 +50,8 @@ const Sidebar = () => {
         <RouteLink to="/">
           <NavItem navSize={navSize} icon={FiHome} title="Home" />
         </RouteLink>
-        <RouteLink to="/testing-portal">
-          <NavItem navSize={navSize} icon={FiFileText} title="Contracts" />
+        <RouteLink to="/contract-testing">
+          <NavItem navSize={navSize} icon={GrDocumentTest} title="Contract Testing" />
         </RouteLink>
         <Spacer />
         <RouteLink to="settings">

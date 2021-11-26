@@ -25,7 +25,7 @@ const NavItem = ({ navSize, icon, title, active, route }) => {
           _hover={{ textDecor: 'none', backgroundColor: 'blue.500' }}
           w={navSize === "large" && "100%"}
         >
-          <MenuButton w="100%">
+          <MenuButton >
             <Flex>
               <Icon as={icon} fontSize="xl" color={active ? "#82AAAD" : "grey.500"} />
               <Text ml={5} display={navSize === "small" ? "none" : "flex"}>{title}</Text>
