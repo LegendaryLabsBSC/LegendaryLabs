@@ -30,9 +30,8 @@ import SmartContracts from '../../SmartContracts/SmartContracts';
 
 const FormHeader = (props) => {
 
-  const handleOnClick = (contractIndex) => {
-    console.log(contractIndex)
-    props.setContract(contractIndex)
+  const handleOnClick = (contractData) => {
+    props.setContract(contractData)
     console.log(props.contract)
   }
 
@@ -47,10 +46,6 @@ const FormHeader = (props) => {
 
 
       <Menu >
-        {/* <Routes>
-          <Route path="/contract-testing/" element={<ContractTesting />} />
-        </Routes> */}
-        {/* <Box> */}
         <MenuButton
           as={Button}
           leftIcon={<FiFileText />}
@@ -64,8 +59,9 @@ const FormHeader = (props) => {
         <MenuList>
           <MenuOptionGroup
             title="Contracts"
-            defaultValue={`${props.contract}`} // todo: make contract persist on refresh
+            // defaultValue={`0`} // todo: make contract persist on refresh
             type='radio'
+          //todo: add second group to use as a filter; read,write, etc
           >
             {
               SmartContracts.map((contract, i) =>

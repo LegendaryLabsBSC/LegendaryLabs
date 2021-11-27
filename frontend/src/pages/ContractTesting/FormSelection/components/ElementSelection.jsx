@@ -33,12 +33,12 @@ const ElementSelection = (props) => {
           borderWidth: 3,
         }
 
-      case "write":
+      case "nonpayable":
         return {
           colorScheme: "red"
         }
 
-      case "read":
+      case "view":
         return {
           colorScheme: "blue"
         }
@@ -52,34 +52,30 @@ const ElementSelection = (props) => {
   }
 
   return (
-    <SimpleGrid columns={4} spacing={5} >
-      {
-        props.contract && props.contract.abi && props.contract.abi.map((page, i) =>
-        // props.contract.map((page, i) =>
-        // contractABI.map((page, i) =>
-        // SmartContracts[0].map((page, i) =>
-        // props.contract.abi.map((page, i) =>
-        // formJSON.map((page, i) =>
-        // SmartContracts.map((page, i) =>
-        // page.abi.map((page, i) =>
-        (
-          // c.name ?
-          < Button
-            size="md"
-            fontSize={11}
-            {...setColorScheme(page.theme)}
-            onClick={() => handleOnClick(i)}
-            boxShadow="0 4px 12px rgba(0,0,0,0.55)"
-          >
-            {/* {c.name} */}
-            {page.name}
-          </Button>
-          // : null
-        )
-        )
-        // )
-      }
-    </SimpleGrid >
+    <Flex>
+      <SimpleGrid columns={4} spacingX={3} spacingY={2} >
+        {
+          props.contract &&
+          props.contract.abi &&
+          props.contract.abi.map((page, i) =>
+          (
+            (page.name && page.type === "function") ?
+              < Button
+                size="md"
+                fontSize={11}
+                {...setColorScheme(page.stateMutability)}
+                onClick={() => handleOnClick(i)}
+                boxShadow="0 4px 12px rgba(0,0,0,0.55)"
+                w="90%"
+              >
+                {page.name}
+              </Button>
+              : null
+          )
+          )
+        }
+      </SimpleGrid >
+    </Flex >
   )
 }
 
