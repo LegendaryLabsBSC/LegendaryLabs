@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Element from "./Element"
+import Element from "./components/Element"
 import formJSON from './formElement.json'
 import {
   PopoverArrow,
@@ -22,8 +22,9 @@ import {
   Popover,
   PopoverTrigger
 } from '@chakra-ui/react'
-import { FormContext } from './FormContext';
+import { FormContext } from './components/FormContext';
 import OutputConsole from '../OutputConsole/OutputConsole';
+import PopoverHeading from './components/PopoverHeading';
 
 const InputForm = (props) => {
 
@@ -92,39 +93,7 @@ const InputForm = (props) => {
 
       // alignItems="center"
       >
-
-
-        <Flex
-          flexDirection="row"
-          // borderWidth={3}
-          justify="center"
-          w="100%"
-          mt={4}
-        // mb={3}
-        >
-          <Popover>
-            <PopoverTrigger>
-              <Button
-                background="none"
-                _hover={{ background: 'blue.500' }}
-              >
-                <Heading as="h4" size="md">{page_label}</Heading>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverCloseButton />
-              <PopoverBody>
-                <iframe
-                  src={`https://docs.legendarylabs.net/docs/contracts/lab/LegendsLaboratory#${page_label}`}
-                  // todo: fix this to handle dynamic slugs^
-                  width="500px"
-                  height="500px">
-                </iframe>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        </Flex>
-
+        <PopoverHeading title={page_label} />
         <Flex
           // borderWidth={2}
           flexDirection="column"
@@ -173,7 +142,7 @@ const InputForm = (props) => {
 
 
 
-        <OutputConsole navSize={props.navSize}/>
+        <OutputConsole navSize={props.navSize} />
 
 
 
