@@ -1,6 +1,6 @@
 import React, { useState, lazy } from 'react'
 import { Avatar, Divider, Flex, Heading, IconButton, Spacer, Text, Box } from '@chakra-ui/react'
-import { FiMenu, FiHome, FiSettings, FiFileText, FiFile } from "react-icons/fi";
+import { FiMenu, FiHome, FiSettings} from "react-icons/fi";
 import NavItem from "./components/NavItem"
 import {
   BrowserRouter as Router,
@@ -8,7 +8,6 @@ import {
   Link as RouteLink
 } from "react-router-dom";
 import { GrDocumentTest } from "react-icons/gr"
-import { GiMagicPortal } from "react-icons/gi"
 
 
 const Sidebar = () => {
@@ -20,11 +19,13 @@ const Sidebar = () => {
       left="5"
       h="95vh"
       mt="2.5vh"
-      boxShadow="0 4px 12px rgba(0,0,0,0.15)"
+      boxShadow="0 6px 12px rgba(49,130,206,1)"
       borderRadius={navSize === "small" ? "15px" : "30px"}
       w={navSize === "small" ? "100px" : "200px"}
       flexDir="column"
       justifyContent="space-between"
+      // background="blue.600"
+
     >
       <Flex
         p="5%"

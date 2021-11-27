@@ -1,13 +1,34 @@
 import React, { useState, useEffect } from 'react'
 import Element from "./Element"
 import formJSON from './formElement.json'
-import { Grid, Box, Button, Stack, Heading, HStack, FormLabel, FormControl, GridItem, Flex, Spacer, Divider } from '@chakra-ui/react'
+import {
+  PopoverArrow,
+  PopoverContent,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
+  Grid,
+  Box,
+  Button,
+  Stack,
+  Heading,
+  HStack,
+  FormLabel,
+  FormControl,
+  GridItem,
+  Flex, Spacer,
+  Divider,
+  Link,
+  Popover,
+  PopoverTrigger
+} from '@chakra-ui/react'
 import { FormContext } from './FormContext';
 import OutputConsole from '../OutputConsole/OutputConsole';
 
 const InputForm = (props) => {
 
   const [elements, setElements] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     setElements(formJSON[props.page])
@@ -48,6 +69,10 @@ const InputForm = (props) => {
     console.log(elements)
   }
 
+  const handleSlug = (label) => {
+    return label.toLowerCase()
+  }
+
   //todo: change key from using index
   //todo: make form header text color match button color
   return (
@@ -55,13 +80,15 @@ const InputForm = (props) => {
 
     <FormContext.Provider value={{ handleChange }}>
       <Flex
-        boxShadow="0 4px 12px rgba(0,0,0,0.15)"
+        boxShadow="0 4px 12px rgba(0,0,0,0.75)"
         borderRadius={30}
         flexDirection="column"
         mr={5}
         h="90vh"
         mt="2.5vh"
         w="25vw"
+        background="white"
+
       // alignItems="center"
       >
 
@@ -72,9 +99,29 @@ const InputForm = (props) => {
           justify="center"
           w="100%"
           mt={4}
-          mb={3}
+        // mb={3}
         >
-          <Heading as="h4" size="md">{page_label}</Heading>
+          <Popover>
+            <PopoverTrigger>
+              <Button
+                background="none"
+                _hover={{ background: 'blue.500' }}
+              >
+                <Heading as="h4" size="md">{page_label}</Heading>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverCloseButton />
+              <PopoverBody>
+                <iframe
+                  src={`https://docs.legendarylabs.net/docs/contracts/lab/LegendsLaboratory#${page_label}`}
+                  // todo: fix this to handle dynamic slugs^
+                  width="500px"
+                  height="500px">
+                </iframe>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Flex>
 
         <Flex
