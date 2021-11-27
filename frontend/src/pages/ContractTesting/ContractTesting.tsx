@@ -3,7 +3,6 @@ import InputForm from "./InputForm/InputForm";
 import FormSelection from "./FormSelection/FormSelection";
 import { Flex } from "@chakra-ui/react";
 // import OutputConsole from "./OutputConsole/OutputConsole";
-import ContentContainer from "../../components/Sidebar/ContentContainer";
 
 const ContractTesting = (props: any) => {
   const [page, setPage] = useState(0);

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import formJSON from '../../InputForm/formElement.json'
 import { Button, SimpleGrid, Flex } from '@chakra-ui/react'
 import SmartContracts from '../../SmartContracts/SmartContracts'
@@ -6,6 +6,18 @@ import SmartContracts from '../../SmartContracts/SmartContracts'
 //todo: button color
 
 const ElementSelection = (props) => {
+
+  // const contractABI[] = props.contract.abi.map
+  // const { tss } = props
+  const [contractABI, setContractABI] = useState(null);
+
+  useEffect(() => {
+    setContractABI(SmartContracts[0])
+  }, [props.contract])
+
+  const handleABI = () => {
+
+  }
 
   const handleOnClick = (pageIndex) => {
     props.newPage(pageIndex)
@@ -42,9 +54,14 @@ const ElementSelection = (props) => {
   return (
     <SimpleGrid columns={4} spacing={5} >
       {
-        formJSON.map((page, i) =>
+        props.contract && props.contract.abi && props.contract.abi.map((page, i) =>
+        // props.contract.map((page, i) =>
+        // contractABI.map((page, i) =>
+        // SmartContracts[0].map((page, i) =>
+        // props.contract.abi.map((page, i) =>
+        // formJSON.map((page, i) =>
         // SmartContracts.map((page, i) =>
-        // page.abi.map((c, e) =>
+        // page.abi.map((page, i) =>
         (
           // c.name ?
           < Button
@@ -55,12 +72,12 @@ const ElementSelection = (props) => {
             boxShadow="0 4px 12px rgba(0,0,0,0.55)"
           >
             {/* {c.name} */}
-            {page.page_label}
+            {page.name}
           </Button>
           // : null
         )
-          // )
         )
+        // )
       }
     </SimpleGrid >
   )

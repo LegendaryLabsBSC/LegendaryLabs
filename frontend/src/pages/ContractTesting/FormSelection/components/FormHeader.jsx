@@ -13,7 +13,9 @@ import {
   Button,
   MenuList,
   MenuItem,
-  Link
+  Link,
+  MenuOptionGroup,
+  MenuItemOption
 } from "@chakra-ui/react";
 import {
   BrowserRouter as Router,
@@ -26,7 +28,14 @@ import ContractTesting from '../../ContractTesting';
 import SmartContracts from '../../SmartContracts/SmartContracts';
 
 
-const FormHeader = () => {
+const FormHeader = (props) => {
+
+  const handleOnClick = (contractIndex) => {
+    console.log(contractIndex)
+    props.setContract(contractIndex)
+    console.log(props.contract)
+  }
+
   return (
     <Flex
       alignItems="center"
@@ -35,38 +44,50 @@ const FormHeader = () => {
       mt={3}
       mb={2}
     >
+
+
       <Menu >
-        <Routes>
+        {/* <Routes>
           <Route path="/contract-testing/" element={<ContractTesting />} />
-        </Routes>
-
-        <Box>
-          <MenuButton
-            as={Button}
-            leftIcon={<FiFileText />}
-            background="none"
-            color="blue.500"
-            _hover={{ background: 'none' }}
-          // _pressed={{ background: 'none' }}
-
+        </Routes> */}
+        {/* <Box> */}
+        <MenuButton
+          as={Button}
+          leftIcon={<FiFileText />}
+          background="none"
+          color="blue.500"
+          _hover={{ background: 'none' }}
+        // _pressed={{ background: 'none' }}
+        >
+          Contracts
+        </MenuButton>
+        <MenuList>
+          <MenuOptionGroup
+            title="Contracts"
+            defaultValue={`${props.contract}`} // todo: make contract persist on refresh
+            type='radio'
           >
-            Contracts
-          </MenuButton>
-          <MenuList>
             {
               SmartContracts.map((contract, i) =>
-                <RouteLink to={contract.contractName}>
-                  <MenuItem>{contract.contractName}</MenuItem>
-                </RouteLink>
+                <MenuItemOption
+                  value={`${i}`}
+                  onClick={() => handleOnClick(contract)}
+                >
+                  {contract.contractName}
+                </MenuItemOption>
               )
             }
-          </MenuList>
-        </Box>
+          </MenuOptionGroup>
+        </MenuList>
+        {/* </Box> */}
       </Menu>
+
+
+
       <Spacer />
       <Box>
         <Heading as="h3" size="lg">
-          LegendsLaboratory
+          {props.contract.contractName}
         </Heading>
       </Box>
       <Spacer />

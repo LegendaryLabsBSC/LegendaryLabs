@@ -10,13 +10,19 @@ import {
 
 const SmartContracts = [
   // {
-    LegendsLaboratory,
-    LegendsNFT,
-    LegendToken,
-    LegendRejuvenation,
-    LegendsMarketplace,
-    LegendsMatchingBoard,
+  //   lab: LegendsLaboratory,
+  //   nft: LegendsNFT,
+  //   token: LegendToken,
+  //   rejuvenation: LegendRejuvenation,
+  //   market: LegendsMarketplace,
+  //   matching: LegendsMatchingBoard,
   // }
+  LegendsLaboratory,
+  LegendsNFT,
+  LegendToken,
+  LegendRejuvenation,
+  LegendsMarketplace,
+  LegendsMatchingBoard,
 ]
 
 export default SmartContracts

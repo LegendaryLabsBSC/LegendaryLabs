@@ -10,7 +10,6 @@ import {
 } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import Settings from "./pages/Settings/Settings";
-import ContentContainer from "./components/Sidebar/ContentContainer";
 
 const App = () => {
   const [navSize, changeNavSize] = useState("large");
