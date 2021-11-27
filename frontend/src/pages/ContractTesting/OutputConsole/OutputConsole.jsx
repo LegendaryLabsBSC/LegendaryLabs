@@ -4,11 +4,12 @@ import {
   Flex, Textarea
 } from "@chakra-ui/react";
 
-const OutputConsole = () => {
+const OutputConsole = (props) => {
   return (
     <Flex
       // borderWidth={3}
-      w="24vw"
+      w={props.navSize === "small" ? "32vw" : "24vw"}
+      // w="32vw"
       ml=".5vw"
       h="27vh"
       mt="1vh"

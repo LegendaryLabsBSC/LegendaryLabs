@@ -2,7 +2,7 @@ import React from 'react'
 import { Flex } from '@chakra-ui/react'
 
 
-const Home = () => {
+const Home = (props) => {
   return (
     <Flex
       pos="sticky"

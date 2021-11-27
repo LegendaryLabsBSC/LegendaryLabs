@@ -86,7 +86,8 @@ const InputForm = (props) => {
         mr={5}
         h="90vh"
         mt="2.5vh"
-        w="25vw"
+        w={props.navSize === "small" ? "33vw" : "25vw"}
+        // w="33vw"
         background="white"
 
       // alignItems="center"
@@ -172,7 +173,7 @@ const InputForm = (props) => {
 
 
 
-        <OutputConsole />
+        <OutputConsole navSize={props.navSize}/>
 
 
 

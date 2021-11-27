@@ -18,12 +18,15 @@ const App = () => {
   return (
     <Flex flexDirection="row" justifyContent="space-between">
       <Router>
-        <Sidebar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/contract-testing" element={<ContractTesting />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
+        <Sidebar changeNavSize={changeNavSize} navSize={navSize} />
+        <Routes>
+          <Route path="/" element={<Home navSize={navSize} />} />
+          <Route
+            path="/contract-testing"
+            element={<ContractTesting navSize={navSize} />}
+          />
+          <Route path="/settings" element={<Settings navSize={navSize} />} />
+        </Routes>
       </Router>
     </Flex>
   );

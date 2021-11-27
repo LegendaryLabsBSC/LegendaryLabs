@@ -10,14 +10,14 @@ const ContractTesting = (props: any) => {
 
   return (
     <Flex
-      pos="sticky"
+      // pos="sticky"
       left="5"
       mr="4%"
       h="95vh"
       marginTop="2.5vh"
       boxShadow="0 4px 12px rgba(0,0,0,1)"
       borderRadius={"30px"}
-      w="80vw"
+      w={props.navSize === "small" ? "87vw" : "80vw"}
       flexDir="row"
       justifyContent="space-between"
       background="blue.500"
@@ -25,7 +25,7 @@ const ContractTesting = (props: any) => {
     >
       {/* <ContentContainer> */}
       <FormSelection newPage={setPage} />
-      <InputForm page={page} />
+      <InputForm navSize={props.navSize} page={page} />
       {/* </ContentContainer> */}
     </Flex>
   );
