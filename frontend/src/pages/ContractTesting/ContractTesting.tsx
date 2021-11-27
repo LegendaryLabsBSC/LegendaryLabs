@@ -9,25 +9,10 @@ const ContractTesting = (props: any) => {
   const [page, setPage] = useState(0);
 
   return (
-    <Flex
-      // pos="sticky"
-      left="5"
-      mr="4%"
-      h="95vh"
-      marginTop="2.5vh"
-      boxShadow="0 4px 12px rgba(0,0,0,1)"
-      borderRadius={"30px"}
-      w={props.navSize === "small" ? "87vw" : "80vw"}
-      flexDir="row"
-      justifyContent="space-between"
-      background="blue.500"
-      // alignItems="center"
-    >
-      {/* <ContentContainer> */}
+    <>
       <FormSelection newPage={setPage} />
       <InputForm navSize={props.navSize} page={page} />
-      {/* </ContentContainer> */}
-    </Flex>
+    </>
   );
 };
 
