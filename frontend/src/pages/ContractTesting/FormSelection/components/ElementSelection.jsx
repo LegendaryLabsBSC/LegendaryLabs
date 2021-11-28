@@ -53,18 +53,14 @@ const ElementSelection = (props) => {
 
   return (
     <Flex
+      position="absolute"
+      top="0"
+      right="-20px"
       overflowY="scroll"
       overflowX="hidden"
       h="77vh"
       flexDir="column"
     >
-      {/* <SimpleGrid
-        columns={4}
-        spacingX={3}
-        spacingY={2}
-      // w="100%"
-      > */}
-
       <Flex
         wrap="wrap" m={1}
         justify="center"
@@ -92,7 +88,6 @@ const ElementSelection = (props) => {
           )
           )
         }
-        {/* </SimpleGrid > */}
       </Flex>
     </Flex>
   )

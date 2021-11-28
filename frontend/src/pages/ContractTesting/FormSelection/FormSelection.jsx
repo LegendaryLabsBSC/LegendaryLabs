@@ -62,10 +62,11 @@ const FormSelection = (props) => {
 
       <Flex
         mt={5}
-      // alignItems="center"
-      // justify-content='center'
-      // w="100%"
-      // borderWidth={3}
+        style={{ overflow: "hidden" }}
+        width="100%"
+        height="100%"
+        overflow="hidden"
+        position="relative"
       >
         <ElementSelection
           contract={contract}
