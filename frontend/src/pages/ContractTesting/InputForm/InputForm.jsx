@@ -15,22 +15,21 @@ import {
 import { FormContext } from './components/FormContext';
 import OutputConsole from '../OutputConsole/OutputConsole';
 import PopoverHeading from './components/PopoverHeading';
+import SmartContracts from '../SmartContracts/SmartContracts';
 
 const InputForm = (props) => {
 
   const [elements, setElements] = useState(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    setElements(formJSON[props.page])
+    setElements(SmartContracts[props.contractIndex].abi[props.page])
   }, [props.page])
 
-  const { fields, page_label } = elements ?? {}
+  const { inputs, name, outputs, stateMutability } = elements ?? {}
+
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-    console.log(elements)
   }
 
   const handleChange = (id, event) => {
@@ -83,7 +82,7 @@ const InputForm = (props) => {
 
       // alignItems="center"
       >
-        <PopoverHeading title={page_label} />
+        <PopoverHeading title={name} />
         <Flex
           // borderWidth={2}
           flexDirection="column"
@@ -94,19 +93,32 @@ const InputForm = (props) => {
         >
           <form>
             <Flex flexDirection="column">
+
+
               {
-                fields ? fields.map((field, i) =>
+                inputs ? inputs.map((input, i) =>
                   <FormControl
                     align="center"
                     // borderWidth={2}
                     // borderColor="green"
                     p={1}
                   >
-                    <FormLabel fontWeight="bold">{field.field_label}:</FormLabel>
-                    <Element key={i} field={field} />
+                    <FormLabel fontWeight="bold">{input.name}:</FormLabel>
+
+
+                    <Element
+                      // key={input.name} 
+                      key={i}
+                      input={input}
+                    />
+
+
                   </FormControl>
                 ) : null
               }
+
+
+
             </Flex>
 
             <Flex

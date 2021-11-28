@@ -30,9 +30,9 @@ import SmartContracts from '../../SmartContracts/SmartContracts';
 
 const FormHeader = (props) => {
 
-  const handleOnClick = (contractData) => {
+  const handleOnClick = (contractData, index) => {
     props.setContract(contractData)
-    console.log(props.contract)
+    props.setContractIndex(index)
   }
 
   return (
@@ -67,7 +67,7 @@ const FormHeader = (props) => {
               SmartContracts.map((contract, i) =>
                 <MenuItemOption
                   value={`${i}`}
-                  onClick={() => handleOnClick(contract)}
+                  onClick={() => handleOnClick(contract, i)}
                 >
                   {contract.contractName}
                 </MenuItemOption>

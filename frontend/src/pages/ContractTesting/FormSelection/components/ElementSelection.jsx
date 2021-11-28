@@ -12,7 +12,7 @@ const ElementSelection = (props) => {
   const [contractABI, setContractABI] = useState(null);
 
   useEffect(() => {
-    setContractABI(SmartContracts[0])
+    setContractABI(SmartContracts[props.contractIndex])
   }, [props.contract])
 
   const handleABI = () => {

@@ -30,22 +30,8 @@ import FormHeader from "./components/FormHeader";
 
 
 const FormSelection = (props) => {
-  // const [functions, setFunction] = useState(null)
-
-  // const { landing } = 
-  // // SmartContracts[0]
-  // SmartContracts.map((page, i) => {
-  //   if (i === 0) {
-  //     return page
-  //   }
-  // })
-
-
   const [contract, setContract] = useState({});
-
-  // useEffect(() => {
-  //   setContract(contract)
-  // }, [contract])
+  // const [contractIndex, setContractIndex] = useState(0);
 
   return (
     <Flex
@@ -64,7 +50,12 @@ const FormSelection = (props) => {
 
 
 
-      <FormHeader setContract={setContract} contract={contract} />
+      <FormHeader
+        setContract={setContract}
+        contract={contract}
+        setContractIndex={props.setContractIndex}
+        contractIndex={props.contractIndex}
+      />
       <Divider />
 
 
@@ -76,7 +67,10 @@ const FormSelection = (props) => {
       // w="100%"
       // borderWidth={3}
       >
-        <ElementSelection contract={contract} newPage={props.newPage}
+        <ElementSelection
+          contract={contract}
+          contractIndex={props.contractIndex}
+          newPage={props.newPage}
         //todo: move to input form ? 
         />
       </Flex>

@@ -6,11 +6,20 @@ import { Flex } from "@chakra-ui/react";
 
 const ContractTesting = (props: any) => {
   const [page, setPage] = useState(0);
+  const [contractIndex, setContractIndex] = useState(0);
 
   return (
     <>
-      <FormSelection newPage={setPage} />
-      <InputForm navSize={props.navSize} page={page} />
+      <FormSelection
+        newPage={setPage}
+        setContractIndex={setContractIndex}
+        contractIndex={contractIndex}
+      />
+      <InputForm
+        navSize={props.navSize}
+        page={page}
+        contractIndex={contractIndex}
+      />
     </>
   );
 };
