@@ -79,7 +79,7 @@ function FarmsApp() {
       const role = LAB_TECH
       const checkRole = await contract.lab.read.hasRole(role, account)
 
-      console.log(checkRole, account)
+      console.log(checkRole)
     }
   }
 
