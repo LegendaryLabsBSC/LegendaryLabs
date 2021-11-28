@@ -1,49 +1,93 @@
 import React, { useContext, useState } from "react";
 import {
-  Input, Select, Radio, RadioGroup,
-  Switch, Stack, FormControl, FormLabel,
-  Slider, SliderTrack, SliderFilledTrack,
-  SliderThumb, NumberInput, NumberInputField,
-  NumberInputStepper, NumberIncrementStepper,
-  NumberDecrementStepper, Heading, Flex
+  Input,
+  Radio,
+  RadioGroup,
+  Stack,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  Heading,
+  Flex,
+  Text
 } from "@chakra-ui/react";
 
 import { FormContext } from './FormContext';
 
 
 const Element = (
-  { input: { internalType, name, type }, key }
+  { input: { internalType, name, type }, key, register }
 ) => {
 
-  const [value, setValue] = useState(0)
-  const [strVal, setStrVal] = useState("")
+  const [value, setValue] = useState({
+    radio: "false",
+    num: 0
+  })
 
-  const { handleChange } = useContext(FormContext);
+  const updateValue = (val, type) => {
+    setValue({
+      ...value,
+      [type]: val
+    })
+    console.log(val, type)
+  }
 
   switch (type) {
     case "string":
       return (
         <Input
           // id={key}
+          id={name}
           label={name}
-          // placeholder={field_placeholder ? field_placeholder : ''}
-          value={value}
-          onChange={event => handleChange(key, event)}
+          {...register(name, {
+            // required: 'This is required',
+            // minLength: { value: 4, message: 'Minimum length should be 4' },
+          })}
+        // placeholder={field_placeholder ? field_placeholder : ''}
+        // value={strVal}
+        // onChange={event => handleChange(key, event)}
+        // onChange={event => handleChange(name, event)}
+        // onChange={event => console.log(event)}
+
         />
       );
     case "bool":
       return (
         <Stack direction="row" spacing={12} >
           <RadioGroup
-            id={key}
+            // id={key}
+            id={name}
             label={name}
+            // defaultValue={0}
             // placeholder={field_placeholder ? field_placeholder : ''}
-            value={value}
-            onChange={event => handleChange(key, event)}
+            // radioValue={radioValue}
+            value={value.radio}
+            onChange={(e) => updateValue(e, 'radio')}
+          // onChange={setValue}
           >
             <Stack direction="row">
-              <Radio value={0}>No</Radio>
-              <Radio value={1}>Yes</Radio>
+              <Radio
+                // radioValue={"false"}
+                value={"false"}
+                {...register(name, {
+                  // required: 'This is required',
+                  // minLength: { value: 4, message: 'Minimum length should be 4' },
+                })}
+              >
+                No
+              </Radio>
+              <Radio
+                // radioValue={"true"}
+                value={"true"}
+                {...register(name, {
+                  // required: 'This is required',
+                  // minLength: { value: 4, message: 'Minimum length should be 4' },
+                })}
+              >
+                Yes
+              </Radio>
             </Stack>
           </RadioGroup >
         </Stack>
@@ -57,8 +101,13 @@ const Element = (
             // min={field_options.min}
             // max={field_options.max}
             // value={field_value ? field_value : field_options.min}
-            value={value}
-            onChange={event => handleChange(key, event)}
+            value={value.num}
+            {...register(name, {
+              // required: 'This is required',
+              // minLength: { value: 4, message: 'Minimum length should be 4' },
+            })}
+            onChange={(e) => updateValue(e, 'num')}
+          // onChange={event => handleChange(key, event)}
           >
             <NumberInputField />
             <NumberInputStepper>
@@ -66,33 +115,14 @@ const Element = (
               <NumberDecrementStepper />
             </NumberInputStepper>
           </NumberInput>
-          <Slider
-            flex="1"
-            focusThumbOnChange={false}
-            // value={field_value ? field_value : field_options.min}
-            value={value}
-            // min={field_options.min}
-            // max={field_options.max}
-            onChange={event => handleChange(key, event)}
-          >
-            <SliderTrack >
-              <SliderFilledTrack />
-            </SliderTrack>
-            <SliderThumb
-              fontSize="sm"
-              boxSize="32px"
-              // children={field_value ? field_value : field_options.min}
-              children={value}
-            />
-          </Slider>
         </Flex>
       )
 
-    //todo: number & ;rightside unit icon dynamic units ?
-
     default:
-      console.log(type)
-      return null;
+      console.log(`Error: ${type} not supported`)
+      return <Text>
+        {`Error: ${type} not supported`}
+      </Text>
   }
 };
 

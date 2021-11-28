@@ -5,59 +5,71 @@ import {
   Button,
   FormLabel,
   FormControl,
-  GridItem,
-  Flex, Spacer,
-  Divider,
-  Link,
-  Popover,
-  PopoverTrigger
+  FormErrorMessage,
+  Flex,
 } from '@chakra-ui/react'
 import { FormContext } from './components/FormContext';
 import OutputConsole from '../OutputConsole/OutputConsole';
 import PopoverHeading from './components/PopoverHeading';
 import SmartContracts from '../SmartContracts/SmartContracts';
+import { useForm } from 'react-hook-form'
 
 const InputForm = (props) => {
 
   const [elements, setElements] = useState(null);
 
+  // const [value, setValue] = useState(0)
+  // const [strVal, setStrVal] = useState("")
+
+  const {
+    handleSubmit,
+    register,
+    formState: { errors, isSubmitting },
+  } = useForm()
+
+  const onSubmit = (values) => {
+
+    console.log(values)
+  }
+
+  // const onSubmit = (data) => {
+  //   // event.preventDefault();
+
+  //   console.log(data)
+  // }
+
   useEffect(() => {
     setElements(SmartContracts[props.contractIndex].abi[props.page])
   }, [props.page])
 
-  const { inputs, name, outputs, stateMutability } = elements ?? {}
+  const { inputs, name, outputs, stateMutability, value } = elements ?? {}
 
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-  }
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
 
-  const handleChange = (id, event) => {
-    const newElements = { ...elements }
+  //   console.log(elements)
+  // }
 
-    newElements.fields.forEach(field => {
-      const { field_type, field_id } = field;
+  // const handleChange = (id, event) => {
+  //   const newElements = { ...elements }
 
-      if (id === field_id) {
-        switch (field_type) {
+  //   newElements.inputs.forEach(input => {
+  //     const { stateMutability, name } = input;
 
-          case "slider":
-            field['field_value'] = event;
-            break;
+  //     if (id === name) {
+  //       switch (stateMutability) {
 
-          case "radio":
-            field['field_value'] = event;
-            break;
 
-          default:
-            field['field_value'] = event.target.value;
-            break;
-        }
-      }
-      setElements(newElements)
-    });
-    console.log(elements)
-  }
+  //         default:
+  //           value = event.target.value
+  //           break;
+  //       }
+  //     }
+  //     setElements(newElements)
+  //   });
+  //   console.log(elements)
+  // }
 
   const handleSlug = (label) => {
     return label.toLowerCase()
@@ -66,93 +78,102 @@ const InputForm = (props) => {
   //todo: change key from using index
   //todo: make form header text color match button color
   return (
-    // <GridItem rowSpan={2} colSpan={2}>
+    // <FormContext.Provider value={{ handleChange }}>
+    <Flex
+      boxShadow="0 4px 12px rgba(0,0,0,0.75)"
+      borderRadius={30}
+      flexDirection="column"
+      mr={5}
+      h="90vh"
+      mt="2.5vh"
+      w={props.navSize === "small" ? "33vw" : "25vw"}
+      // w="33vw"
+      background="white"
 
-    <FormContext.Provider value={{ handleChange }}>
+    // alignItems="center"
+    >
+      <PopoverHeading
+        title={name}
+        colorScheme={stateMutability}
+      />
       <Flex
-        boxShadow="0 4px 12px rgba(0,0,0,0.75)"
-        borderRadius={30}
+        // borderWidth={2}
         flexDirection="column"
-        mr={5}
-        h="90vh"
-        mt="2.5vh"
-        w={props.navSize === "small" ? "33vw" : "25vw"}
-        // w="33vw"
-        background="white"
-
-      // alignItems="center"
+        // justifyContent="center"
+        // borderColor="blue"
+        h="60%"
+        p={5}
       >
-        <PopoverHeading
-          title={name}
-          colorScheme={stateMutability}
-        />
-        <Flex
-          // borderWidth={2}
-          flexDirection="column"
-          // justifyContent="center"
-          // borderColor="blue"
-          h="60%"
-          p={5}
-        >
-          <form>
-            <Flex flexDirection="column">
 
 
-              {
-                inputs ? inputs.map((input, i) =>
-                  <FormControl
-                    align="center"
-                    // borderWidth={2}
-                    // borderColor="green"
-                    p={1}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Flex flexDirection="column">
+
+
+            {
+              inputs ? inputs.map((input, i) =>
+                <FormControl
+                  align="center"
+                  // borderWidth={2}
+                  // borderColor="green"
+                  p={1}
+                  isInvalid={errors.name}
+                >
+                  <FormLabel
+                    fontWeight="bold"
+                    htmlFor='name'
                   >
-                    <FormLabel fontWeight="bold">{input.name}:</FormLabel>
+                    {input.name}:
+                  </FormLabel>
 
 
-                    <Element
-                      // key={input.name} 
-                      key={i}
-                      input={input}
-                    />
+                  <Element
+                    // key={input.name} 
+                    key={i}
+                    input={input}
+                    // strVal={strVal}
+                    register={register}
+                  // {...register(inputs.name, {
+                  //   // required: 'This is required',
+                  //   // minLength: { value: 4, message: 'Minimum length should be 4' },
+                  // })}
+                  />
+                  <FormErrorMessage>
+                    {errors.name && errors.name.message}
+                  </FormErrorMessage>
+
+                </FormControl>
+              ) : null
+            }
 
 
-                  </FormControl>
-                ) : null
-              }
 
+          </Flex>
 
-
-            </Flex>
-
-            <Flex
-              flexDirection="column"
-              alignItems="center"
-              p={2}
-              mt={3}
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+            p={2}
+            mt={3}
+          >
+            {/* <Spacer /> */}
+            <Button
+              type="submit"
+              // w="30%"
+              size="lg"
+              // onClick={(e) => handleSubmit(e)}
+              // onClick={() => handleSubmit()}
+              isLoading={isSubmitting}
             >
-              {/* <Spacer /> */}
-              <Button
-                type="submit"
-                // w="30%"
-                size="lg"
-                onClick={(e) => handleSubmit(e)}
-              >
-                Submit
-              </Button>
-            </Flex>
-          </form>
-        </Flex>
+              Submit
+            </Button>
+          </Flex>
+        </form>
+      </Flex>
 
-
-
-
-
-        <OutputConsole navSize={props.navSize} />
-
-
-
-      </Flex >
-    </FormContext.Provider >
+      <OutputConsole navSize={props.navSize} />
+    </Flex >
+    // </FormContext.Provider >
   )
 }
 
