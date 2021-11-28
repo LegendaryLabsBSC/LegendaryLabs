@@ -1,6 +1,6 @@
 import React, { useState, lazy } from 'react'
 import { Avatar, Divider, Flex, Heading, IconButton, Spacer, Text, Box } from '@chakra-ui/react'
-import { FiMenu, FiHome, FiSettings} from "react-icons/fi";
+import { FiMenu, FiHome, FiSettings } from "react-icons/fi";
 import NavItem from "./components/NavItem"
 import {
   BrowserRouter as Router,
@@ -8,6 +8,7 @@ import {
   Link as RouteLink
 } from "react-router-dom";
 import { GrDocumentTest } from "react-icons/gr"
+import MetaMaskConnect from '../MetaMaskConnect';
 
 
 const Sidebar = (props) => {
@@ -24,7 +25,7 @@ const Sidebar = (props) => {
       w={props.navSize === "small" ? "100px" : "200px"}
       flexDir="column"
       justifyContent="space-between"
-      // background="blue.600"
+    // background="blue.600"
 
     >
       <Flex
@@ -70,13 +71,7 @@ const Sidebar = (props) => {
         mb={4}
       >
         <Divider display={props.navSize === "small" ? "none" : "flex"} />
-        <Flex mt={4} align="center">
-          <Avatar size="sm" src="gavin.png" />
-          <Flex flexDir="column" ml={4} display={props.navSize === "small" ? "none" : "flex"}>
-            <Heading as="h3" size="sm">Gavin Sproles</Heading>
-            <Text color="gray">Admin</Text>
-          </Flex>
-        </Flex>
+          <MetaMaskConnect />
       </Flex>
     </Flex>
   )

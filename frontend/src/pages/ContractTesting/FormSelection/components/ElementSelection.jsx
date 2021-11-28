@@ -23,6 +23,7 @@ const ElementSelection = (props) => {
     props.newPage(pageIndex)
   };
 
+  //todo: extract this out ? reuse with popoverheading
   const setColorScheme = (theme) => {
     switch (theme) {
 

@@ -82,7 +82,10 @@ const InputForm = (props) => {
 
       // alignItems="center"
       >
-        <PopoverHeading title={name} />
+        <PopoverHeading
+          title={name}
+          colorScheme={stateMutability}
+        />
         <Flex
           // borderWidth={2}
           flexDirection="column"

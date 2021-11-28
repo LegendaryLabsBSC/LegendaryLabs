@@ -1,9 +1,37 @@
 import React from 'react'
 import { Flex, Popover, PopoverTrigger, Heading, Button, PopoverContent, PopoverBody } from '@chakra-ui/react'
 
-const PopoverHeading = ({ title }) => {
+const PopoverHeading = ({ title, colorScheme }) => {
 
   const popoverSlug = `${title}`.toLowerCase()
+
+  const setColorScheme = (theme) => {
+    switch (theme) {
+
+      case "write-lab":
+        return {
+          colorScheme: "red",
+          borderColor: "black",
+          borderWidth: 3,
+        }
+
+      case "nonpayable":
+        return {
+          colorScheme: "red"
+        }
+
+      case "view":
+        return {
+          colorScheme: "blue"
+        }
+
+      default:
+        return {
+          colorScheme: "gray"
+        }
+
+    }
+  }
 
   return (
     <Flex
