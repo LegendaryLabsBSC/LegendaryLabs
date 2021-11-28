@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Button, Flex, Icon, Text } from '@chakra-ui/react'
+import { Button, Flex, Icon, Text, Tooltip } from '@chakra-ui/react'
 import { IoWallet } from 'react-icons/io5'
 
 
-const MetaMaskConnect = () => {
+const MetaMaskConnect = (props) => {
 
   const [walletAddress, setWalletAddress] = useState([0])
 
@@ -16,6 +16,7 @@ const MetaMaskConnect = () => {
 
     return displayAddress
   }
+
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -37,31 +38,54 @@ const MetaMaskConnect = () => {
     <Flex
       mt={5}
       align="center"
+      display="flex"
     >
-      <Icon
-        size="lg"
-        as={IoWallet}
-        w="20%"
-        h="80%"
-      />
-      < Button
-        onClick={connectWallet}
-        background="none"
-        _hover={{ background: 'none' }}
-        borderWidth={3}
-        borderColor="blue.500"
-        borderRadius={30}
-        h="95%"
-        w="100%"
-        left={3}
-      >
-        <Text
-          fontSize="md"
-          color="blue.500"
+      {props.navSize === "small" ?
+        <Tooltip
+          label={walletAddress != 0 && walletAddress}
+          placement='auto-start'
+          fontSize={13}
+          borderRadius={15}
+          shouldWrapChildren
         >
-          {handleDisplayAddress(walletAddress)}
-        </Text>
-      </Button >
+          <Button
+            size="md"
+            as={IoWallet}
+            ml={1}
+            onClick={connectWallet}
+            background="none"
+            _hover={{ background: 'blue.500' }}
+          />
+        </Tooltip> :
+        <>
+          <Icon
+            size="lg"
+            as={IoWallet}
+            w="20%"
+            h="80%"
+            ml={1}
+          />
+          < Button
+            onClick={connectWallet}
+            background="none"
+            _hover={{ background: 'none' }}
+            borderWidth={3}
+            borderColor="blue.500"
+            borderRadius={30}
+            h="95%"
+            w="100%"
+            left={3}
+          >
+
+            <Text
+              fontSize="md"
+              color="blue.500"
+            >
+              {handleDisplayAddress(walletAddress)}
+            </Text>
+          </Button >
+        </>
+      }
     </Flex>
   );
 }

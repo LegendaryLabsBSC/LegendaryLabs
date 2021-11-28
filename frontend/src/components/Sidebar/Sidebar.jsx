@@ -12,7 +12,6 @@ import MetaMaskConnect from '../MetaMaskConnect';
 
 
 const Sidebar = (props) => {
-  // const [navSize, changeNavSize] = useState("large")
 
   return (
     <Flex
@@ -71,7 +70,7 @@ const Sidebar = (props) => {
         mb={4}
       >
         <Divider display={props.navSize === "small" ? "none" : "flex"} />
-          <MetaMaskConnect />
+        <MetaMaskConnect navSize={props.navSize} />
       </Flex>
     </Flex>
   )
