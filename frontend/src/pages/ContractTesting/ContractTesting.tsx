@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import InputForm from "./InputForm/InputForm";
-import FormSelection from "./FormSelection/FormSelection";
+import FunctionSelectionForm from "./ContractFunctions/FunctionSelectionForm";
 import { Flex } from "@chakra-ui/react";
 // import OutputConsole from "./OutputConsole/OutputConsole";
 
@@ -10,7 +10,7 @@ const ContractTesting = (props: any) => {
 
   return (
     <>
-      <FormSelection
+      <FunctionSelectionForm
         newPage={setPage}
         setContractIndex={setContractIndex}
         contractIndex={contractIndex}

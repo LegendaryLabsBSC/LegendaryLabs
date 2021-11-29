@@ -8,7 +8,7 @@ import {
   Link as RouteLink
 } from "react-router-dom";
 import { GrDocumentTest } from "react-icons/gr"
-import MetaMaskConnect from '../MetaMaskConnect';
+import MetaMaskConnect from '../MetaMaskConnect/MetaMaskConnect';
 
 
 const Sidebar = (props) => {

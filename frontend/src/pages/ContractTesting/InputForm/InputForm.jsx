@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import Element from "./components/Element"
-import formJSON from './formElement.json'
+import { useForm } from 'react-hook-form'
+import FormElement from "./components/FormElement"
+import OutputConsole from './OutputConsole/OutputConsole';
+import PopoverDocsHeading from './components/PopoverDocsHeading';
+import SmartContracts from '../../../config/SmartContracts';
+import smartContractCall from '../../../utils/smartContractCall'
 import {
   Button,
   FormLabel,
@@ -8,12 +12,6 @@ import {
   FormErrorMessage,
   Flex,
 } from '@chakra-ui/react'
-import { FormContext } from './components/FormContext';
-import OutputConsole from '../OutputConsole/OutputConsole';
-import PopoverHeading from './components/PopoverHeading';
-import SmartContracts from '../SmartContracts/SmartContracts';
-import { useForm } from 'react-hook-form'
-import smartContractCall from './smartContractCall';
 
 const InputForm = (props) => {
 
@@ -73,7 +71,7 @@ const InputForm = (props) => {
 
     // alignItems="center"
     >
-      <PopoverHeading
+      <PopoverDocsHeading
         title={name}
         colorScheme={stateMutability}
       />
@@ -108,7 +106,7 @@ const InputForm = (props) => {
                   </FormLabel>
 
 
-                  <Element
+                  <FormElement
                     key={input.name}
                     input={input}
                     register={register}

@@ -24,3 +24,4 @@ yarn-error.log*
 
 _tests
 src/components/Interface
+artifacts

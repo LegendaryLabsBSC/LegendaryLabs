@@ -10,11 +10,12 @@ const MetaMaskConnect = (props) => {
   const testNetwork = { name: 'Harmony Testnet', chainId: '0x6357d2e0' }
 
   const handleDisplayAddress = (address) => {
-    const displayAddress = walletAddress != 0 ?
-      `${address.slice(0, 4)}...${address.slice(-4)}`
-      : 'Connect'
+    if (walletAddress != 0) {
+      return `${address.slice(0, 4)}...${address.slice(-4)}`
+    } else {
+      return 'Connect'
+    }
 
-    return displayAddress
   }
 
 

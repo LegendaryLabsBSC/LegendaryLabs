@@ -18,7 +18,6 @@ import {
 } from "@chakra-ui/react";
 import { MdContentPaste } from 'react-icons/md'
 
-import { FormContext } from './FormContext';
 
 
 const Element = (

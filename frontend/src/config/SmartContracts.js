@@ -6,7 +6,7 @@ import {
   LegendRejuvenation,
   LegendsMarketplace,
   LegendsMatchingBoard,
-} from "../../../config/contractABIs";
+} from "./contractABIs";
 
 const SmartContracts = [
   LegendsLaboratory,

@@ -1,4 +1,4 @@
-import { contract } from '../../../config/contractInterface'
+import { contract } from '../config/contractInterface'
 
 export default async function smartContractCall(
   contractIndex, callType, name, values

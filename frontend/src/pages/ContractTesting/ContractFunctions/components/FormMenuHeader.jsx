@@ -1,59 +1,43 @@
 import React from 'react'
+import { GiWhiteBook, GiScrollUnfurled } from 'react-icons/gi'
+import SmartContracts from '../../../../config/SmartContracts';
 import {
-  Grid,
   Box,
-  Stack,
   Heading,
-  GridItem,
   Flex,
   Spacer,
-  Divider,
   Menu,
   MenuButton,
   Button,
   MenuList,
-  MenuItem,
   Link,
   MenuOptionGroup,
   MenuItemOption
 } from "@chakra-ui/react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link as RouteLink,
-} from "react-router-dom";
-import { FiFileText, FiHome } from "react-icons/fi";
-import ContractTesting from '../../ContractTesting';
-import SmartContracts from '../../SmartContracts/SmartContracts';
 
 
-const FormHeader = (props) => {
+const FormMenuHeader = (props) => {
 
   const handleOnClick = (contractData, index) => {
     props.setContract(contractData)
     props.setContractIndex(index)
-    console.log(props.contract)
   }
 
   return (
     <Flex
       alignItems="center"
-      // flexDirection="row"
       w="100%"
       mt={3}
       mb={2}
     >
-
-
       <Menu >
         <MenuButton
           as={Button}
-          leftIcon={<FiFileText />}
+          leftIcon={<GiScrollUnfurled />}
           background="none"
           color="blue.500"
+          size="lg"
           _hover={{ background: 'none' }}
-        // _pressed={{ background: 'none' }}
         >
           Contracts
         </MenuButton>
@@ -89,21 +73,22 @@ const FormHeader = (props) => {
       </Box>
       <Spacer />
 
-      <Box>
+      <Flex>
         <Link href="https://docs.legendarylabs.net" style={{ textDecoration: 'none' }} isExternal>
           <Button
-            rightIcon={<FiFileText />}
+            rightIcon={<GiWhiteBook />}
             background="none"
             color="blue.500"
+            size="lg"
             _hover={{ background: 'none' }}
 
           >
             Docs
           </Button>
         </Link>
-      </Box>
+      </Flex>
     </Flex >
   )
 }
 
-export default FormHeader
+export default FormMenuHeader

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Flex, Popover, PopoverTrigger, Heading, Button, PopoverContent, PopoverBody } from '@chakra-ui/react'
 
-const PopoverHeading = ({ title, colorScheme }) => {
+const PopoverDocsHeading = ({ title, colorScheme }) => {
 
   const popoverSlug = `${title}`.toLowerCase()
 
@@ -67,4 +67,4 @@ const PopoverHeading = ({ title, colorScheme }) => {
   )
 }
 
-export default PopoverHeading
+export default PopoverDocsHeading
