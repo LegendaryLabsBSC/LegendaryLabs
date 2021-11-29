@@ -9,15 +9,15 @@ const ElementSelection = (props) => {
 
   // const contractABI[] = props.contract.abi.map
   // const { tss } = props
-  const [contractABI, setContractABI] = useState(null);
+  // const [contractABI, setContractABI] = useState(null);
 
-  useEffect(() => {
-    setContractABI(SmartContracts[props.contractIndex])
-  }, [props.contract])
+  // useEffect(() => {
+  //   setContractABI(SmartContracts[props.contractIndex])
+  // }, [props.contract])
 
-  const handleABI = () => {
+  // const handleABI = () => {
 
-  }
+  // }
 
   const handleOnClick = (pageIndex) => {
     props.newPage(pageIndex)

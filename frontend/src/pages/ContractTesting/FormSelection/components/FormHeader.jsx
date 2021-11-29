@@ -33,6 +33,7 @@ const FormHeader = (props) => {
   const handleOnClick = (contractData, index) => {
     props.setContract(contractData)
     props.setContractIndex(index)
+    console.log(props.contract)
   }
 
   return (

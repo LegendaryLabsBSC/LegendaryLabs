@@ -31,7 +31,6 @@ import FormHeader from "./components/FormHeader";
 
 const FormSelection = (props) => {
   const [contract, setContract] = useState({});
-  // const [contractIndex, setContractIndex] = useState(0);
 
   return (
     <Flex

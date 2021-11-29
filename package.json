@@ -33,7 +33,8 @@
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "deploy": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.ts",
+    "deployB": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.ts",
+    "deploy": "npx hardhat compile && npx hardhat run --network onetest scripts/deploy.ts",
     "compile": "npx hardhat compile",
     "size": "npx hardhat compile && hardhat size-contracts",
     "lint": "npx hardhat check",

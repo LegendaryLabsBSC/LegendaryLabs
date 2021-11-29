@@ -13,72 +13,49 @@ import OutputConsole from '../OutputConsole/OutputConsole';
 import PopoverHeading from './components/PopoverHeading';
 import SmartContracts from '../SmartContracts/SmartContracts';
 import { useForm } from 'react-hook-form'
+import handleCall from './handleCall';
 
 const InputForm = (props) => {
 
+  //todo : ?
   const [elements, setElements] = useState(null);
 
-  // const [value, setValue] = useState(0)
-  // const [strVal, setStrVal] = useState("")
-
+  //todo:
   const {
-    handleSubmit,
-    register,
+    handleSubmit, register,
     formState: { errors, isSubmitting },
   } = useForm()
 
   const onSubmit = (values) => {
+    let callType;
 
-    console.log(values)
+    switch (stateMutability) {
+      case 'nonpayable':
+        callType = 'write'
+        break;
+
+      default:
+        console.log(`Error: ${stateMutability} Call1 Not Supported`)
+    }
+
+    handleCall(props.contractIndex, callType, name, values)
   }
 
-  // const onSubmit = (data) => {
-  //   // event.preventDefault();
-
-  //   console.log(data)
-  // }
-
   useEffect(() => {
-    setElements(SmartContracts[props.contractIndex].abi[props.page])
+    setElements(
+      SmartContracts[props.contractIndex].abi[props.page]
+    )
   }, [props.page])
 
+  //todo : ?
   const { inputs, name, outputs, stateMutability, value } = elements ?? {}
-
-
-  // const handleSubmit = (event) => {
-  //   event.preventDefault();
-
-  //   console.log(elements)
-  // }
-
-  // const handleChange = (id, event) => {
-  //   const newElements = { ...elements }
-
-  //   newElements.inputs.forEach(input => {
-  //     const { stateMutability, name } = input;
-
-  //     if (id === name) {
-  //       switch (stateMutability) {
-
-
-  //         default:
-  //           value = event.target.value
-  //           break;
-  //       }
-  //     }
-  //     setElements(newElements)
-  //   });
-  //   console.log(elements)
-  // }
 
   const handleSlug = (label) => {
     return label.toLowerCase()
   }
 
-  //todo: change key from using index
   //todo: make form header text color match button color
   return (
-    // <FormContext.Provider value={{ handleChange }}>
     <Flex
       boxShadow="0 4px 12px rgba(0,0,0,0.75)"
       borderRadius={30}
@@ -128,15 +105,9 @@ const InputForm = (props) => {
 
 
                   <Element
-                    // key={input.name} 
-                    key={i}
+                    key={input.name}
                     input={input}
-                    // strVal={strVal}
                     register={register}
-                  // {...register(inputs.name, {
-                  //   // required: 'This is required',
-                  //   // minLength: { value: 4, message: 'Minimum length should be 4' },
-                  // })}
                   />
                   <FormErrorMessage>
                     {errors.name && errors.name.message}
@@ -173,7 +144,6 @@ const InputForm = (props) => {
 
       <OutputConsole navSize={props.navSize} />
     </Flex >
-    // </FormContext.Provider >
   )
 }
 

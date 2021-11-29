@@ -31,25 +31,16 @@ const Element = (
       ...value,
       [type]: val
     })
-    console.log(val, type)
   }
 
   switch (type) {
     case "string":
       return (
         <Input
-          // id={key}
           id={name}
           label={name}
-          {...register(name, {
-            // required: 'This is required',
-            // minLength: { value: 4, message: 'Minimum length should be 4' },
-          })}
-        // placeholder={field_placeholder ? field_placeholder : ''}
-        // value={strVal}
-        // onChange={event => handleChange(key, event)}
-        // onChange={event => handleChange(name, event)}
-        // onChange={event => console.log(event)}
+          {...register(name)}
+          placeholder={`Enter ${name}`}
 
         />
       );
@@ -57,34 +48,21 @@ const Element = (
       return (
         <Stack direction="row" spacing={12} >
           <RadioGroup
-            // id={key}
             id={name}
             label={name}
-            // defaultValue={0}
-            // placeholder={field_placeholder ? field_placeholder : ''}
-            // radioValue={radioValue}
             value={value.radio}
             onChange={(e) => updateValue(e, 'radio')}
-          // onChange={setValue}
           >
             <Stack direction="row">
               <Radio
-                // radioValue={"false"}
                 value={"false"}
-                {...register(name, {
-                  // required: 'This is required',
-                  // minLength: { value: 4, message: 'Minimum length should be 4' },
-                })}
+                {...register(name)}
               >
                 No
               </Radio>
               <Radio
-                // radioValue={"true"}
                 value={"true"}
-                {...register(name, {
-                  // required: 'This is required',
-                  // minLength: { value: 4, message: 'Minimum length should be 4' },
-                })}
+                {...register(name)}
               >
                 Yes
               </Radio>
@@ -98,16 +76,9 @@ const Element = (
           <NumberInput
             maxW="100px"
             mr="2rem"
-            // min={field_options.min}
-            // max={field_options.max}
-            // value={field_value ? field_value : field_options.min}
             value={value.num}
-            {...register(name, {
-              // required: 'This is required',
-              // minLength: { value: 4, message: 'Minimum length should be 4' },
-            })}
+            {...register(name)}
             onChange={(e) => updateValue(e, 'num')}
-          // onChange={event => handleChange(key, event)}
           >
             <NumberInputField />
             <NumberInputStepper>
