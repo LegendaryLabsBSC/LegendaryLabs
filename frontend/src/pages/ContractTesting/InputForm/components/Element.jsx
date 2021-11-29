@@ -11,8 +11,12 @@ import {
   NumberDecrementStepper,
   Heading,
   Flex,
-  Text
+  Text,
+  Button,
+  InputGroup,
+  IconButton
 } from "@chakra-ui/react";
+import { MdContentPaste } from 'react-icons/md'
 
 import { FormContext } from './FormContext';
 
@@ -33,16 +37,30 @@ const Element = (
     })
   }
 
+    //todo:
+  async function handlePaste(input) {
+    const clip = await navigator.clipboard.readText()
+    input.value = clip
+    console.log(input.value)
+  }
+
   switch (type) {
     case "string":
+    case "address":
       return (
-        <Input
-          id={name}
-          label={name}
-          {...register(name)}
-          placeholder={`Enter ${name}`}
+        <InputGroup>
+          <Input
+            id={name}
+            label={name}
+            {...register(name)}
+            placeholder={`Enter ${name}`}
+          />
 
-        />
+          <IconButton
+            icon={<MdContentPaste />}
+            onClick={handlePaste}
+          />
+        </InputGroup>
       );
     case "bool":
       return (

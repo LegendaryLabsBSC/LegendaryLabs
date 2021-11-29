@@ -13,7 +13,7 @@ import OutputConsole from '../OutputConsole/OutputConsole';
 import PopoverHeading from './components/PopoverHeading';
 import SmartContracts from '../SmartContracts/SmartContracts';
 import { useForm } from 'react-hook-form'
-import handleCall from './handleCall';
+import smartContractCall from './smartContractCall';
 
 const InputForm = (props) => {
 
@@ -34,11 +34,15 @@ const InputForm = (props) => {
         callType = 'write'
         break;
 
+      case 'view':
+        callType = 'read'
+        break;
+
       default:
-        console.log(`Error: ${stateMutability} Call1 Not Supported`)
+        console.log(`Error: ${stateMutability} Call Not Supported`)
     }
 
-    handleCall(props.contractIndex, callType, name, values)
+    smartContractCall(props.contractIndex, callType, name, values)
   }
 
   useEffect(() => {

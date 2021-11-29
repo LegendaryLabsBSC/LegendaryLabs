@@ -7,7 +7,7 @@ import {
   LegendRejuvenation,
   LegendsMarketplace,
   LegendsMatchingBoard,
-} from "./contractInterfaces";
+} from "./contractABIs";
 
 import {
   legendsLaboratory,
@@ -18,8 +18,7 @@ import {
   legendsMatchingBoard,
 } from "./contractAddresses";
 
-// export default {
-
+// ? still needed 
 declare global {
   interface Window {
     ethereum?: any;
@@ -31,7 +30,7 @@ interface ContractInterface {
   write: Contract;
 }
 
-interface LegendaryLabs {
+interface ContractLab {
   lab: ContractInterface;
   nft: ContractInterface;
   token: ContractInterface;
@@ -45,6 +44,7 @@ interface LegendaryLabs {
 const provider: any = new ethers.providers.Web3Provider(window.ethereum);
 const signer: any = provider.getSigner();
 
+//todo: make dynamic for easy reusability
 const lab: ContractInterface = {
   read: new ethers.Contract(legendsLaboratory, LegendsLaboratory.abi, provider),
   write: new ethers.Contract(legendsLaboratory, LegendsLaboratory.abi, signer),
@@ -99,15 +99,13 @@ const matching: ContractInterface = {
   ),
 };
 
-const legendaryLabs: LegendaryLabs = {
+const contract: ContractLab = {
   lab: lab,
   nft: nft,
   token: token,
   rejuvenation: rejuvenation,
   marketplace: marketplace,
   matching: matching,
-  // provider: provider,
-  // signer: signer,
 };
 
-export { legendaryLabs };
+export { contract };
