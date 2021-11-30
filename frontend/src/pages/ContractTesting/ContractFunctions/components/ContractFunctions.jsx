@@ -5,8 +5,8 @@ import { Button, Flex, Text } from "@chakra-ui/react";
 
 const ContractFunctions = (props) => {
 
-  const handleOnClick = (pageIndex) => {
-    props.newPage(pageIndex);
+  const handleOnClick = (functionIndex) => {
+    props.setContractFunction(functionIndex);
   };
 
   //todo: extract this out ? reuse with popoverheading
@@ -50,12 +50,12 @@ const ContractFunctions = (props) => {
       >
         {props.contract &&
           props.contract.abi &&
-          props.contract.abi.map((page, i) =>
-            page.name && page.type === "function" ? (
+          props.contract.abi.map((contractCall, i) =>
+          contractCall.name && contractCall.type === "function" ? (
               <Button
                 size="md"
                 fontSize={11}
-                {...setColorScheme(page.stateMutability)}
+                {...setColorScheme(contractCall.stateMutability)}
                 onClick={() => handleOnClick(i)}
                 boxShadow="0 4px 12px rgba(0,0,0,0.55)"
                 w="20%"
@@ -64,7 +64,7 @@ const ContractFunctions = (props) => {
                 <Text
                   fontSize={12}
                 >
-                  {page.name}
+                  {contractCall.name}
                 </Text>
               </Button>
             ) : null
