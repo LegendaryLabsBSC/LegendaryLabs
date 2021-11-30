@@ -20,7 +20,7 @@ const InputForm = (props) => {
 
   //todo:
   const {
-    handleSubmit, register,
+    handleSubmit, register, reset,
     formState: { errors, isSubmitting },
   } = useForm()
 
@@ -44,6 +44,7 @@ const InputForm = (props) => {
   }
 
   useEffect(() => {
+    reset()
     setElements(
       SmartContracts[props.contractIndex].abi[props.page]
     )
