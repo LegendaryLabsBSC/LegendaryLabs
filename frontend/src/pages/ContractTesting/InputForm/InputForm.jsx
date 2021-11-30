@@ -46,9 +46,9 @@ const InputForm = (props) => {
   useEffect(() => {
     reset()
     setElements(
-      SmartContracts[props.contractIndex].abi[props.page]
+      SmartContracts[props.contractIndex].abi[props.contractFunction]
     )
-  }, [props.page])
+  }, [props.contractFunction])
 
   //todo : ?
   const { inputs, name, outputs, stateMutability, value } = elements ?? {}

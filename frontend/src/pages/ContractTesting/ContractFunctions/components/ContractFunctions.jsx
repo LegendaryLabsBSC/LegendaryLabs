@@ -7,7 +7,6 @@ const ContractFunctions = (props) => {
 
   const handleOnClick = (pageIndex) => {
     props.newPage(pageIndex);
-    
   };
 
   //todo: extract this out ? reuse with popoverheading
@@ -21,6 +20,11 @@ const ContractFunctions = (props) => {
       case "view":
         return {
           colorScheme: "blue",
+        };
+
+      case "payable":
+        return {
+          colorScheme: "green",
         };
 
       default:
@@ -42,7 +46,7 @@ const ContractFunctions = (props) => {
     >
       <Flex
         wrap="wrap" m={1} j
-       justify="center"
+        justify="center"
       >
         {props.contract &&
           props.contract.abi &&

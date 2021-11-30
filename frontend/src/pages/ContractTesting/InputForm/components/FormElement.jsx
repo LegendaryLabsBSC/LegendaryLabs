@@ -1,4 +1,5 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
+import { MdContentPaste } from 'react-icons/md'
 import {
   Input,
   Radio,
@@ -9,14 +10,11 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Heading,
   Flex,
   Text,
-  Button,
   InputGroup,
   IconButton
 } from "@chakra-ui/react";
-import { MdContentPaste } from 'react-icons/md'
 
 
 
@@ -36,7 +34,7 @@ const Element = (
     })
   }
 
-    //todo:
+  //todo:
   async function handlePaste(input) {
     const clip = await navigator.clipboard.readText()
     input.value = clip
@@ -58,6 +56,9 @@ const Element = (
           <IconButton
             icon={<MdContentPaste />}
             onClick={handlePaste}
+            right={10}
+            background="none"
+            _hover={{ background: 'none' }}
           />
         </InputGroup>
       );

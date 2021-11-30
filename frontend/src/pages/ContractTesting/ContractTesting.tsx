@@ -5,19 +5,20 @@ import { Flex } from "@chakra-ui/react";
 // import OutputConsole from "./OutputConsole/OutputConsole";
 
 const ContractTesting = (props: any) => {
-  const [page, setPage] = useState(0);
+  const [contractFunction, setContractFunction] = useState(0);
+  
   const [contractIndex, setContractIndex] = useState(0);
 
   return (
     <>
       <FunctionSelectionForm
-        newPage={setPage}
+        setContractFunction={setContractFunction}
         setContractIndex={setContractIndex}
         contractIndex={contractIndex}
       />
       <InputForm
         navSize={props.navSize}
-        page={page}
+        contractFunction={contractFunction}
         contractIndex={contractIndex}
       />
     </>

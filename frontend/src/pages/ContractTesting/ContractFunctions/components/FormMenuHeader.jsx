@@ -74,7 +74,11 @@ const FormMenuHeader = (props) => {
       <Spacer />
 
       <Flex>
-        <Link href="https://docs.legendarylabs.net" style={{ textDecoration: 'none' }} isExternal>
+        <Link
+          href="https://docs.legendarylabs.net/docs/contracts"
+          style={{ textDecoration: 'none' }}
+          isExternal
+        >
           <Button
             rightIcon={<GiWhiteBook />}
             background="none"

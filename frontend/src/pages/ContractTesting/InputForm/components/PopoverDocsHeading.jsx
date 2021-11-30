@@ -1,9 +1,17 @@
 import React from 'react'
-import { Flex, Popover, PopoverTrigger, Heading, Button, PopoverContent, PopoverBody } from '@chakra-ui/react'
+import {
+  Flex,
+  Popover,
+  PopoverTrigger,
+  Heading,
+  Button,
+  PopoverContent,
+  PopoverBody
+} from '@chakra-ui/react'
 
-const PopoverDocsHeading = ({ title, colorScheme }) => {
+const PopoverDocsHeading = (props) => {
 
-  const popoverSlug = `${title}`.toLowerCase()
+  const popoverSlug = `${props.title}`.toLowerCase()
 
   const setColorScheme = (theme) => {
     switch (theme) {
@@ -48,13 +56,14 @@ const PopoverDocsHeading = ({ title, colorScheme }) => {
             background="none"
             _hover={{ background: 'blue.500' }}
           >
-            <Heading as="h4" size="md">{title}</Heading>
+            <Heading as="h4" size="md">{props.title}</Heading>
           </Button>
         </PopoverTrigger>
         <PopoverContent>
           <PopoverBody>
             <iframe
               src={`https://docs.legendarylabs.net/docs/contracts/lab/LegendsLaboratory#${popoverSlug}`}
+              // src={`[baseURL][contractGroup][contractName]#${popoverSlug}`}
               // todo: fix this to handle dynamic slugs; for contracts other than lab^
               width="500px"
               height="500px">

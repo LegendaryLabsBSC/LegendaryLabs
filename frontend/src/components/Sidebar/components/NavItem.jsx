@@ -8,27 +8,26 @@ import {
   Text
 } from '@chakra-ui/react'
 
-
-const NavItem = ({ navSize, icon, title, active, route }) => {
+const NavItem = (props) => {
   return (
     <Flex
       mt={30}
       flexDir="column"
       w="100%"
-      alignItems={navSize === "small" ? "center" : "flex-start"}
+      alignItems={props.navSize === "small" ? "center" : "flex-start"}
     >
       <Menu placement="right">
         <Link 
-          backgroundColor={active && "blue.500"}
+          backgroundColor={props.active && "blue.500"}
           p={3}
           borderRadius={8}
           _hover={{ textDecor: 'none', backgroundColor: 'blue.500' }}
-          w={navSize === "large" && "100%"}
+          w={props.navSize === "large" && "100%"}
         >
           <MenuButton >
             <Flex>
-              <Icon as={icon} fontSize="xl" color={active ? "#82AAAD" : "grey.500"} />
-              <Text ml={5} display={navSize === "small" ? "none" : "flex"}>{title}</Text>
+              <Icon as={props.icon} fontSize="xl" color={props.active ? "#82AAAD" : "grey.500"} />
+              <Text ml={5} display={props.navSize === "small" ? "none" : "flex"}>{props.title}</Text>
             </Flex>
           </MenuButton>
         </Link>

@@ -36,7 +36,7 @@ const FunctionSelectionForm = (props: any) => {
         <ContractFunctions
           contract={contract}
           contractIndex={props.contractIndex}
-          newPage={props.newPage}
+          setContractFunction={props.setContractFunction}
         />
       </Flex>
     </Flex>
