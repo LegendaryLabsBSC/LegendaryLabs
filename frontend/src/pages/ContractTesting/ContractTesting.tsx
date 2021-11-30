@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import InputForm from "./InputForm/InputForm";
 import FunctionSelectionForm from "./ContractFunctions/FunctionSelectionForm";
-import { Flex } from "@chakra-ui/react";
-// import OutputConsole from "./OutputConsole/OutputConsole";
+import InputForm from "./InputForm/InputForm";
 
 const ContractTesting = (props: any) => {
   const [contractFunction, setContractFunction] = useState(0);
-  
   const [contractIndex, setContractIndex] = useState(0);
 
   return (

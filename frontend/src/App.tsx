@@ -20,8 +20,8 @@ const App = () => {
         <Sidebar changeNavSize={changeNavSize} navSize={navSize} />
         <Flex
           // pos="sticky"
-          left="5"
-          mr="4%"
+          // left="50"
+          mr={navSize === "small" ? "3%" : "4%"}
           h="95vh"
           marginTop="2.5vh"
           boxShadow="0 4px 12px rgba(0,0,0,1)"

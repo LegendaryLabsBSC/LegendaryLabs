@@ -17,7 +17,7 @@ const OutputConsole = (props) => {
       boxShadow="0 4px 12px rgba(49,130,206,0.55) inset"
       borderRadius={15}
       overflowY={props.outputContent.length > 1 ? "scroll" : "hidden"}
-      overflowX={props.outputContent.length > 1 ? "scroll" : "hidden"}
+      overflowX={"hidden"}
     >
       <Container >
         <Heading
