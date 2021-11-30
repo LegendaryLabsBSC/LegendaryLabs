@@ -8,12 +8,15 @@ export default async function smartContractCall(
   const args = Object.values(values)
 
   if (typeof window.ethereum !== 'undefined') {
-    await contract[subContract][callType][name](...args)
+
+    return await contract[subContract][callType][name](...args)
       .then((data) => {
-        console.log(data.toString())
+        console.log(data)
+        return data.toString() // ? only return view/pure functions to console?
       })
       .catch((err) => {
         console.log(err)
+        return err.toString() //todo: make error return more user-friendly
       })
   }
 }

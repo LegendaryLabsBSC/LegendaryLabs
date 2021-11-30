@@ -17,6 +17,7 @@ const InputForm = (props) => {
 
   //todo : ?
   const [elements, setElements] = useState(null);
+  const [outputContent, addOutputContent] = useState([""])
 
   //todo:
   const {
@@ -24,7 +25,7 @@ const InputForm = (props) => {
     formState: { errors, isSubmitting },
   } = useForm()
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     let callType;
 
     switch (stateMutability) {
@@ -40,7 +41,18 @@ const InputForm = (props) => {
         console.log(`Error: ${stateMutability} Call Not Supported`)
     }
 
-    smartContractCall(props.contractIndex, callType, name, values)
+    const data = await smartContractCall(props.contractIndex, callType, name, values)
+    console.log(data, 'test')
+
+    handleOutput(data)
+  }
+
+
+  const handleOutput = (data) => {
+    // const newLine = data.replace(/^/, `${name}: `)
+    const newLine = `\n${name}: ${data}\n`
+
+    addOutputContent(outputContent => [...outputContent, newLine])
   }
 
   useEffect(() => {
@@ -145,7 +157,11 @@ const InputForm = (props) => {
         </form>
       </Flex>
 
-      <OutputConsole navSize={props.navSize} />
+      <OutputConsole
+        navSize={props.navSize}
+        name={name}
+        outputContent={outputContent}
+      />
     </Flex >
   )
 }

@@ -45,13 +45,14 @@ const ContractFunctions = (props) => {
       flexDir="column"
     >
       <Flex
-        wrap="wrap" m={1} j
+        m={1}
+        wrap="wrap"
         justify="center"
       >
         {props.contract &&
           props.contract.abi &&
           props.contract.abi.map((contractCall, i) =>
-          contractCall.name && contractCall.type === "function" ? (
+            contractCall.name && contractCall.type === "function" ? (
               <Button
                 size="md"
                 fontSize={11}
