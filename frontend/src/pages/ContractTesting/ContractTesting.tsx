@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import FunctionSelectionForm from "./ContractFunctions/FunctionSelectionForm";
+import FunctionSelectionForm from "./FunctionSelectionForm/FunctionSelectionForm";
 import InputForm from "./InputForm/InputForm";
 
 const ContractTesting = (props: any) => {
-  const [contractFunction, setContractFunction] = useState(0);
+
+  const [contractFunction, setContractFunction] = useState(5); // needs to skip events
   const [contractIndex, setContractIndex] = useState(0);
 
   return (

@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Flex, Divider } from "@chakra-ui/react";
 import FormMenuHeader from "./components/FormMenuHeader";
 import ContractFunctions from "./components/ContractFunctions";
+import { smartContracts } from "../../../config/contractInterface";
 
 const FunctionSelectionForm = (props: any) => {
-  const [contract, setContract] = useState({});
+  const defaultView = smartContracts[props.contractIndex];
+
+  const [contract, setContract] = useState(defaultView);
 
   return (
     <Flex

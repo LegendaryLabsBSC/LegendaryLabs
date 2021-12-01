@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import FormElement from "./components/FormElement"
-import OutputConsole from './OutputConsole/OutputConsole';
+import OutputConsole from './components/OutputConsole';
 import PopoverDocsHeading from './components/PopoverDocsHeading';
-import SmartContracts from '../../../config/SmartContracts';
+import { smartContracts } from '../../../config/contractInterface';
 import smartContractCall from '../../../utils/smartContractCall'
 import {
   Button,
@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react'
 
 const InputForm = (props) => {
+
 
   //todo : ?
   const [elements, setElements] = useState(null);
@@ -55,10 +56,14 @@ const InputForm = (props) => {
     addOutputContent(outputContent => [...outputContent, newLine])
   }
 
+
+
+
+
   useEffect(() => {
     reset()
     setElements(
-      SmartContracts[props.contractIndex].abi[props.contractFunction]
+      smartContracts[props.contractIndex].abi[props.contractFunction]
     )
   }, [props.contractFunction])
 
@@ -142,17 +147,16 @@ const InputForm = (props) => {
             p={2}
             mt={3}
           >
-            {/* <Spacer /> */}
+            {elements !== null ?
             <Button
               type="submit"
-              // w="30%"
               size="lg"
-              // onClick={(e) => handleSubmit(e)}
-              // onClick={() => handleSubmit()}
               isLoading={isSubmitting}
+              onClick={() => console.log(elements)}
             >
               Submit
-            </Button>
+            </Button> : null
+            }
           </Flex>
         </form>
       </Flex>

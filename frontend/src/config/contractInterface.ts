@@ -18,7 +18,7 @@ import {
   legendsMatchingBoard,
 } from "./contractAddresses";
 
-// ? still needed 
+// ? still needed
 declare global {
   interface Window {
     ethereum?: any;
@@ -37,9 +37,16 @@ interface ContractLab {
   rejuvenation: ContractInterface;
   marketplace: ContractInterface;
   matching: ContractInterface;
-  // provider: any;
-  // signer: any;
 }
+
+const smartContracts = [
+  LegendsLaboratory,
+  LegendsNFT,
+  LegendToken,
+  LegendRejuvenation,
+  LegendsMarketplace,
+  LegendsMatchingBoard,
+];
 
 const provider: any = new ethers.providers.Web3Provider(window.ethereum);
 const signer: any = provider.getSigner();
@@ -99,7 +106,7 @@ const matching: ContractInterface = {
   ),
 };
 
-const contract: ContractLab = {
+const contractLab: ContractLab = {
   lab: lab,
   nft: nft,
   token: token,
@@ -108,4 +115,4 @@ const contract: ContractLab = {
   matching: matching,
 };
 
-export { contract };
+export { smartContracts, contractLab };

@@ -1,6 +1,6 @@
 import React from 'react'
 import { GiWhiteBook, GiScrollUnfurled } from 'react-icons/gi'
-import SmartContracts from '../../../../config/SmartContracts';
+import { smartContracts } from '../../../../config/contractInterface';
 import {
   Box,
   Heading,
@@ -20,8 +20,12 @@ const FormMenuHeader = (props) => {
 
   const handleOnClick = (contractData, index) => {
     props.setContract(contractData)
+    console.log(contractData)
     props.setContractIndex(index)
   }
+
+
+  // use effect here on render ??
 
   return (
     <Flex
@@ -44,14 +48,13 @@ const FormMenuHeader = (props) => {
         <MenuList>
           <MenuOptionGroup
             title="Contracts"
-            // defaultValue={`0`} // todo: make contract persist on refresh
             type='radio'
           //todo: add second group to use as a filter; read,write, etc
           >
             {
-              SmartContracts.map((contract, i) =>
+              smartContracts.map((contract, i) =>
                 <MenuItemOption
-                  value={`${i}`}
+                  value={i}
                   onClick={() => handleOnClick(contract, i)}
                 >
                   {contract.contractName}
@@ -60,7 +63,6 @@ const FormMenuHeader = (props) => {
             }
           </MenuOptionGroup>
         </MenuList>
-        {/* </Box> */}
       </Menu>
 
 
