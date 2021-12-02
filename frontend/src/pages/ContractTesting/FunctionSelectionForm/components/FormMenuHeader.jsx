@@ -54,7 +54,7 @@ const FormMenuHeader = (props) => {
             {
               smartContracts.map((contract, i) =>
                 <MenuItemOption
-                  value={i}
+                  value={`${i}`}
                   onClick={() => handleOnClick(contract, i)}
                 >
                   {contract.contractName}
