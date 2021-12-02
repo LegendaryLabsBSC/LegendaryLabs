@@ -39,6 +39,7 @@ interface ContractLab {
   matching: ContractInterface;
 }
 
+
 const smartContracts = [
   LegendsLaboratory,
   LegendsNFT,
@@ -48,6 +49,16 @@ const smartContracts = [
   LegendsMatchingBoard,
 ];
 
+// const smartContracts = () => {
+
+// const fullContracts = [
+//     LegendsLaboratory,
+//     LegendsNFT,
+//     LegendToken,
+//     LegendRejuvenation,
+//     LegendsMarketplace,
+//     LegendsMatchingBoard,
+//   ];}
 const provider: any = new ethers.providers.Web3Provider(window.ethereum);
 const signer: any = provider.getSigner();
 

@@ -147,15 +147,17 @@ const InputForm = (props) => {
             p={2}
             mt={3}
           >
-            {elements !== null ?
-            <Button
-              type="submit"
-              size="lg"
-              isLoading={isSubmitting}
-              onClick={() => console.log(elements)}
-            >
-              Submit
-            </Button> : null
+            {elements != null ? (
+              <Button
+                type="submit"
+                size="lg"
+                isLoading={isSubmitting}
+                // onClick={() => console.log(elements)}
+                onClick={() => console.log(Object.values(elements))}
+
+              >
+                Submit
+              </Button>) : null
             }
           </Flex>
         </form>
