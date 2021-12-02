@@ -5,9 +5,9 @@ import ContractFunctions from "./components/ContractFunctions";
 import { smartContracts } from "../../../config/contractInterface";
 
 const FunctionSelectionForm = (props: any) => {
-  const defaultView = smartContracts[props.contractIndex];
+  const defaultContract = smartContracts[props.contractIndex];
 
-  const [contract, setContract] = useState(defaultView);
+  const [contractData, setContractData] = useState(defaultContract);
 
   return (
     <Flex
@@ -22,8 +22,8 @@ const FunctionSelectionForm = (props: any) => {
       background="white"
     >
       <FormMenuHeader
-        setContract={setContract}
-        contract={contract}
+        setContractData={setContractData}
+        contractData={contractData}
         setContractIndex={props.setContractIndex}
         contractIndex={props.contractIndex}
       />
@@ -37,7 +37,7 @@ const FunctionSelectionForm = (props: any) => {
         position="relative"
       >
         <ContractFunctions
-          contract={contract}
+          contractData={contractData}
           contractIndex={props.contractIndex}
           setContractFunction={props.setContractFunction}
         />

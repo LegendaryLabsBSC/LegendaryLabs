@@ -18,14 +18,10 @@ import {
 
 const FormMenuHeader = (props) => {
 
-  const handleOnClick = (contractData, index) => {
-    props.setContract(contractData)
-    console.log(contractData)
+  const handleOnClick = (data, index) => {
+    props.setContractData(data)
     props.setContractIndex(index)
   }
-
-
-  // use effect here on render ??
 
   return (
     <Flex
@@ -49,32 +45,27 @@ const FormMenuHeader = (props) => {
           <MenuOptionGroup
             title="Contracts"
             type='radio'
-          //todo: add second group to use as a filter; read,write, etc
           >
             {
-              smartContracts.map((contract, i) =>
+              smartContracts.map((contractData, contractIndex) =>
                 <MenuItemOption
-                  value={`${i}`}
-                  onClick={() => handleOnClick(contract, i)}
+                  value={`${contractIndex}`}
+                  onClick={() => handleOnClick(contractData, contractIndex)}
                 >
-                  {contract.contractName}
+                  {contractData.contractName}
                 </MenuItemOption>
               )
             }
           </MenuOptionGroup>
         </MenuList>
       </Menu>
-
-
-
       <Spacer />
       <Box>
         <Heading as="h3" size="lg">
-          {props.contract.contractName}
+          {props.contractData.contractName}
         </Heading>
       </Box>
       <Spacer />
-
       <Flex>
         <Link
           href="https://docs.legendarylabs.net/docs/contracts"

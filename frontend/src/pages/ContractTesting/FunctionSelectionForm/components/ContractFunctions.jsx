@@ -49,9 +49,9 @@ const ContractFunctions = (props) => {
         wrap="wrap"
         justify="center"
       >
-        {props.contract &&
-          props.contract.abi &&
-          props.contract.abi.map((contractCall, i) =>
+        {props.contractData &&
+          props.contractData.abi &&
+          props.contractData.abi.map((contractCall, i) =>
             contractCall.name && contractCall.type === "function" ? (
               <Button
                 size="md"

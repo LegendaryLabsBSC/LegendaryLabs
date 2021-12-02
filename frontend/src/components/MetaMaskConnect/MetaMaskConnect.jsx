@@ -10,7 +10,7 @@ const MetaMaskConnect = (props) => {
   const testNetwork = { name: 'Harmony Testnet', chainId: '0x6357d2e0' }
 
   const handleDisplayAddress = (address) => {
-    if (walletAddress != 0) {
+    if (walletAddress !== 0) {
       return `${address.slice(0, 4)}...${address.slice(-4)}`
     } else {
       return 'Connect'
@@ -25,7 +25,7 @@ const MetaMaskConnect = (props) => {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
 
-      if (chainId != testNetwork.chainId) {
+      if (chainId !== testNetwork.chainId) {
         alert(`Please connect to ${testNetwork.name}`);
       } else {
         const wallet = accounts[0];
@@ -43,7 +43,7 @@ const MetaMaskConnect = (props) => {
     >
       {props.navSize === "small" ?
         <Tooltip
-          label={walletAddress != 0 && walletAddress}
+          label={walletAddress !== 0 && walletAddress}
           placement='auto-start'
           fontSize={13}
           borderRadius={15}
