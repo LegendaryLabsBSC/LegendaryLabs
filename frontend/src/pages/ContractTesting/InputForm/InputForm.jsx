@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import FormElement from "./components/FormElement"
-import OutputConsole from './components/OutputConsole';
+import OutputConsole from './OutputConsole/OutputConsole';
 import PopoverDocsHeading from './components/PopoverDocsHeading';
 import { smartContracts } from '../../../config/contractInterface';
 import smartContractCall from '../../../utils/smartContractCall'
@@ -55,10 +55,6 @@ const InputForm = (props) => {
 
     addOutputContent(outputContent => [...outputContent, newLine])
   }
-
-
-
-
 
   useEffect(() => {
     reset()
@@ -167,6 +163,7 @@ const InputForm = (props) => {
         navSize={props.navSize}
         name={name}
         outputContent={outputContent}
+        clearOutputContent={addOutputContent}
       />
     </Flex >
   )

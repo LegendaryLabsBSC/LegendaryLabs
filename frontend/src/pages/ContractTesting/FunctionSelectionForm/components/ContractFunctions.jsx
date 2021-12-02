@@ -9,10 +9,6 @@ const ContractFunctions = (props) => {
     props.setContractFunction(functionIndex);
   };
 
-  const filterOut = (i) => {
-    if (i.name && i.type === 'function') return true;
-  };
-
   //todo: extract this out ? reuse with popoverheading
   const setColorScheme = (theme) => { ////!!! theme ? change ?
     switch (theme) {
@@ -55,25 +51,26 @@ const ContractFunctions = (props) => {
       >
         {props.contract &&
           props.contract.abi &&
-          props.contract.abi.filter(filterOut).map((contractCall, i) =>
-            <Button
-              size="md"
-              fontSize={11}
-              {...setColorScheme(contractCall.stateMutability)}
-              onClick={() => handleOnClick(i)}
-              boxShadow="0 4px 12px rgba(0,0,0,0.55)"
-              w="20%"
-              m={2}
-            >
-              <Text
-                fontSize={12}
+          props.contract.abi.map((contractCall, i) =>
+            contractCall.name && contractCall.type === "function" ? (
+              <Button
+                size="md"
+                fontSize={11}
+                {...setColorScheme(contractCall.stateMutability)}
+                onClick={() => handleOnClick(i)}
+                boxShadow="0 4px 12px rgba(0,0,0,0.55)"
+                w="20%"
+                m={2}
               >
-                {contractCall.name}
-              </Text>
-            </Button>
+                <Text
+                  fontSize={12}
+                >
+                  {contractCall.name}
+                </Text>
+              </Button>
+            )
+              : null
           )
-          // : null
-          // )
         }
       </Flex>
     </Flex>
