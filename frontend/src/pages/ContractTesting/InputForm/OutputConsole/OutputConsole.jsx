@@ -6,7 +6,7 @@ import {
   Heading
 } from "@chakra-ui/react";
 import { FiSlash, FiDownload } from 'react-icons/fi'
-import ConsoleButton from './components/ConsoleButton';
+import TooltipButton from '../../../../components/TooltipButton';
 import downloadFile from '../../../../utils/downloadFile';
 
 
@@ -56,30 +56,25 @@ const OutputConsole = (props) => {
         <ConsoleHeader />
         <Flex
           position="absolute"
-          right={24}
+          right={28}
           bottom={8}
         >
-          <ConsoleButton
+          <TooltipButton
             icon={<FiSlash />}
             tooltipLabel="Clear Log"
             tooltipPlacement="top-start"
-            background="none"
-            _hover="none"
             onClick={clearLog}
           />
-          <ConsoleButton
+          <TooltipButton
             icon={<FiDownload />}
             tooltipLabel="Download Log"
             tooltipPlacement="top-end"
-            background="none"
-            _hover="none"
             onClick={() => downloadFile(
               props.outputContent,
               "\n>--",
               "contract-testing-log",
               "text/plain",
-              "txt")
-            }
+              "txt")}
           />
         </Flex>
         <LogContent />

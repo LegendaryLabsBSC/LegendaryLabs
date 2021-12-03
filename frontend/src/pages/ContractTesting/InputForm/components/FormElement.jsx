@@ -33,36 +33,21 @@ const Element = (
       [type]: val
     })
   }
-
-  //todo:
-  async function handlePaste(input) {
-    const clip = await navigator.clipboard.readText()
-    input.value = clip
-    console.log(input.value)
-  }
-
   switch (type) {
     case "string":
     case "address":
       return (
-        <InputGroup>
+        <Flex>
           <Input
             id={name}
             label={name}
             {...register(name)}
             placeholder={`Enter ${name}`}
+            w="75%"
           />
-
-          <IconButton
-            icon={<MdContentPaste />}
-            onClick={handlePaste}
-            right={10}
-            background="none"
-            _hover={{ background: 'none' }}
-          />
-        </InputGroup>
+        </Flex>
       );
-    case "bool":
+    case "bool": //todo: change stack to flex
       return (
         <Stack direction="row" spacing={12} >
           <RadioGroup

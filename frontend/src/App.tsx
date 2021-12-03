@@ -5,7 +5,7 @@ import ContractTesting from "./pages/ContractTesting/ContractTesting";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import Settings from "./pages/Settings/Settings";
-import BackDrop from "./components/BackDrop/BackDrop";
+import BackDrop from "./components/BackDrop";
 
 const App = () => {
   const [navSize, changeNavSize] = useState("large");

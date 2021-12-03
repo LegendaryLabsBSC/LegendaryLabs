@@ -5,19 +5,18 @@ import { IoWallet } from 'react-icons/io5'
 
 const MetaMaskConnect = (props) => {
 
-  const [walletAddress, setWalletAddress] = useState([0])
+  const [walletAddress, setWalletAddress] = useState([])
 
   const testNetwork = { name: 'Harmony Testnet', chainId: '0x6357d2e0' }
 
   const handleDisplayAddress = (address) => {
-    if (walletAddress !== 0) {
+    if (walletAddress.length > 1) {
       return `${address.slice(0, 4)}...${address.slice(-4)}`
     } else {
       return 'Connect'
     }
 
   }
-
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -53,7 +52,7 @@ const MetaMaskConnect = (props) => {
             size="md"
             as={IoWallet}
             ml={1}
-            onClick={connectWallet}
+            onClick={() => connectWallet}
             background="none"
             _hover={{ background: 'blue.500' }}
           />

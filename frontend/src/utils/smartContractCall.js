@@ -11,12 +11,10 @@ export default async function smartContractCall(
 
     return await contractLab[subContract][callType][name](...args)
       .then((data) => {
-        console.log(data)
-        return data.toString() // ? only return view/pure functions to console?
+        return data
       })
       .catch((err) => {
-        console.log(err)
-        return err.toString() //todo: make error return more user-friendly
+        return err
       })
   }
 }

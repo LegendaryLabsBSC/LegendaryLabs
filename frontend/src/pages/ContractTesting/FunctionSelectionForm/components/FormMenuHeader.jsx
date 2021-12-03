@@ -2,7 +2,6 @@ import React from 'react'
 import { GiWhiteBook, GiScrollUnfurled } from 'react-icons/gi'
 import { smartContracts } from '../../../../config/contractInterface';
 import {
-  Box,
   Heading,
   Flex,
   Spacer,
@@ -60,11 +59,12 @@ const FormMenuHeader = (props) => {
         </MenuList>
       </Menu>
       <Spacer />
-      <Box>
+      <Flex>
         <Heading as="h3" size="lg">
           {props.contractData.contractName}
         </Heading>
-      </Box>
+      </Flex>
+
       <Spacer />
       <Flex>
         <Link

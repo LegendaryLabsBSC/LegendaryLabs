@@ -44,13 +44,14 @@ const PopoverDocsHeading = (props) => {
   return (
     <Flex
       flexDirection="row"
-      // borderWidth={3}
       justify="center"
       w="100%"
       mt={4}
-    // mb={3}
     >
-      <Popover placement='left-start'>
+      <Popover
+       placement='left-start'
+       w="100%"
+       >
         <PopoverTrigger>
           <Button
             background="none"

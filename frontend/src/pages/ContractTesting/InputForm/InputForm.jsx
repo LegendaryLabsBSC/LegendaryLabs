@@ -14,16 +14,15 @@ import {
 } from '@chakra-ui/react'
 
 const InputForm = (props) => {
-
-
-  //todo : ?
   const [elements, setElements] = useState(null);
   const [outputContent, addOutputContent] = useState([""])
 
   //todo:
   const {
-    handleSubmit, register, reset,
-    formState: { errors, isSubmitting },
+    handleSubmit,
+    register,
+    reset,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm()
 
   const onSubmit = async (values) => {
@@ -43,14 +42,11 @@ const InputForm = (props) => {
     }
 
     const data = await smartContractCall(props.contractIndex, callType, name, values)
-    console.log(data, 'test')
-
-    handleOutput(data)
+    handleOutput(JSON.stringify(data))
   }
 
 
   const handleOutput = (data) => {
-    // const newLine = data.replace(/^/, `${name}: `)
     const newLine = `\n${name}: ${data}\n`
 
     addOutputContent(outputContent => [...outputContent, newLine])
@@ -100,9 +96,9 @@ const InputForm = (props) => {
 
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex flexDirection="column">
-
-
+          <Flex
+            flexDirection="column"
+          >
             {
               inputs ? inputs.map((input, i) =>
                 <FormControl
@@ -118,8 +114,6 @@ const InputForm = (props) => {
                   >
                     {input.name}:
                   </FormLabel>
-
-
                   <FormElement
                     key={input.name}
                     input={input}
@@ -128,15 +122,10 @@ const InputForm = (props) => {
                   <FormErrorMessage>
                     {errors.name && errors.name.message}
                   </FormErrorMessage>
-
                 </FormControl>
               ) : null
             }
-
-
-
           </Flex>
-
           <Flex
             flexDirection="column"
             alignItems="center"
@@ -150,7 +139,7 @@ const InputForm = (props) => {
                 isLoading={isSubmitting}
                 // onClick={() => console.log(elements)}
                 onClick={() => console.log(Object.values(elements))}
-
+                loadingText='Submitting'
               >
                 Submit
               </Button>) : null
@@ -158,7 +147,6 @@ const InputForm = (props) => {
           </Flex>
         </form>
       </Flex>
-
       <OutputConsole
         navSize={props.navSize}
         name={name}

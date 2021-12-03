@@ -1,11 +1,11 @@
 import React from 'react'
 import { IconButton, Tooltip } from '@chakra-ui/react'
 
-const ConsoleButton = (props) => {
+const TooltipButton = (props) => {
   return (
     <Tooltip
       label={props.tooltipLabel}
-      fontSize="md"
+      fontSize="sm"
       placement={props.tooltipPlacement}
       bg="blue.500"
       hasArrow
@@ -15,9 +15,10 @@ const ConsoleButton = (props) => {
         background="none"
         _hover="none"
         onClick={props.onClick}
+        size="sm"
       />
     </Tooltip>
   )
 }
 
-export default ConsoleButton
+export default TooltipButton
