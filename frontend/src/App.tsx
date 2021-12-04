@@ -23,12 +23,11 @@ const Lottery = lazy(() => import('./views/Lottery'))
 const NotFound = lazy(() => import('./views/NotFound'))
 // const Nft = lazy(() => import('./views/Nft'))
 
-// TODO:
-// This config is required for number formating
-BigNumber.config({
-  EXPONENTIAL_AT: 1000,
-  DECIMAL_PLACES: 80,
-})
+// This config is required for number formatting
+// BigNumber.config({
+//   EXPONENTIAL_AT: 1000,
+//   DECIMAL_PLACES: 80,
+// })
 
 const App: React.FC = () => {
   const { account, connect } = useWallet()

@@ -13,11 +13,14 @@
     "hardhat-docgen": "^1.1.2",
     "hardhat-gas-reporter": "^1.0.4",
     "hardhat-spdx-license-identifier": "^2.0.3",
-    "hardhat-storage-layout": "^0.1.6"
+    "hardhat-storage-layout": "^0.1.6",
+    "solc-0.8": "npm:solc@0.8.4",
+    "ts-node": "^10.4.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.2",
     "@pinata/ipfs-gateway-tools": "^1.1.6",
+    "@types/node": "^16.11.7",
     "axios": "^0.21.4",
     "dotenv": "^10.0.0",
     "hardhat-tracer": "^1.0.0-alpha.6",
@@ -26,13 +29,16 @@
     "json2csv": "^5.0.6",
     "mv": "^2.1.1",
     "nodemon": "^2.0.12",
+    "solidity-docgen": "^0.5.16",
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "hh:load": "npx hardhat compile && npx hardhat run --network bsctest scripts/deploy.js",
-    "hh:com": "npx hardhat compile",
-    "hh:size": "npx hardhat compile && hardhat size-contracts",
-    "hh:lint": "npx hardhat check",
+    "deploy": "npx hardhat run --network bsctest scripts/deploy.ts",
+    "compile": "npx hardhat compile",
+    "size": "npx hardhat compile && hardhat size-contracts",
+    "lint": "npx hardhat check",
+    "gendocs": "npx solidity-docgen --solc-module solc-0.8",
+    "scanfunctions": "npx hardhat compile && yarn run hardhat docgen",
     "start:api": "nodemon scripts/generateLegend.js"
   }
 }
