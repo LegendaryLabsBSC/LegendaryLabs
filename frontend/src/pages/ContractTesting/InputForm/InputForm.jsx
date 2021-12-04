@@ -17,12 +17,13 @@ const InputForm = (props) => {
   const [elements, setElements] = useState(null);
   const [outputContent, addOutputContent] = useState([""])
 
-  //todo:
+  const { inputs, name, outputs, stateMutability, value } = elements ?? {}
+
   const {
     handleSubmit,
     register,
     reset,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
+    formState: { errors, isSubmitting },
   } = useForm()
 
   const onSubmit = async (values) => {
@@ -42,21 +43,25 @@ const InputForm = (props) => {
         console.log(`Error: ${stateMutability} Call Not Supported`)
     }
 
-    const data = await smartContractCall(props.contractIndex, callType, name, values)
-    handleOutput(data, callType)
+    const transaction = await smartContractCall(props.contractIndex, callType, name, values)
+    handleOutput(transaction, callType, values)
   }
 
 
-  const handleOutput = (data, callType) => {
-    let newLine;
+  const handleOutput = (transaction, callType, values) => {
+    if (transaction.code === 4001) return // no output if user rejects transaction
+
+    let data;
 
     if (callType === "write") {
-      data.hash ?
-        newLine = `${name}: ${data.hash}`
-        : newLine = `${name}: ${JSON.stringify(data)}`
+      transaction.hash ?
+        data = `${transaction.hash} ${JSON.stringify(values)}`
+        : data = (JSON.stringify(transaction))
     } else {
-      newLine = `${name}: ${data}`
+      data = transaction
     }
+
+    const newLine = `\n${name}:\n ${data}\n`
 
     addOutputContent(outputContent => [...outputContent, newLine])
   }
@@ -68,8 +73,6 @@ const InputForm = (props) => {
     )
   }, [props.contractFunction])
 
-  //todo : ?
-  const { inputs, name, outputs, stateMutability, value } = elements ?? {}
 
   const handleSlug = (label) => {
     return label.toLowerCase()
