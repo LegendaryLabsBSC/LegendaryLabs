@@ -17,10 +17,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root-react-app'),
 )
-
-ReactDOM.render(
-  <React.StrictMode>
-    <MainNav />
-  </React.StrictMode>,
-  document.getElementById('root-react-nav'),
-)

@@ -66,7 +66,7 @@
     "@commitlint/config-conventional": "^11.0.0",
     "@types/jest": "^26.0.19",
     "husky": "^4.3.0",
-    "mini-css-extract-plugin": "^0.9.0",
+    "mini-css-extract-plugin": "^2.4.5",
     "prettier": "^2.1.2",
     "rewire": "^5.0.0",
     "source-map-explorer": "^2.5.1"

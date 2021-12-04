@@ -6,7 +6,7 @@ import { AddressZero } from 'ethers/constants'
 import {
   legendsLaboratory,
   legendsNFT,
-  legendsToken,
+  legendToken,
   legendsMarketplace,
   legendsMatchingBoard,
 } from 'contract_config/contract-config'
@@ -27,8 +27,8 @@ const contract = {
     write: new ethers.Contract(legendsLaboratory, LegendsLaboratory.abi, signer),
   },
   token: {
-    read: new ethers.Contract(legendsToken, LegendToken.abi, provider),
-    write: new ethers.Contract(legendsToken, LegendToken.abi, signer),
+    read: new ethers.Contract(legendToken, LegendToken.abi, provider),
+    write: new ethers.Contract(legendToken, LegendToken.abi, signer),
   },
   nft: {
     read: new ethers.Contract(legendsNFT, LegendsNFT.abi, provider),
@@ -184,8 +184,8 @@ function FarmsApp() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
-      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
-
+      const totalPromos = await contract.lab.read.fetchPromoCounts()
+      console.log(totalPromos);
       for (let i = 1; i <= totalPromos; i++) {
         contract.lab.read.fetchPromoEvent(i).then((p) => {
           console.log(`Promo: ${p.promoName}`)
@@ -215,7 +215,7 @@ function FarmsApp() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
-      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
+      const totalPromos = await contract.lab.read.fetchPromoCounts()
       // const amount = async await contract.lab.read.fetchRedeemableTickets(id, account)
       // console.log(amount)
 
