@@ -1,4 +1,10 @@
-const downloadFile = (data, separator, title, fileType, fileExt) => {
+const downloadFile = (
+  data,
+  separator,
+  title,
+  fileType,
+  fileExt
+) => {
   const element = document.createElement("a");
   const file = new Blob([data.join(separator)], { type: fileType });
   element.href = URL.createObjectURL(file);

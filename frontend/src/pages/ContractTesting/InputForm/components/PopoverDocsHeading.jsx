@@ -13,34 +13,6 @@ const PopoverDocsHeading = (props) => {
 
   const popoverSlug = `${props.title}`.toLowerCase()
 
-  const setColorScheme = (theme) => {
-    switch (theme) {
-
-      case "write-lab":
-        return {
-          colorScheme: "red",
-          borderColor: "black",
-          borderWidth: 3,
-        }
-
-      case "nonpayable":
-        return {
-          colorScheme: "red"
-        }
-
-      case "view":
-        return {
-          colorScheme: "blue"
-        }
-
-      default:
-        return {
-          colorScheme: "gray"
-        }
-
-    }
-  }
-
   return (
     <Flex
       flexDirection="row"
@@ -49,13 +21,13 @@ const PopoverDocsHeading = (props) => {
       mt={4}
     >
       <Popover
-       placement='left-start'
-       w="100%"
-       >
+        placement='left-start'
+        w="100%"
+      >
         <PopoverTrigger>
           <Button
             background="none"
-            _hover={{ background: 'blue.500' }}
+            _hover={{ background: `${props.colorScheme}.100` }}
           >
             <Heading as="h4" size="md">{props.title}</Heading>
           </Button>

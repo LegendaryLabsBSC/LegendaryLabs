@@ -5,6 +5,7 @@ import OutputConsole from './OutputConsole/OutputConsole';
 import PopoverDocsHeading from './components/PopoverDocsHeading';
 import { smartContracts } from '../../../config/contractInterface';
 import smartContractCall from '../../../utils/smartContractCall'
+import setColorScheme from '../../../utils/setColorScheme';
 import {
   Button,
   FormLabel,
@@ -25,6 +26,13 @@ const InputForm = (props) => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm()
+
+  useEffect(() => {
+    reset()
+    setElements(
+      smartContracts[props.contractIndex].abi[props.contractFunction]
+    )
+  }, [props.contractFunction])
 
   const onSubmit = async (values) => {
     let callType;
@@ -47,7 +55,6 @@ const InputForm = (props) => {
     handleOutput(transaction, callType, values)
   }
 
-
   const handleOutput = (transaction, callType, values) => {
     if (transaction.code === 4001) return // no output if user rejects transaction
 
@@ -66,14 +73,7 @@ const InputForm = (props) => {
     addOutputContent(outputContent => [...outputContent, newLine])
   }
 
-  useEffect(() => {
-    reset()
-    setElements(
-      smartContracts[props.contractIndex].abi[props.contractFunction]
-    )
-  }, [props.contractFunction])
-
-
+  //todo: ;; move to PDH ?
   const handleSlug = (label) => {
     return label.toLowerCase()
   }
@@ -95,7 +95,7 @@ const InputForm = (props) => {
     >
       <PopoverDocsHeading
         title={name}
-        colorScheme={stateMutability}
+        colorScheme={setColorScheme(stateMutability)}
       />
       <Flex
         // borderWidth={2}
@@ -146,6 +146,7 @@ const InputForm = (props) => {
               <Button
                 type="submit"
                 size="lg"
+                colorScheme={setColorScheme(stateMutability)}
                 isLoading={isSubmitting}
                 loadingText='Submitting'
               >

@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, Flex, Text } from "@chakra-ui/react";
-
-//todo: button color
+import setColorScheme from "../../../../utils/setColorScheme";
 
 const ContractFunctions = (props) => {
 
@@ -10,29 +9,29 @@ const ContractFunctions = (props) => {
   };
 
   //todo: extract this out ? reuse with popoverheading
-  const setColorScheme = (theme) => { ////!!! theme ? change ?
-    switch (theme) {
-      case "nonpayable":
-        return {
-          colorScheme: "red",
-        };
+  // const setColorScheme = (theme) => { ////!!! theme ? change ?
+  //   switch (theme) {
+  //     case "nonpayable":
+  //       return {
+  //         colorScheme: "red",
+  //       };
 
-      case "view":
-        return {
-          colorScheme: "blue",
-        };
+  //     case "view":
+  //       return {
+  //         colorScheme: "blue",
+  //       };
 
-      case "payable":
-        return {
-          colorScheme: "green",
-        };
+  //     case "payable":
+  //       return {
+  //         colorScheme: "green",
+  //       };
 
-      default:
-        return {
-          colorScheme: "gray",
-        };
-    }
-  };
+  //     default:
+  //       return {
+  //         colorScheme: "gray",
+  //       };
+  //   }
+  // };
 
   return (
     <Flex
@@ -56,7 +55,8 @@ const ContractFunctions = (props) => {
               <Button
                 size="md"
                 fontSize={11}
-                {...setColorScheme(contractCall.stateMutability)}
+                colorScheme={setColorScheme(contractCall.stateMutability)}
+                // {...setColorScheme(contractCall.stateMutability)}
                 onClick={() => handleOnClick(i)}
                 boxShadow="0 4px 12px rgba(0,0,0,0.55)"
                 w="20%"
