@@ -28,6 +28,7 @@ const InputForm = (props) => {
   const onSubmit = async (values) => {
     let callType;
 
+    //todo: eval other call types to see if this can be simplified 
     switch (stateMutability) {
       case 'nonpayable':
         callType = 'write'
@@ -42,12 +43,20 @@ const InputForm = (props) => {
     }
 
     const data = await smartContractCall(props.contractIndex, callType, name, values)
-    handleOutput(JSON.stringify(data))
+    handleOutput(data, callType)
   }
 
 
-  const handleOutput = (data) => {
-    const newLine = `\n${name}: ${data}\n`
+  const handleOutput = (data, callType) => {
+    let newLine;
+
+    if (callType === "write") {
+      data.hash ?
+        newLine = `${name}: ${data.hash}`
+        : newLine = `${name}: ${JSON.stringify(data)}`
+    } else {
+      newLine = `${name}: ${data}`
+    }
 
     addOutputContent(outputContent => [...outputContent, newLine])
   }
@@ -93,8 +102,6 @@ const InputForm = (props) => {
         h="60%"
         p={5}
       >
-
-
         <form onSubmit={handleSubmit(onSubmit)}>
           <Flex
             flexDirection="column"
@@ -137,8 +144,6 @@ const InputForm = (props) => {
                 type="submit"
                 size="lg"
                 isLoading={isSubmitting}
-                // onClick={() => console.log(elements)}
-                onClick={() => console.log(Object.values(elements))}
                 loadingText='Submitting'
               >
                 Submit

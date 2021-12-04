@@ -56,17 +56,19 @@ const OutputConsole = (props) => {
         <ConsoleHeader />
         <Flex
           position="absolute"
-          right={28}
+          right="6.5%"
           bottom={8}
         >
           <TooltipButton
             icon={<FiSlash />}
+            color="red"
             tooltipLabel="Clear Log"
             tooltipPlacement="top-start"
             onClick={clearLog}
           />
           <TooltipButton
             icon={<FiDownload />}
+            color="green.400"
             tooltipLabel="Download Log"
             tooltipPlacement="top-end"
             onClick={() => downloadFile(

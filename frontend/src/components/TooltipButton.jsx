@@ -16,6 +16,7 @@ const TooltipButton = (props) => {
         _hover="none"
         onClick={props.onClick}
         size="sm"
+        color={props.color}
       />
     </Tooltip>
   )
