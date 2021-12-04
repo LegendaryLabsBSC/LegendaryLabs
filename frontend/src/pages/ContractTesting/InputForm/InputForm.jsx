@@ -13,6 +13,7 @@ import {
   FormErrorMessage,
   Flex,
 } from '@chakra-ui/react'
+import DrawerDocs from './components/DrawerDocs';
 
 const InputForm = (props) => {
   const [elements, setElements] = useState(null);
@@ -114,6 +115,8 @@ const InputForm = (props) => {
         contractData={smartContracts[props.contractIndex]}
         colorScheme={setColorScheme(stateMutability)}
       />
+
+      {/* <DrawerDocs /> */}
       <Flex
         flexDirection="column"
         h="60%"

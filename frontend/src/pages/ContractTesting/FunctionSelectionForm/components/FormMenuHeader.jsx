@@ -43,6 +43,7 @@ const FormMenuHeader = (props) => {
           background="none"
           color="blue.500"
           size="lg"
+          borderRadius={36}
           _hover={{ background: 'none' }}
         >
           Contracts
@@ -71,10 +72,6 @@ const FormMenuHeader = (props) => {
           {props.contractData.contractName}
         </Heading>
       </Flex>
-
-
-
-
       <Spacer />
       <Flex>
         <Link
@@ -88,6 +85,7 @@ const FormMenuHeader = (props) => {
             color="blue.500"
             size="lg"
             _hover={{ background: 'none' }}
+            borderRadius={36}
             onClick={handleURL}
           >
             Docs
