@@ -8,31 +8,6 @@ const ContractFunctions = (props) => {
     props.setContractFunction(functionIndex);
   };
 
-  //todo: extract this out ? reuse with popoverheading
-  // const setColorScheme = (theme) => { ////!!! theme ? change ?
-  //   switch (theme) {
-  //     case "nonpayable":
-  //       return {
-  //         colorScheme: "red",
-  //       };
-
-  //     case "view":
-  //       return {
-  //         colorScheme: "blue",
-  //       };
-
-  //     case "payable":
-  //       return {
-  //         colorScheme: "green",
-  //       };
-
-  //     default:
-  //       return {
-  //         colorScheme: "gray",
-  //       };
-  //   }
-  // };
-
   return (
     <Flex
       position="absolute"
@@ -56,22 +31,17 @@ const ContractFunctions = (props) => {
                 size="md"
                 fontSize={11}
                 colorScheme={setColorScheme(contractCall.stateMutability)}
-                // {...setColorScheme(contractCall.stateMutability)}
                 onClick={() => handleOnClick(i)}
                 boxShadow="0 4px 12px rgba(0,0,0,0.55)"
                 w="20%"
                 m={2}
               >
-                <Text
-                  fontSize={12}
-                >
+                <Text fontSize={12}>
                   {contractCall.name}
                 </Text>
               </Button>
-            )
-              : null
-          )
-        }
+            ) : null
+          )}
       </Flex>
     </Flex>
   );

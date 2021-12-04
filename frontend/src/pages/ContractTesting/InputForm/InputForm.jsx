@@ -27,12 +27,34 @@ const InputForm = (props) => {
     formState: { errors, isSubmitting },
   } = useForm()
 
+  function handleDefaultView() {
+
+    const filterBy = (f) => {
+      if (f.type !== "function") return false
+
+      return true
+    }
+
+    const defaultView = smartContracts[props.contractIndex] &&
+      smartContracts[props.contractIndex].abi &&
+      smartContracts[props.contractIndex].abi.filter(filterBy);
+
+    return defaultView[0]
+  }
+
+  useEffect(() => {
+    reset()
+    setElements(handleDefaultView)
+  }, [props.contractIndex])
+
   useEffect(() => {
     reset()
     setElements(
       smartContracts[props.contractIndex].abi[props.contractFunction]
     )
   }, [props.contractFunction])
+
+
 
   const onSubmit = async (values) => {
     let callType;
@@ -68,7 +90,7 @@ const InputForm = (props) => {
       data = transaction
     }
 
-    const newLine = `\n${name}:\n ${data}\n`
+    const newLine = `${name}:\n ${data}\n`
 
     addOutputContent(outputContent => [...outputContent, newLine])
   }
