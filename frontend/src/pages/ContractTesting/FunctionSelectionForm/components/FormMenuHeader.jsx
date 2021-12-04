@@ -22,6 +22,13 @@ const FormMenuHeader = (props) => {
     props.setContractIndex(index)
   }
 
+  const handleURL = () => {
+    const baseURL = "https://docs.legendarylabs.net/docs/"
+    const slug = props.contractData.sourceName.split('.')[0]
+
+    return `${baseURL}${slug}`
+  }
+
   return (
     <Flex
       alignItems="center"
@@ -65,10 +72,13 @@ const FormMenuHeader = (props) => {
         </Heading>
       </Flex>
 
+
+
+
       <Spacer />
       <Flex>
         <Link
-          href="https://docs.legendarylabs.net/docs/contracts"
+          href={handleURL()}
           style={{ textDecoration: 'none' }}
           isExternal
         >
@@ -78,7 +88,7 @@ const FormMenuHeader = (props) => {
             color="blue.500"
             size="lg"
             _hover={{ background: 'none' }}
-
+            onClick={handleURL}
           >
             Docs
           </Button>

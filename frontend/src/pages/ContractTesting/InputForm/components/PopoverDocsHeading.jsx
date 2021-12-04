@@ -11,7 +11,14 @@ import {
 
 const PopoverDocsHeading = (props) => {
 
-  const popoverSlug = `${props.title}`.toLowerCase()
+  const handleURL = () => {
+    const baseURL = "https://docs.legendarylabs.net/docs/"
+    const slug = props.contractData.sourceName.split('.')[0]
+
+    return `${baseURL}${slug}#${props.title}`.toLowerCase()
+  }
+
+
 
   return (
     <Flex
@@ -28,6 +35,7 @@ const PopoverDocsHeading = (props) => {
           <Button
             background="none"
             _hover={{ background: `${props.colorScheme}.100` }}
+            onClick={() => handleURL()}
           >
             <Heading as="h4" size="md">{props.title}</Heading>
           </Button>
@@ -35,9 +43,7 @@ const PopoverDocsHeading = (props) => {
         <PopoverContent>
           <PopoverBody>
             <iframe
-              src={`https://docs.legendarylabs.net/docs/contracts/lab/LegendsLaboratory#${popoverSlug}`}
-              // src={`[baseURL][contractGroup][contractName]#${popoverSlug}`}
-              // todo: fix this to handle dynamic slugs; for contracts other than lab^
+              src={`${handleURL()}`}
               width="500px"
               height="500px">
             </iframe>

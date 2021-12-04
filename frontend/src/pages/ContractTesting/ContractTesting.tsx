@@ -4,8 +4,8 @@ import InputForm from "./InputForm/InputForm";
 import { smartContracts } from "../../config/contractInterface";
 
 const ContractTesting = (props: any) => {
-  const [contractFunction, setContractFunction] = useState(null); //todo: needs to skip events
   const [contractIndex, setContractIndex] = useState(0);
+  const [contractFunction, setContractFunction] = useState(null);
 
   return (
     <>

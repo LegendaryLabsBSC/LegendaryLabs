@@ -54,8 +54,6 @@ const InputForm = (props) => {
     )
   }, [props.contractFunction])
 
-
-
   const onSubmit = async (values) => {
     let callType;
 
@@ -96,11 +94,10 @@ const InputForm = (props) => {
   }
 
   //todo: ;; move to PDH ?
-  const handleSlug = (label) => {
+  const handleURL = (label) => {
     return label.toLowerCase()
   }
 
-  //todo: make form header text color match button color
   return (
     <Flex
       boxShadow="0 4px 12px rgba(0,0,0,0.75)"
@@ -110,20 +107,15 @@ const InputForm = (props) => {
       h="90vh"
       mt="2.5vh"
       w={props.navSize === "small" ? "33vw" : "25vw"}
-      // w="33vw"
       background="white"
-
-    // alignItems="center"
     >
       <PopoverDocsHeading
         title={name}
+        contractData={smartContracts[props.contractIndex]}
         colorScheme={setColorScheme(stateMutability)}
       />
       <Flex
-        // borderWidth={2}
         flexDirection="column"
-        // justifyContent="center"
-        // borderColor="blue"
         h="60%"
         p={5}
       >
