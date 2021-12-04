@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { MdContentPaste } from 'react-icons/md'
 import {
   Input,
   Radio,
@@ -12,14 +11,16 @@ import {
   NumberDecrementStepper,
   Flex,
   Text,
-  InputGroup,
-  IconButton
 } from "@chakra-ui/react";
 
-
-
 const Element = (
-  { input: { internalType, name, type }, key, register }
+  {
+    input: {
+      internalType,
+      name,
+      type
+    },
+    register }
 ) => {
 
   const [value, setValue] = useState({
@@ -39,17 +40,18 @@ const Element = (
       return (
         <Flex>
           <Input
+            w="75%"
             id={name}
             label={name}
             {...register(name)}
             placeholder={`Enter ${name}`}
-            w="75%"
           />
         </Flex>
       );
-    case "bool": //todo: change stack to flex
+
+    case "bool":
       return (
-        <Stack direction="row" spacing={12} >
+        <Flex>
           <RadioGroup
             id={name}
             label={name}
@@ -71,14 +73,15 @@ const Element = (
               </Radio>
             </Stack>
           </RadioGroup >
-        </Stack>
+        </Flex>
       );
+
     case "uint256":
       return (
         <Flex>
           <NumberInput
-            maxW="100px"
             mr="2rem"
+            maxW="100px"
             value={value.num}
             {...register(name)}
             onChange={(e) => updateValue(e, 'num')}
@@ -94,9 +97,11 @@ const Element = (
 
     default:
       console.log(`Error: ${type} not supported`)
-      return <Text>
-        {`Error: ${type} not supported`}
-      </Text>
+      return (
+        <Text>
+          {`Error: ${type} not supported`}
+        </Text>
+      )
   }
 };
 

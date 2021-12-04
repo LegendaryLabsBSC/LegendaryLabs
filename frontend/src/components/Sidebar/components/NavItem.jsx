@@ -17,8 +17,7 @@ const NavItem = (props) => {
       alignItems={props.navSize === "small" ? "center" : "flex-start"}
     >
       <Menu placement="right">
-        <Link 
-          backgroundColor={props.active && "blue.500"}
+        <Link
           p={3}
           borderRadius={8}
           _hover={{ textDecor: 'none', backgroundColor: 'blue.500' }}
@@ -26,8 +25,13 @@ const NavItem = (props) => {
         >
           <MenuButton >
             <Flex>
-              <Icon as={props.icon} fontSize="xl" color={props.active ? "#82AAAD" : "grey.500"} />
-              <Text ml={5} display={props.navSize === "small" ? "none" : "flex"}>{props.title}</Text>
+              <Icon as={props.icon} fontSize="xl" />
+              <Text
+                ml={5}
+                display={props.navSize === "small" ? "none" : "flex"}
+              >
+                {props.title}
+              </Text>
             </Flex>
           </MenuButton>
         </Link>

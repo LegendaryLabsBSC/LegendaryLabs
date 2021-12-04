@@ -1,24 +1,24 @@
 import React from 'react'
+import { FiSlash, FiDownload } from 'react-icons/fi'
+import downloadFile from '../../../../utils/downloadFile';
+import TooltipButton from '../../../../components/TooltipButton';
 import {
   Container,
   Flex,
   Text,
   Heading
 } from "@chakra-ui/react";
-import { FiSlash, FiDownload } from 'react-icons/fi'
-import TooltipButton from '../../../../components/TooltipButton';
-import downloadFile from '../../../../utils/downloadFile';
 
 
 const OutputConsole = (props) => {
 
   const ConsoleHeader = () => (
     <Heading
+      mt={2}
       as='h5'
       size='sm'
-      mt={2}
     >
-      Smart Contract Response Log:
+      {props.consoleHeader}
     </Heading>
   )
 
@@ -27,10 +27,10 @@ const OutputConsole = (props) => {
       props.outputContent.map((line, key) =>
       (
         <Text
+          p={2}
+          ml={2}
           key={key}
           fontSize="sm"
-          ml={2}
-          p={2}
         >
           {line}
         </Text>
@@ -41,23 +41,24 @@ const OutputConsole = (props) => {
   const clearLog = () => {
     props.clearOutputContent([""])
   }
+
   return (
     <Flex
-      w={props.navSize === "small" ? "32vw" : "24vw"}
+      mt="1vh"
       ml=".5vw"
       h="27vh"
-      mt="1vh"
-      boxShadow="0 4px 12px rgba(49,130,206,0.55) inset"
+      w={props.navSize === "small" ? "32vw" : "24vw"}
       borderRadius={15}
-      overflowY={props.outputContent.length > 1 ? "scroll" : "hidden"}
+      boxShadow="0 4px 12px rgba(49,130,206,0.55) inset"
       overflowX={"hidden"}
+      overflowY={props.outputContent.length > 1 ? "scroll" : "hidden"}
     >
       <Container >
         <ConsoleHeader />
         <Flex
           position="absolute"
-          right="6.5%"
           bottom={8}
+          right="6.5%"
         >
           <TooltipButton
             icon={<FiSlash />}
@@ -73,7 +74,7 @@ const OutputConsole = (props) => {
             tooltipPlacement="top-end"
             onClick={() => downloadFile(
               props.outputContent,
-              "\n>--",
+              ">--",
               "contract-testing-log",
               "text/plain",
               "txt")}

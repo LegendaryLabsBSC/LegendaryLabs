@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import FormElement from "./components/FormElement"
-import OutputConsole from './OutputConsole/OutputConsole';
+import OutputConsole from './components/OutputConsole';
 import PopoverDocsHeading from './components/PopoverDocsHeading';
 import { smartContracts } from '../../../config/contractInterface';
 import smartContractCall from '../../../utils/smartContractCall'
 import setColorScheme from '../../../utils/setColorScheme';
+import DrawerDocs from './components/DrawerDocs';
 import {
   Button,
   FormLabel,
@@ -13,19 +14,21 @@ import {
   FormErrorMessage,
   Flex,
 } from '@chakra-ui/react'
-import DrawerDocs from './components/DrawerDocs';
 
 const InputForm = (props) => {
   const [elements, setElements] = useState(null);
   const [outputContent, addOutputContent] = useState([""])
 
-  const { inputs, name, outputs, stateMutability, value } = elements ?? {}
+  const { inputs, name, outputs, stateMutability } = elements ?? {}
 
   const {
     handleSubmit,
     register,
     reset,
-    formState: { errors, isSubmitting },
+    formState: {
+      errors,
+      isSubmitting
+    },
   } = useForm()
 
   function handleDefaultView() {
@@ -58,18 +61,13 @@ const InputForm = (props) => {
   const onSubmit = async (values) => {
     let callType;
 
-    //todo: eval other call types to see if this can be simplified 
-    switch (stateMutability) {
-      case 'nonpayable':
-        callType = 'write'
-        break;
+    console.log(values)
 
-      case 'view':
-        callType = 'read'
-        break;
-
-      default:
-        console.log(`Error: ${stateMutability} Call Not Supported`)
+    if (stateMutability === "view") {
+      callType = 'read'
+    }
+    else {
+      callType = 'write'
     }
 
     const transaction = await smartContractCall(props.contractIndex, callType, name, values)
@@ -89,61 +87,52 @@ const InputForm = (props) => {
       data = transaction
     }
 
-    const newLine = `${name}:\n ${data}\n`
+    const newLine = `\n${name}:\n ${data}\n\n`
+    // const newLine = `${name}: ${data}`
 
     addOutputContent(outputContent => [...outputContent, newLine])
   }
 
-  //todo: ;; move to PDH ?
-  const handleURL = (label) => {
-    return label.toLowerCase()
-  }
-
   return (
     <Flex
-      boxShadow="0 4px 12px rgba(0,0,0,0.75)"
-      borderRadius={30}
-      flexDirection="column"
       mr={5}
       h="90vh"
       mt="2.5vh"
-      w={props.navSize === "small" ? "33vw" : "25vw"}
+      borderRadius={30}
       background="white"
+      flexDirection="column"
+      boxShadow="0 4px 12px rgba(0,0,0,0.75)"
+      w={props.navSize === "small" ? "33vw" : "25vw"}
     >
       <PopoverDocsHeading
         title={name}
-        contractData={smartContracts[props.contractIndex]}
         colorScheme={setColorScheme(stateMutability)}
+        contractData={smartContracts[props.contractIndex]}
       />
-
       {/* <DrawerDocs /> */}
-      <Flex
-        flexDirection="column"
-        h="60%"
+      <Flex //todo: extract out
         p={5}
+        h="60%"
+        flexDirection="column"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex
-            flexDirection="column"
-          >
+          <Flex flexDirection="column">
             {
               inputs ? inputs.map((input, i) =>
                 <FormControl
-                  align="center"
-                  // borderWidth={2}
-                  // borderColor="green"
                   p={1}
+                  align="center"
                   isInvalid={errors.name}
                 >
                   <FormLabel
-                    fontWeight="bold"
                     htmlFor='name'
+                    fontWeight="bold"
                   >
                     {input.name}:
                   </FormLabel>
                   <FormElement
-                    key={input.name}
                     input={input}
+                    key={input.name}
                     register={register}
                   />
                   <FormErrorMessage>
@@ -154,18 +143,18 @@ const InputForm = (props) => {
             }
           </Flex>
           <Flex
-            flexDirection="column"
-            alignItems="center"
             p={2}
             mt={3}
+            alignItems="center"
+            flexDirection="column"
           >
             {elements != null ? (
               <Button
-                type="submit"
                 size="lg"
-                colorScheme={setColorScheme(stateMutability)}
-                isLoading={isSubmitting}
+                type="submit"
                 loadingText='Submitting'
+                isLoading={isSubmitting}
+                colorScheme={setColorScheme(stateMutability)}
               >
                 Submit
               </Button>) : null
@@ -174,10 +163,11 @@ const InputForm = (props) => {
         </form>
       </Flex>
       <OutputConsole
-        navSize={props.navSize}
         name={name}
+        navSize={props.navSize}
         outputContent={outputContent}
         clearOutputContent={addOutputContent}
+        consoleHeader="Smart Contract Response Log:"
       />
     </Flex >
   )

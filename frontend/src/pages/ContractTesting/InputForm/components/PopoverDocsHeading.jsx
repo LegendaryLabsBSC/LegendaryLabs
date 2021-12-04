@@ -21,19 +21,20 @@ const PopoverDocsHeading = (props) => {
 
   return (
     <Flex
-      flexDirection="row"
-      justify="center"
-      w="100%"
       mt={4}
+      w="100%"
+      justify="center"
     >
       <Popover placement='bottom-start'>
         <PopoverTrigger>
           <Button
             background="none"
-            _hover={{ background: `${props.colorScheme} .100` }}
+            _hover={{ background: `${props.colorScheme}.100` }}
             onClick={() => handleURL()}
           >
-            <Heading as="h4" size="md">{props.title}</Heading>
+            <Heading as="h4" size="md">
+              {props.title}
+            </Heading>
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -51,7 +52,6 @@ const PopoverDocsHeading = (props) => {
         </PopoverContent>
       </Popover>
     </Flex>
-
   )
 }
 

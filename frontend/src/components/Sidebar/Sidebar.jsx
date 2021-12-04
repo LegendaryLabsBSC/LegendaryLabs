@@ -1,14 +1,10 @@
-import React, { useState, lazy } from 'react'
-import { Avatar, Divider, Flex, Heading, IconButton, Spacer, Text, Box } from '@chakra-ui/react'
+import React from 'react'
+import { Divider, Flex, IconButton, Spacer } from '@chakra-ui/react'
 import { FiMenu, FiHome, FiSettings } from "react-icons/fi";
 import NavItem from "./components/NavItem"
-import {
-  BrowserRouter as Router,
-  Route,
-  Link as RouteLink
-} from "react-router-dom";
 import { GrDocumentTest } from "react-icons/gr"
 import MetaMaskConnect from '../MetaMaskConnect/MetaMaskConnect';
+import { Link as RouteLink } from "react-router-dom";
 
 
 const Sidebar = (props) => {
@@ -24,8 +20,6 @@ const Sidebar = (props) => {
       w={props.navSize === "small" ? "100px" : "200px"}
       flexDir="column"
       justifyContent="space-between"
-    // background="blue.600"
-
     >
       <Flex
         p="5%"
@@ -47,7 +41,6 @@ const Sidebar = (props) => {
               props.changeNavSize("small")
           }}
         />
-
         <RouteLink to="/">
           <NavItem navSize={props.navSize} icon={FiHome} title="Home" />
         </RouteLink>
@@ -58,10 +51,7 @@ const Sidebar = (props) => {
         <RouteLink to="settings">
           <NavItem navSize={props.navSize} icon={FiSettings} title="Settings" />
         </RouteLink>
-
       </Flex>
-
-
       <Flex
         p="5%"
         flexDirection="column"

@@ -14,7 +14,7 @@ const ContractTesting = (props: any) => {
         setContractIndex={setContractIndex}
         contractIndex={contractIndex}
       />
-      <InputForm
+    <InputForm
         navSize={props.navSize}
         contractFunction={contractFunction}
         contractIndex={contractIndex}

@@ -10,7 +10,7 @@ const setColorScheme = (theme) => {
       return "green"
 
     default:
-      return "gray"
+      return "none"
   }
 };
 

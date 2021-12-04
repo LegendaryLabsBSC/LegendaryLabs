@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Flex, Divider } from "@chakra-ui/react";
 import FormMenuHeader from "./components/FormMenuHeader";
 import ContractFunctions from "./components/ContractFunctions";
@@ -10,37 +10,28 @@ const FunctionSelectionForm = (props: any) => {
 
   return (
     <Flex
-      flexDirection="column"
-      boxShadow="0 4px 12px rgba(0,0,0,0.75)"
-      borderRadius={30}
       ml={5}
-      h="90vh"
       mt="2.5vh"
       w="50vw"
-      alignItems="center"
+      h="90vh"
+      borderRadius={30}
       background="white"
+      alignItems="center"
+      flexDirection="column"
+      boxShadow="0 4px 12px rgba(0,0,0,0.75)"
     >
       <FormMenuHeader
-        setContractData={setContractData}
         contractData={contractData}
-        setContractIndex={props.setContractIndex}
         contractIndex={props.contractIndex}
+        setContractData={setContractData}
+        setContractIndex={props.setContractIndex}
       />
       <Divider />
-      <Flex
-        mt={5}
-        style={{ overflow: "hidden" }}
-        width="100%"
-        height="100%"
-        overflow="hidden"
-        position="relative"
-      >
-        <ContractFunctions
-          contractData={contractData}
-          contractIndex={props.contractIndex}
-          setContractFunction={props.setContractFunction}
-        />
-      </Flex>
+      <ContractFunctions
+        contractData={contractData}
+        contractIndex={props.contractIndex}
+        setContractFunction={props.setContractFunction}
+      />
     </Flex>
   );
 };
