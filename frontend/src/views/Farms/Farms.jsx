@@ -173,7 +173,6 @@ function FarmsApp() {
         `)
     }
   }
-  
 
   async function createPromoEvent() {
     if (typeof window.ethereum !== 'undefined') {
@@ -185,7 +184,7 @@ function FarmsApp() {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
       const totalPromos = await contract.lab.read.fetchPromoCounts()
-      console.log(totalPromos);
+      console.log(totalPromos)
       for (let i = 1; i <= totalPromos; i++) {
         contract.lab.read.fetchPromoEvent(i).then((p) => {
           console.log(`Promo: ${p.promoName}`)
@@ -980,7 +979,6 @@ function FarmsApp() {
           <button type="submit" onClick={fetchGenetics}>
             Fetch IPFS Genetics
           </button>
-
         </div>
         <div>
           <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setParent1(e.target.value)} />

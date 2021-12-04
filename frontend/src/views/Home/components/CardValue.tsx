@@ -39,5 +39,5 @@ export default CardValue
 CardValue.defaultProps = {
   decimals: 2,
   fontSize: '20px',
-  prefix: ''
+  prefix: '',
 }
