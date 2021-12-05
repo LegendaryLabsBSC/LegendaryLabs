@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { smartContracts } from '../../../config/contractInterface';
 import FormElement from "./components/FormElement"
 import OutputConsole from './components/OutputConsole';
-import PopoverDocsHeading from './components/PopoverDocsHeading';
-import { smartContracts } from '../../../config/contractInterface';
-import smartContractCall from '../../../utils/smartContractCall'
 import setColorScheme from '../../../utils/setColorScheme';
-import DrawerDocs from './components/DrawerDocs';
+import smartContractCall from '../../../utils/smartContractCall'
+import PopoverDocsHeading from './components/DocsViewerHeading/components/PopoverDocsHeading';
 import {
+  Flex,
   Button,
   FormLabel,
   FormControl,
   FormErrorMessage,
-  Flex,
 } from '@chakra-ui/react'
 
 const InputForm = (props) => {
@@ -88,7 +87,6 @@ const InputForm = (props) => {
     }
 
     const newLine = `\n${name}:\n ${data}\n\n`
-    // const newLine = `${name}: ${data}`
 
     addOutputContent(outputContent => [...outputContent, newLine])
   }
@@ -96,21 +94,26 @@ const InputForm = (props) => {
   return (
     <Flex
       mr={5}
-      h="90vh"
       mt="2.5vh"
-      borderRadius={30}
+      h="90vh"
+      w={props.navSize === "small" ? "33vw" : "25vw"}
       background="white"
+      borderRadius={30}
       flexDirection="column"
       boxShadow="0 4px 12px rgba(0,0,0,0.75)"
-      w={props.navSize === "small" ? "33vw" : "25vw"}
     >
+      {/* <DocsViewerHeading
+        title={name}
+        colorScheme={setColorScheme(stateMutability)}
+        contractData={smartContracts[props.contractIndex]}
+      /> */}
+
       <PopoverDocsHeading
         title={name}
         colorScheme={setColorScheme(stateMutability)}
         contractData={smartContracts[props.contractIndex]}
       />
-      {/* <DrawerDocs /> */}
-      <Flex //todo: extract out
+      <Flex
         p={5}
         h="60%"
         flexDirection="column"
