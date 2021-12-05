@@ -183,8 +183,8 @@ function FarmsApp() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
-      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
-
+      const totalPromos = await contract.lab.read.fetchPromoCounts()
+      console.log(totalPromos)
       for (let i = 1; i <= totalPromos; i++) {
         contract.lab.read.fetchPromoEvent(i).then((p) => {
           console.log(`Promo: ${p.promoName}`)
@@ -214,7 +214,7 @@ function FarmsApp() {
     if (typeof window.ethereum !== 'undefined') {
       const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
-      const totalPromos = await contract.lab.read.fetchTotalPromoCount()
+      const totalPromos = await contract.lab.read.fetchPromoCounts()
       // const amount = async await contract.lab.read.fetchRedeemableTickets(id, account)
       // console.log(amount)
 
