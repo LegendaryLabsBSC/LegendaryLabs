@@ -4,6 +4,7 @@ import { useWallet } from '@binance-chain/bsc-use-wallet'
 import { ResetCSS } from '@legendarylabs/uikit'
 import BigNumber from 'bignumber.js'
 import { useFetchPriceList, useFetchPublicData } from 'state/hooks'
+import AllLegends from 'components/all-legends/all-legends'
 import useGetDocumentTitlePrice from './hooks/useGetDocumentTitlePrice'
 import GlobalStyle from './style/Global'
 import Menu from './components/Menu'
@@ -50,6 +51,10 @@ const App: React.FC = () => {
           <Route path="/" exact>
             {/* <Home /> */}
             <FarmsApp />
+          </Route>
+          <Route path="/legends" exact>
+            {/* <Home /> */}
+            <AllLegends />
           </Route>
           <Route path="/farms">
             <Farms />
