@@ -1,14 +1,19 @@
-import { Card } from '@legendarylabs/uikit'
+// import { Card } from '@legendarylabs/uikit'
 import React from 'react'
 import styled from 'styled-components'
 
-const StyledCard = styled(Card)`
+const StyledCard = styled.div`
   & {
     width: 300px;
     text-align: center;
     padding-top: 25px;
     img {
       padding: 25px;
+    }
+    background-color: whiteSmoke;
+    border-radius: 10%;
+    h3 {
+      color: #000
     }
   }
 `

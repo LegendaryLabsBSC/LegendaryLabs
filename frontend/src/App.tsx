@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { useWallet } from '@binance-chain/bsc-use-wallet'
-import { ResetCSS } from '@legendarylabs/uikit'
+// import { ResetCSS } from '@legendarylabs/uikit'
 import BigNumber from 'bignumber.js'
 import AllLegends from 'components/all-legends/all-legends'
 // import Menu from './components/Menu'

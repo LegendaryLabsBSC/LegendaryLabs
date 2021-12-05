@@ -34,7 +34,6 @@
     "@binance-chain/bsc-use-wallet": "^0.8.1",
     "@crowdin/crowdin-api-client": "^1.10.1",
     "@ethersproject/abi": "^5.0.7",
-    "@legendarylabs/uikit": "^1.0.5",
     "@pancakeswap-libs/eslint-config-pancake": "^1.0.1",
     "@reduxjs/toolkit": "^1.5.0",
     "@types/react": "^17.0.27",

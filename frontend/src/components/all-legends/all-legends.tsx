@@ -50,34 +50,9 @@ const contract = {
   },
 }
 
-function AllLegends() {
-  const [legends, setLegends] = useState([])
+const AllLegends: React.FC = () => {
+  const [legends, setLegends] = useState<any[]>()
   const [gettingLegends, setGettingLegends] = useState(false)
-
-  const getTokensByOwner = useCallback(async function () {
-    setGettingLegends(true)
-    if (typeof window.ethereum !== 'undefined') {
-      const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      await contract.nft.read.balanceOf(account).then((balance) => {
-        if (balance > 0) {
-          const legendsData = []
-          for (let i = 0; i < balance; i++) {
-            contract.nft.read.tokenOfOwnerByIndex(account, i).then((token) => {
-              const tokenId = token.toString()
-              loadLegends(tokenId).then((res) => {
-                legendsData.push(res)
-              })
-            })
-          }
-          setLegends(legendsData)
-          setGettingLegends(false)
-        } else {
-          console.log('Account does not own any Legend Tokens')
-          setGettingLegends(false)
-        }
-      })
-    }
-  }, [])
 
   async function loadLegends(tokenID) {
     const imgURL = await contract.nft.read.fetchLegendURI(tokenID)
@@ -106,11 +81,45 @@ function AllLegends() {
   }
 
   useEffect(() => {
+    const getTokensByOwner = async () => {
+      setGettingLegends(true)
+      if (typeof window.ethereum !== 'undefined') {
+        const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+        const legendsData = []
+        const balance = await contract.nft.read.balanceOf(account)
+        console.log(balance);
+        
+          // .then((balance) => {
+        if (balance) {
+          // for (let i = 0; i < balance; i++) {
+            const token = await contract.nft.read.tokenOfOwnerByIndex(account, 0)
+            console.log(token);
+            
+            // .then((token) => {
+            const tokenId = token.toString()
+            const res = await loadLegends(tokenId)
+            console.log(res);
+            
+            // then((res) => {
+            legendsData.push(res)
+            // })
+            // })
+          // }
+        } else {
+          console.log('Account does not own any Legend Tokens')
+          setGettingLegends(false)
+        }
+          // })
+        setLegends(legendsData)
+      }
+      setGettingLegends(false)
+    }
     getTokensByOwner()
-  }, [getTokensByOwner])
+  }, [])
+            console.log(legends);
 
   const legendsModule =
-    legends.length > 0 ? (
+    legends ? (
       legends.map((legend) => {
         console.log(legends)
         return (
@@ -124,7 +133,20 @@ function AllLegends() {
       <div>Account does not own any Legend Tokens</div>
     )
 
-  return <NftContainer>{gettingLegends ? <img alt="eater" src={gif} /> : legendsModule}</NftContainer>
-}
+  return (
+    <NftContainer>
+      {
+        legends && legends.map((legend) => {
+          console.log(legends)
+          return (
+            <NftCard key={legend}>
+              <h3>Legend ID: {legend.tokenID}</h3>
+              <img width="200px" alt="legend" src={cidToUrl(legend.imgURL)} />
+            </NftCard>
+          )
+        })
+      }
+    </NftContainer>
+)}
 
 export default AllLegends
