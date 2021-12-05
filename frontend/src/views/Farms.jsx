@@ -173,7 +173,6 @@ function FarmsApp() {
         `)
     }
   }
-  
 
   async function createPromoEvent() {
     if (typeof window.ethereum !== 'undefined') {
@@ -979,7 +978,6 @@ function FarmsApp() {
           <button type="submit" onClick={fetchGenetics}>
             Fetch IPFS Genetics
           </button>
-
         </div>
         <div>
           <input type="number" placeholder="Parent 1 Token ID" onChange={(e) => setParent1(e.target.value)} />

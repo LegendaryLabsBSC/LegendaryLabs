@@ -14,13 +14,13 @@ const App: React.FC = () => {
         <Route path={['/marketplace.html', '/arena.html']} exact>
           <ComingSoon />
         </Route>
-        <Route path={["/legends.html"]} exact>
-              <AllLegends />
-            </Route>
+        <Route path={['/legends.html']} exact>
+          <AllLegends />
+        </Route>
         {/* Use FarmsApp for contract testing. import on line 9 */}
         <Route path="/" exact>
-              <FarmsApp />
-            </Route>
+          <FarmsApp />
+        </Route>
       </Switch>
       {/* </Menu> */}
     </Router>

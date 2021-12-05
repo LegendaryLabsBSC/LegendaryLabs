@@ -19,9 +19,9 @@ import LegendToken from 'artifacts/contracts/token/LegendToken.sol/LegendToken.j
 import gif from 'eater.gif'
 
 declare global {
-    interface Window {
-        ethereum:any;
-    }
+  interface Window {
+    ethereum: any
+  }
 }
 
 const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -54,7 +54,6 @@ function AllLegends() {
   const [legends, setLegends] = useState([])
   const [gettingLegends, setGettingLegends] = useState(false)
 
-  
   const getTokensByOwner = useCallback(async function () {
     setGettingLegends(true)
     if (typeof window.ethereum !== 'undefined') {
@@ -110,27 +109,22 @@ function AllLegends() {
     getTokensByOwner()
   }, [getTokensByOwner])
 
-  const legendsModule = legends.length > 0 
-                        ? ( legends.map((legend) => {
-                            console.log(legends)
-                            return (
-                                <NftCard key={legend}>
-                                    <h3>Legend ID: {legend.tokenID}</h3>
-                                    <img width="200px" alt="legend" src={cidToUrl(legend.imgURL)} />
-                                </NftCard>
-                            )})
-                        )
-                        : ( <div>Account does not own any Legend Tokens</div> )
+  const legendsModule =
+    legends.length > 0 ? (
+      legends.map((legend) => {
+        console.log(legends)
+        return (
+          <NftCard key={legend}>
+            <h3>Legend ID: {legend.tokenID}</h3>
+            <img width="200px" alt="legend" src={cidToUrl(legend.imgURL)} />
+          </NftCard>
+        )
+      })
+    ) : (
+      <div>Account does not own any Legend Tokens</div>
+    )
 
-  return (
-    <NftContainer>
-        { 
-          gettingLegends 
-          ? ( <img alt="eater" src={gif} /> )
-          : ( legendsModule )
-        }
-    </NftContainer>
-  )
+  return <NftContainer>{gettingLegends ? <img alt="eater" src={gif} /> : legendsModule}</NftContainer>
 }
 
 export default AllLegends
