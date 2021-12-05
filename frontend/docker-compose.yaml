@@ -4,7 +4,7 @@ services:
     web:
         image: nginx:latest
         ports:
-            - "8080:80"
+            - "80:80"
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
             - ./godlike/app:/usr/share/nginx/html
@@ -12,3 +12,5 @@ services:
         image: php:fpm
         volumes:
             - ./godlike:/app
+    # cloudflare:
+    #     image: cloudflare/cloudflared:2021.11.0-amd64

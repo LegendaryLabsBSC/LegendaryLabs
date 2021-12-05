@@ -121,7 +121,7 @@ var options = {
     secondaryNavbarBackItem: 'Back',
     likeAnimationLiked: 'Liked!',
     likeAnimationDisliked: 'Disliked!',
-    cookieAlert: "<span class=\"nk-cookie-alert-close\"><span class=\"nk-icon-close\"></span></span>\n            Cookie alert are ready to use. You can simply change content inside this alert or disable it in javascript theme options. <a href=\"#\">Cookies policy</a>.\n            <div class=\"nk-gap\"></div>\n            <span class=\"nk-cookie-alert-confirm nk-btn link-effect-4 nk-btn-bg-white nk-btn-color-dark-1\">Confirm</span>",
+    // cookieAlert: "<span class=\"nk-cookie-alert-close\"><span class=\"nk-icon-close\"></span></span>\n            Cookie alert are ready to use. You can simply change content inside this alert or disable it in javascript theme options. <a href=\"#\">Cookies policy</a>.\n            <div class=\"nk-gap\"></div>\n            <span class=\"nk-cookie-alert-confirm nk-btn link-effect-4 nk-btn-bg-white nk-btn-color-dark-1\">Confirm</span>",
     plainVideoIcon: '<span class="nk-video-icon"><i class="fa fa-play pl-5"></i></span>',
     plainVideoLoadIcon: '<span class="nk-loading-spinner"><i></i></span>',
     fullscreenVideoClose: '<span class="nk-icon-close"></span>',
@@ -5061,60 +5061,7 @@ __webpack_require__.r(__webpack_exports__);
 
 -------------------------------------------------------------------*/
 
-function initCookieAlert() {
-  var self = this;
-  var confirmedCookieName = 'nk_cookie_alert_dismissed';
-  var expiration = 365;
-  var showTimeout = 2000; // stop if already dismissed
 
-  if (!self.options.enableCookieAlert || document.cookie.indexOf(confirmedCookieName) > -1 || window.navigator && window.navigator.CookiesOK) {
-    return;
-  } // create alert
-
-
-  var $alert = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["$"])('<div class="nk-cookie-alert">').hide().append(self.options.templates.cookieAlert).appendTo(_utility__WEBPACK_IMPORTED_MODULE_0__["$body"]); // hide alert
-
-  function hideAlert() {
-    _utility__WEBPACK_IMPORTED_MODULE_0__["tween"].to($alert, {
-      opacity: 0,
-      duration: 0.5,
-      display: 'none'
-    });
-  } // show alert
-
-
-  function showAlert() {
-    _utility__WEBPACK_IMPORTED_MODULE_0__["tween"].set($alert, {
-      opacity: 0,
-      display: 'none',
-      y: 20
-    });
-    _utility__WEBPACK_IMPORTED_MODULE_0__["tween"].to($alert, {
-      opacity: 1,
-      duration: 0.5,
-      display: 'block',
-      y: 0,
-      force3D: true
-    });
-  } // set cookie after confirmation
-
-
-  function setConfirmed() {
-    var exdate = new Date();
-    exdate.setDate(exdate.getDate() + expiration);
-    exdate = exdate.toUTCString();
-    document.cookie = "".concat(confirmedCookieName, "=yes;expires=").concat(exdate, ";path=/");
-  }
-
-  _utility__WEBPACK_IMPORTED_MODULE_0__["$wnd"].on('load', function () {
-    setTimeout(showAlert, showTimeout);
-  });
-  $alert.on('click', '.nk-cookie-alert-confirm', function () {
-    hideAlert();
-    setConfirmed();
-  });
-  $alert.on('click', '.nk-cookie-alert-close', hideAlert);
-}
 
 
 

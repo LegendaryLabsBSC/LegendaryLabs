@@ -1,94 +1,33 @@
-import React, { useEffect, Suspense, lazy } from 'react'
+import React from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import { useWallet } from '@binance-chain/bsc-use-wallet'
 import { ResetCSS } from '@legendarylabs/uikit'
 import BigNumber from 'bignumber.js'
-import { useFetchPriceList, useFetchPublicData } from 'state/hooks'
 import AllLegends from 'components/all-legends/all-legends'
-import useGetDocumentTitlePrice from './hooks/useGetDocumentTitlePrice'
-import GlobalStyle from './style/Global'
-import Menu from './components/Menu'
-import PageLoader from './components/PageLoader'
-import Pools from './views/Pools'
+// import Menu from './components/Menu'
 // import NftGlobalNotification from './views/Nft/components/NftGlobalNotification'
-import XBLZD from './views/XBLZD'
+import ComingSoon from './components/coming-soon/coming-soon'
+// import Menu from './components/Menu'
 import FarmsApp from './views/Farms'
 
-// Route-based code splitting
-// Only pool is included in the main bundle because of it's the most visited page'
-const Home = lazy(() => import('./views/Home'))
-const Farms = lazy(() => import('./views/Farms'))
-const Lottery = lazy(() => import('./views/Lottery'))
-// const Pools = lazy(() => import('./views/Pools'))
-// const Ifos = lazy(() => import('./views/Ifos'))
-const NotFound = lazy(() => import('./views/NotFound'))
-// const Nft = lazy(() => import('./views/Nft'))
-
-// This config is required for number formatting
-// BigNumber.config({
-//   EXPONENTIAL_AT: 1000,
-//   DECIMAL_PLACES: 80,
-// })
-
 const App: React.FC = () => {
-  const { account, connect } = useWallet()
-  useEffect(() => {
-    if (!account && window.localStorage.getItem('connectorId')) {
-      connect('injected')
-    }
-  }, [account, connect])
-
-  useFetchPublicData()
-  useFetchPriceList()
-  useGetDocumentTitlePrice()
-
   return (
     <Router>
-      <ResetCSS />
-      <GlobalStyle />
-      <Suspense fallback={<PageLoader />}>
-        <Switch>
-          <Route path="/contracts" exact>
-            {/* <Home /> */}
-            <FarmsApp />
-          </Route>
-          <Route path="/legends" exact>
-            {/* <Home /> */}
-            <AllLegends />
-          </Route>
-          <Route path="/farms">
-            <Farms />
-          </Route>
-          <Route path="/caves">
-            <Lottery />
-          </Route>
-          <Route path="/pools">
-            <Pools />
-          </Route>
-          <Route path="/xBLZD">
-            <XBLZD />
-          </Route>
-          {/* <Route path="/lottery"> */}
-          {/*  <Lottery /> */}
-          {/* </Route> */}
-          {/* <Route path="/ifo"> */}
-          {/*  <Ifos /> */}
-          {/* </Route> */}
-          {/* <Route path="/nft"> */}
-          {/*  <Nft /> */}
-          {/* </Route> */}
-          {/* Redirect */}
-          {/* <Route path="/staking"> */}
-          {/*  <Redirect to="/pools" /> */}
-          {/* </Route> */}
-          {/* <Route path="/syrup"> */}
-          {/*  <Redirect to="/pools" /> */}
-          {/* </Route> */}
-          {/* 404 */}
-          <Route component={NotFound} />
-        </Switch>
-      </Suspense>
-      {/* <NftGlobalNotification /> */}
+      <Switch>
+        <Route path={['/marketplace.html', '/arena.html']} exact>
+          <ComingSoon />
+        </Route>
+        <Route path={['/legends.html']} exact>
+          <AllLegends />
+        </Route>
+        {/* Use FarmsApp for contract testing. import on line 9 */}
+        {/* for testing on dev */}
+        <Route path="/contracts" exact>
+          {/* <Home /> */}
+          <FarmsApp />
+        </Route>
+      </Switch>
+      {/* </Menu> */}
     </Router>
   )
 }

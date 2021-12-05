@@ -54,9 +54,9 @@ function initCookieAlert() {
         document.cookie = `${confirmedCookieName}=yes;expires=${exdate};path=/`;
     }
 
-    $wnd.on('load', () => {
-        setTimeout(showAlert, showTimeout);
-    });
+    // $wnd.on('load', () => {
+    //     setTimeout(showAlert, showTimeout);
+    // });
     $alert.on('click', '.nk-cookie-alert-confirm', () => {
         hideAlert();
         setConfirmed();

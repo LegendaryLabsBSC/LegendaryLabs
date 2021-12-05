@@ -95,7 +95,7 @@ class GODLIKE {
         self.initInstagram();
         self.initTwitter();
         self.initShortcuts();
-        self.initCookieAlert();
+        // self.initCookieAlert();
 
         // init plugins
         self.initPluginObjectFitImages();
@@ -274,9 +274,9 @@ class GODLIKE {
         return initTwitter.call(this);
     }
 
-    initCookieAlert() {
-        return initCookieAlert.call(this);
-    }
+    // initCookieAlert() {
+    //     return initCookieAlert.call(this);
+    // }
 
 
     initPluginObjectFitImages() {
