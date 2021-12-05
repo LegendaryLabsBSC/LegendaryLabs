@@ -63,15 +63,17 @@ const OutputConsole = (props) => {
           <TooltipButton
             icon={<FiSlash />}
             color="red"
-            tooltipLabel="Clear Log"
-            tooltipPlacement="top-start"
+            label="Clear Log"
+            placement="top-start"
+            size="sm"
             onClick={clearLog}
           />
           <TooltipButton
             icon={<FiDownload />}
             color="green.400"
-            tooltipLabel="Download Log"
-            tooltipPlacement="top-end"
+            label="Download Log"
+            placement="top-end"
+            size="sm"
             onClick={() => downloadFile(
               props.outputContent,
               ">--",

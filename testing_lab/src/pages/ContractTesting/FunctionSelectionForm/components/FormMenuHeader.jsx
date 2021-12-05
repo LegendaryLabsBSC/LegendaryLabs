@@ -12,6 +12,11 @@ import {
 
 const FormMenuHeader = (props) => {
 
+  const handleOnClick = (data, index) => {
+    props.setContractData(data)
+    props.setContractIndex(index)
+  }
+
   return (
     <Flex
       mt={3}
@@ -24,8 +29,7 @@ const FormMenuHeader = (props) => {
         color="blue.500"
         leftIcon={<GiScrollUnfurled />}
         menuSource={smartContracts}
-        setContractData={props.setContractData}
-        setContractIndex={props.setContractIndex}
+        handleOnClick={handleOnClick}
       />
       <Spacer />
       <Flex>

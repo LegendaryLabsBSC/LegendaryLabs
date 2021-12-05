@@ -10,13 +10,8 @@ import {
 
 const DropdownMenu = (props) => {
 
-  const handleOnClick = (data, index) => {
-    props.setContractData(data)
-    props.setContractIndex(index)
-  }
-  
   return (
-    <Menu 
+    <Menu
     >
       <MenuButton
         size="lg"
@@ -36,12 +31,12 @@ const DropdownMenu = (props) => {
           title="Contracts"
         >
           {
-            props.menuSource.map((contractData, contractIndex) =>
+            props.menuSource.map((data, index) =>
               <MenuItemOption
-                value={`${contractIndex}`}
-                onClick={() => handleOnClick(contractData, contractIndex)}
+                value={`${index}`}
+                onClick={() => props.handleOnClick(data, index)}
               >
-                {contractData.contractName}
+                {data.contractName}
               </MenuItemOption>
             )
           }

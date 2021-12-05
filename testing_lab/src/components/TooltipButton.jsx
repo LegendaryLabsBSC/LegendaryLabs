@@ -4,9 +4,9 @@ import { IconButton, Tooltip } from '@chakra-ui/react'
 const TooltipButton = (props) => {
   return (
     <Tooltip
-      label={props.tooltipLabel}
-      fontSize="sm"
-      placement={props.tooltipPlacement}
+      label={props.label}
+      fontSize={props.fontSize}
+      placement={props.placement}
       bg="blue.500"
       hasArrow
     >
@@ -15,7 +15,7 @@ const TooltipButton = (props) => {
         background="none"
         _hover="none"
         onClick={props.onClick}
-        size="sm"
+        size={props.size}
         color={props.color}
       />
     </Tooltip>

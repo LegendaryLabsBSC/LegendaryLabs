@@ -20,15 +20,23 @@ const InputForm = (props) => {
 
   const { inputs, name, outputs, stateMutability } = elements ?? {}
 
-  const {
-    handleSubmit,
-    register,
-    reset,
+  const { handleSubmit, register, reset,
     formState: {
-      errors,
-      isSubmitting
+      errors, isSubmitting
     },
   } = useForm()
+
+  useEffect(() => {
+    reset()
+    setElements(handleDefaultView)
+  }, [props.contractIndex])
+
+  useEffect(() => {
+    reset()
+    setElements(
+      smartContracts[props.contractIndex].abi[props.contractFunction]
+    )
+  }, [props.contractFunction])
 
   function handleDefaultView() {
 
@@ -44,19 +52,6 @@ const InputForm = (props) => {
 
     return defaultView[0]
   }
-
-  useEffect(() => {
-    reset()
-    setElements(handleDefaultView)
-  }, [props.contractIndex])
-
-  useEffect(() => {
-    reset()
-    setElements(
-      smartContracts[props.contractIndex].abi[props.contractFunction]
-    )
-  }, [props.contractFunction])
-
   const onSubmit = async (values) => {
     let callType;
 
