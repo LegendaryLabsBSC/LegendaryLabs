@@ -5,7 +5,7 @@ import FormElement from "./components/FormElement"
 import OutputConsole from './components/OutputConsole';
 import setColorScheme from '../../../utils/setColorScheme';
 import smartContractCall from '../../../utils/smartContractCall'
-import PopoverDocsHeading from './components/DocsViewerHeading/components/PopoverDocsHeading';
+import PopoverDocsHeading from './components/PopoverDocsHeading';
 import {
   Flex,
   Button,

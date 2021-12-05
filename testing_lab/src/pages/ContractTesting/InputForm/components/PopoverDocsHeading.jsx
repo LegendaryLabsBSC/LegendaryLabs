@@ -25,7 +25,7 @@ const PopoverDocsHeading = (props) => {
       w="100%"
       justify="center"
     >
-      <Popover placement='bottom-start'>
+      <Popover placement='bottom'>
         <PopoverTrigger>
           <Button
             background="none"

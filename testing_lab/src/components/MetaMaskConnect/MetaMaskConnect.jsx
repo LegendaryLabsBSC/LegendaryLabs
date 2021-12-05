@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
-import { Button, Flex, Icon, Text, Tooltip } from '@chakra-ui/react'
+import React, { useState, useEffect } from 'react'
+import { Button, Flex, Icon, Text, Tooltip, useToast } from '@chakra-ui/react'
 import { IoWallet } from 'react-icons/io5'
 
 
 const MetaMaskConnect = (props) => {
-
   const [walletAddress, setWalletAddress] = useState([])
+
+  const toast = useToast()
 
   const testNetwork = { name: 'Harmony Testnet', chainId: '0x6357d2e0' }
 
@@ -15,20 +16,31 @@ const MetaMaskConnect = (props) => {
     } else {
       return 'Connect'
     }
-
   }
 
-  const connectWallet = async () => {
-    if (window.ethereum) {
 
+  async function connectWallet() {
+    if (window.ethereum) {
       const accounts = await window.ethereum.request({ method: 'eth_accounts' });
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+
+      console.log(window.ethereum.address)
+      console.log(accounts)
 
       if (chainId !== testNetwork.chainId) {
         alert(`Please connect to ${testNetwork.name}`);
       } else {
         const wallet = accounts[0];
         setWalletAddress(wallet);
+        toast({
+          title: 'Account Connected!',
+          description: `You can now use the Lab.`,
+          status: 'success',
+          variant: 'left-accent',
+          duration: 2000,
+          position: 'bottom-left',
+          isClosable: true,
+        })
       }
     } else {
       alert("Please install MetaMask");
@@ -52,7 +64,7 @@ const MetaMaskConnect = (props) => {
             size="md"
             as={IoWallet}
             ml={1}
-            onClick={() => connectWallet}
+            onClick={connectWallet}
             background="none"
             _hover={{ background: 'blue.500' }}
           />
