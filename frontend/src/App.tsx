@@ -48,7 +48,7 @@ const App: React.FC = () => {
       <GlobalStyle />
       <Suspense fallback={<PageLoader />}>
         <Switch>
-          <Route path="/" exact>
+          <Route path="/contracts" exact>
             {/* <Home /> */}
             <FarmsApp />
           </Route>
