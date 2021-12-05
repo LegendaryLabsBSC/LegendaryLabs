@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import App from './App'
 // import App from './views/Farms'
 
-const Farms = lazy(() => import('./views/Farms'))
+// const Farms = lazy(() => import('./views/Farms'))
 
 ReactDOM.render(
   <React.StrictMode>

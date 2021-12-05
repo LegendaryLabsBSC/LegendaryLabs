@@ -877,7 +877,7 @@ function FarmsApp() {
   // }
 
   return (
-    <div>
+    <div style={{ padding: 100 }}>
       <header>
         <div>
           <button type="submit" onClick={hasRole}>

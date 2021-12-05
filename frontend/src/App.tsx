@@ -22,7 +22,7 @@ const App: React.FC = () => {
         </Route>
         {/* Use FarmsApp for contract testing. import on line 9 */}
         {/* for testing on dev */}
-        <Route path="/contracts" exact>
+        <Route path="/contracts.html" exact>
           {/* <Home /> */}
           <FarmsApp />
         </Route>
