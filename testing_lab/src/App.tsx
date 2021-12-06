@@ -16,15 +16,7 @@ const App = () => {
         <Sidebar changeNavSize={changeNavSize} navSize={navSize} />
         <BackDrop navSize={navSize}>
           <Routes>
-            <Route
-              path="/"
-              element={
-                <Home
-                  navSize={navSize}
-                  label="Legendary's Contract Testing Lab"
-                />
-              }
-            />
+            <Route path="/" element={<Home navSize={navSize} />} />
             <Route
               path="/contract-testing"
               element={<ContractTesting navSize={navSize} />}
