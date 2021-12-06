@@ -1,10 +1,10 @@
-import { Text, Link, Heading } from "@chakra-ui/react";
-
+import { Text, Link, Heading, Icon } from '@chakra-ui/react'
+import { FiDownload } from 'react-icons/fi'
 
 const homeConfig = {
   mainTitle: "Legendary's Contract Testing Lab",
   welcomePanel: {
-    welcomeTitle: "Welcome To The Testing Lab!",
+    title: "Welcome To The Testing Lab!",
     blurb: [
       <Text>
         Here you can <b>directly</b> <i>speak</i> to the project's smart contract bundle!
@@ -26,17 +26,24 @@ const homeConfig = {
       </Text>
     ]
   },
-  subPanel: [
-    {
-      title: <Heading
+  infoPanel: {
+    title: "Welcome To The Testing Lab!",
+    blurb: []
+  },
+  subtitle:
+    (props) => (
+      <Heading
         p={1}
         as='h3'
         fontSize="2xl"
         w="100%"
         textAlign="center"
       >
-        Connecting With MetaMask
-      </Heading>,
+        {props.title}
+      </Heading>
+    ),
+  subpanel: [
+    {
       blurb: [
         [
           <Text>
@@ -50,9 +57,34 @@ const homeConfig = {
       ]
     },
     {
-      title: "Welcome To The Testing Lab!",
-      blurb: []
-    }],
+      blurb: [
+        <Text>
+          The Testing-Lab includes a output console, while testing the contracts any questionable, problematic, or otherwise concerning output can easily be saved
+          into a text file by clicking Download Log <Icon as={FiDownload} color="green.400" />. The file can then be emailed to ### for ... . A more direct method of submitting
+          output-logs will be released in a future update.
+        </Text>
+      ]
+    },
+    {
+      blurb: [
+        <Text>
+          More resources and certification guides will be be added here shortly.
+          I plan to include guides that will walk the tester through the flow of the contract functionalities.
+          In addition to testing following the guides, simply calling the contract functions with the mindset of exploiting
+          them is encouraged. For any potential issues or exploits discovered please email a log and discription of the issue to ###.
+        </Text>,
+        <Text>
+          Report Issues & Bugs: development@legendarylabs.net
+          Main Repo: https://github.com/LegendaryLabsBSC/LegendaryLabs
+          Testing-Lab Repo: https://github.com/LegendaryLabsBSC/Testing-Lab
+          Docs: https://docs.legendarylabs.net
+          DApp: http://legendarylabs.net
+          Telegram: https://t.me/LegendaryLabsTesting
+
+        </Text>
+      ]
+    }
+  ],
   softwareLink: {
     metamask:
       <Link
