@@ -11,12 +11,20 @@ const App = () => {
   const [navSize, changeNavSize] = useState("large");
 
   return (
-    <Flex flexDirection="row" justifyContent="space-between">
+    <Flex justifyContent="space-between">
       <Router>
         <Sidebar changeNavSize={changeNavSize} navSize={navSize} />
         <BackDrop navSize={navSize}>
           <Routes>
-            <Route path="/" element={<Home navSize={navSize} />} />
+            <Route
+              path="/"
+              element={
+                <Home
+                  navSize={navSize}
+                  label="Legendary's Contract Testing Lab"
+                />
+              }
+            />
             <Route
               path="/contract-testing"
               element={<ContractTesting navSize={navSize} />}

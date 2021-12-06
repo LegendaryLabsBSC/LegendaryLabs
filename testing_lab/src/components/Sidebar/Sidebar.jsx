@@ -1,5 +1,5 @@
 import React from 'react'
-import { Divider, Flex, IconButton, Spacer } from '@chakra-ui/react'
+import { Divider, Flex, IconButton, Spacer, Badge } from '@chakra-ui/react'
 import { FiMenu, FiHome, FiSettings } from "react-icons/fi";
 import NavItem from "./components/NavItem"
 import { GrDocumentTest } from "react-icons/gr"
@@ -42,24 +42,47 @@ const Sidebar = (props) => {
           }}
         />
         <RouteLink to="/">
-          <NavItem navSize={props.navSize} icon={FiHome} title="Home" />
+          <NavItem
+            title="Home"
+            icon={FiHome}
+            navSize={props.navSize}
+          />
         </RouteLink>
         <RouteLink to="/contract-testing">
-          <NavItem navSize={props.navSize} icon={GrDocumentTest} title="Contract Testing" />
+          <NavItem
+            title="Contract Testing"
+            icon={GrDocumentTest}
+            navSize={props.navSize}
+          />
         </RouteLink>
-        <Spacer />
+        {/* <Spacer />
         <RouteLink to="settings">
-          <NavItem navSize={props.navSize} icon={FiSettings} title="Settings" />
-        </RouteLink>
+          <NavItem
+            title="Settings"
+            icon={FiSettings}
+            navSize={props.navSize}
+          />
+        </RouteLink> */}
       </Flex>
       <Flex
         p="5%"
-        flexDirection="column"
-        w="100%"
-        alignItems={props.navSize === "small" ? "center" : "flex-start"}
         mb={4}
+        w="100%"
+        flexDirection="column"
+        alignItems="center"
       >
-        <Divider display={props.navSize === "small" ? "none" : "flex"} />
+        <Divider
+          display={props.navSize === "small" ? "none" : "flex"}
+        />
+
+        <Flex
+        mt={1.5}
+        // flexDir="column"
+        // alignItems="center"
+        >
+          {/* <Badge backgroundColor="#02f2d5" color="#2535a0">Harmony</Badge> */}
+        <Badge backgroundColor="#fcd535">Binance</Badge>
+        </Flex>
         <MetaMaskConnect navSize={props.navSize} />
       </Flex>
     </Flex>

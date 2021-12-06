@@ -86,6 +86,60 @@ const InputForm = (props) => {
     addOutputContent(outputContent => [...outputContent, newLine])
   }
 
+  const FormContext = () => (
+    <Flex
+      p={5}
+      h="60%"
+      flexDirection="column"
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Flex flexDirection="column">
+          {
+            inputs ? inputs.map((input, i) =>
+              <FormControl
+                p={1}
+                align="center"
+                isInvalid={errors.name}
+              >
+                <FormLabel
+                  htmlFor='name'
+                  fontWeight="bold"
+                >
+                  {input.name}:
+                </FormLabel>
+                <FormElement
+                  input={input}
+                  key={input.name}
+                  register={register}
+                />
+                <FormErrorMessage>
+                  {errors.name && errors.name.message}
+                </FormErrorMessage>
+              </FormControl>
+            ) : null
+          }
+        </Flex>
+        <Flex
+          p={2}
+          mt={3}
+          alignItems="center"
+          flexDirection="column"
+        >
+          <Button
+            size="lg"
+            type="submit"
+            loadingText='Submitting'
+            isLoading={isSubmitting}
+            display={elements !== null ? "flex" : "none"}
+            colorScheme={setColorScheme(stateMutability)}
+          >
+            Submit
+          </Button>
+        </Flex>
+      </form>
+    </Flex>
+  )
+
   return (
     <Flex
       mr={5}
@@ -108,58 +162,7 @@ const InputForm = (props) => {
         colorScheme={setColorScheme(stateMutability)}
         contractData={smartContracts[props.contractIndex]}
       />
-      <Flex
-        p={5}
-        h="60%"
-        flexDirection="column"
-      >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Flex flexDirection="column">
-            {
-              inputs ? inputs.map((input, i) =>
-                <FormControl
-                  p={1}
-                  align="center"
-                  isInvalid={errors.name}
-                >
-                  <FormLabel
-                    htmlFor='name'
-                    fontWeight="bold"
-                  >
-                    {input.name}:
-                  </FormLabel>
-                  <FormElement
-                    input={input}
-                    key={input.name}
-                    register={register}
-                  />
-                  <FormErrorMessage>
-                    {errors.name && errors.name.message}
-                  </FormErrorMessage>
-                </FormControl>
-              ) : null
-            }
-          </Flex>
-          <Flex
-            p={2}
-            mt={3}
-            alignItems="center"
-            flexDirection="column"
-          >
-            {elements != null ? (
-              <Button
-                size="lg"
-                type="submit"
-                loadingText='Submitting'
-                isLoading={isSubmitting}
-                colorScheme={setColorScheme(stateMutability)}
-              >
-                Submit
-              </Button>) : null
-            }
-          </Flex>
-        </form>
-      </Flex>
+      <FormContext />
       <OutputConsole
         name={name}
         navSize={props.navSize}
