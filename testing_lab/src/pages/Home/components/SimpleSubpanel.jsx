@@ -8,6 +8,7 @@ const SimpleSubpanel = (props) => {
       w="100%"
       flexDir="column"
       alignItems="center"
+
     >
       {props.title}
       <Flex

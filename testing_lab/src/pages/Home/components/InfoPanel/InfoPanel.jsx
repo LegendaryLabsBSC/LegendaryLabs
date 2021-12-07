@@ -8,6 +8,7 @@ import {
 const InfoPanel = (props) => {
   return (
     <Flex
+      // mt={4}
       h="100%"
       w="100%"
       flexDir="column"
@@ -23,13 +24,12 @@ const InfoPanel = (props) => {
         <Flex
           h="100%"
           w="100%"
+
+          flexDir="column"
+          alignItems="center"
         >
           {props.blurb[0]}
-        </Flex>
-        <Flex
-          h="100%"
-          w="100%"
-        >
+          <br />
           {props.blurb[1]}
         </Flex>
       </Flex>

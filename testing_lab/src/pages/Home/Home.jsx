@@ -1,13 +1,14 @@
 import React from 'react'
-import { FiDownload } from 'react-icons/fi'
 import homeConfig from './config/home-config'
+import WelcomePanel from './components/WelcomePanel/WelcomePanel'
+import InfoPanel from './components/InfoPanel/InfoPanel'
 import {
   Flex,
   Heading,
+  HStack,
 } from '@chakra-ui/react'
-import WelcomePanel from './components/WelcomePanel/WelcomePanel'
-import InfoPanel from './components/InfoPanel/InfoPanel'
-
+import ConnectionHowTo from './components/WelcomePanel/components/ConnectionHowTo'
+import SimpleSubpanel from './components/SimpleSubpanel'
 
 
 const Home = (props) => {
@@ -47,58 +48,95 @@ const Home = (props) => {
       <MainTitle />
       <Flex
         id="body"
+        mt={1}
         h="100%"
         w="100%"
+
+        borderWidth={3}
+        borderColor="purple"
       >
+
         <Flex
-          id="mainPanel"
+          flexDir="column"
           h="100%"
-          w="100%"
+          w="65%"
+
+          borderWidth={3}
+          borderColor="cyan"
         >
-          <WelcomePanel
-            title={homeConfig.welcomePanel.title}
-            subtitle={
-              [
-                homeConfig.subtitle({ title: "Connecting With MetaMask" }),
-                homeConfig.subtitle({ title: "Testing Logs" })
-              ]
-            }
-            blurb={
-              [
-                [
-                  homeConfig.welcomePanel.blurb[0],
-                  homeConfig.welcomePanel.blurb[1],
-                  homeConfig.welcomePanel.blurb[2]
-                ],
-                [
-                  homeConfig.subpanel[0].blurb[0][0],
-                  homeConfig.softwareLink.metamask,
-                  homeConfig.subpanel[0].blurb[0][1]
-                ],
-                homeConfig.subpanel[1].blurb[0]
-              ]
-            }
-          />
+
+          <Flex
+            id="mainPanel"
+            h="100%"
+            w="100%"
+            borderWidth={3}
+            borderColor="red"
+          >
+            <WelcomePanel
+              title={homeConfig.welcomePanel.title}
+              blurb={homeConfig.welcomePanel.blurb}
+            />
+          </Flex>
+
+
+          <Flex
+            h="100%"
+            w="100%"
+            // flexDir="column"
+
+            borderWidth={3}
+            borderColor="green"
+          >
+
+            <Flex
+              h="100%"
+              w="100%"
+              flexDir="column"
+
+              borderWidth={3}
+              borderColor="silver"
+            >
+              <SimpleSubpanel
+                title={homeConfig.subtitle({ title: "Testing Certs" })}
+                body={homeConfig.subpanel.certs}
+              />
+            </Flex>
+            <Flex
+              h="100%"
+              w="100%"
+              flexDir="column"
+
+              borderWidth={3}
+              borderColor="yellow"
+            >
+              <SimpleSubpanel
+                title={homeConfig.subtitle({ title: "Testing Logs" })}
+                body={homeConfig.subpanel.resources}
+              />
+            </Flex>
+          </Flex>
         </Flex>
+
         <Flex
           id="auxPanel"
           h="100%"
-          w="65%"
+          w="35%"
+
+          borderWidth={3}
+          borderColor="black"
         >
-          <InfoPanel
-            title={homeConfig.subtitle({ title: "Other Resources" })}
-            blurb={
-              [
-                [
-                  homeConfig.subpanel[2].blurb[0],
-                ],
-                [
-                  homeConfig.subpanel[2].blurb[1],
-                ],
-              ]
-            }
-          />
+          <Flex
+            flexDir="column"
+          >
+            <ConnectionHowTo
+              title={homeConfig.welcomePanel.title}
+              subtitle={homeConfig.subtitle({ title: "Connecting With MetaMask" })}
+              blurb={homeConfig.subpanel.metamask}
+            />
+          </Flex>
         </Flex>
+
+
       </Flex>
     </Flex>
   )
