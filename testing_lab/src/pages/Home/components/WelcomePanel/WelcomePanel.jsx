@@ -26,8 +26,9 @@ const WelcomePanel = (props) => {
       </Heading>
       <Flex
         ml={3}
-        pr={2}
+        pr={4}
         flexDir="column"
+        textAlign="justify"
       >
         {props.blurb}
       </Flex>
@@ -35,41 +36,6 @@ const WelcomePanel = (props) => {
         h="100%"
         w="100%"
       >
-
-
-
-        {/* <Flex
-          h="100%"
-          w="100%"
-          flexDir="column"
-          alignItems="center"
-        >
-          {props.subtitle[0]}
-          <Flex
-            p={1}
-            pr={2}
-            ml={2}
-          >
-            <Flex flexDir="column">
-              {props.blurb[1]}
-            </Flex>
-          </Flex> */}
-        {/* <Flex
-            flexDir="column"
-          >
-            <ConnectionHowTo />
-          </Flex> */}
-        {/* </Flex> */}
-        
-        {/* <SimpleSubpanel
-          title={props.subtitle[1]}
-          body={props.blurb[1]}
-        />
-
-        <SimpleSubpanel
-          title={props.subtitle[1]}
-          body={props.blurb[2]}
-        /> */}
       </Flex>
     </Flex>
   )

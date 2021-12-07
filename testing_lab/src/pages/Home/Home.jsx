@@ -3,6 +3,7 @@ import homeConfig from './config/home-config'
 import WelcomePanel from './components/WelcomePanel/WelcomePanel'
 import InfoPanel from './components/InfoPanel/InfoPanel'
 import {
+  Divider,
   Flex,
   Heading,
   HStack,
@@ -51,26 +52,18 @@ const Home = (props) => {
         mt={1}
         h="100%"
         w="100%"
-
-        borderWidth={3}
-        borderColor="purple"
       >
 
         <Flex
           flexDir="column"
           h="100%"
           w="65%"
-
-          borderWidth={3}
-          borderColor="cyan"
         >
 
           <Flex
             id="mainPanel"
             h="100%"
             w="100%"
-            borderWidth={3}
-            borderColor="red"
           >
             <WelcomePanel
               title={homeConfig.welcomePanel.title}
@@ -78,40 +71,39 @@ const Home = (props) => {
             />
           </Flex>
 
-
           <Flex
             h="100%"
             w="100%"
-            // flexDir="column"
-
-            borderWidth={3}
-            borderColor="green"
+          // flexDir="column"
           >
 
             <Flex
+              ml={3}
+              pr={2}
               h="100%"
               w="100%"
               flexDir="column"
-
-              borderWidth={3}
-              borderColor="silver"
+              borderRightWidth={1}
+              borderRightColor="black"
+              borderRight
             >
               <SimpleSubpanel
+                id="certs"
                 title={homeConfig.subtitle({ title: "Testing Certs" })}
                 body={homeConfig.subpanel.certs}
+
               />
             </Flex>
             <Flex
+              ml={3}
               h="100%"
               w="100%"
               flexDir="column"
-
-              borderWidth={3}
-              borderColor="yellow"
             >
               <SimpleSubpanel
+                id="logs"
                 title={homeConfig.subtitle({ title: "Testing Logs" })}
-                body={homeConfig.subpanel.resources}
+                body={homeConfig.subpanel.logs}
               />
             </Flex>
           </Flex>
@@ -121,17 +113,16 @@ const Home = (props) => {
           id="auxPanel"
           h="100%"
           w="35%"
-
-          borderWidth={3}
-          borderColor="black"
         >
           <Flex
+            borderLeftWidth={1}
+            borderLeftColor="black"
             flexDir="column"
           >
             <ConnectionHowTo
-              title={homeConfig.welcomePanel.title}
-              subtitle={homeConfig.subtitle({ title: "Connecting With MetaMask" })}
+              title={homeConfig.subtitle({ title: "Connecting With MetaMask" })}
               blurb={homeConfig.subpanel.metamask}
+              installLink={homeConfig.softwareLink.metamask}
             />
           </Flex>
         </Flex>

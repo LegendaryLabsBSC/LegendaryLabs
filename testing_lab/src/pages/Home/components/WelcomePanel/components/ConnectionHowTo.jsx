@@ -13,6 +13,7 @@ import {
   ListItem,
   Container,
   Link,
+  Text
 } from '@chakra-ui/react'
 
 const ConnectionHowTo = (props) => {
@@ -24,25 +25,43 @@ const ConnectionHowTo = (props) => {
       flexDir="column"
       alignItems="center"
     >
-      {props.subtitle}
+      {props.title}
       <Flex
         p={1}
         pr={2}
         ml={2}
       >
-        <Flex flexDir="column">
-          {props.blurb}
-        </Flex>
+        <Text>
+          Install {props.installLink}
+          <br />
+          To add a new Testnet to Metamask:
+          <UnorderedList>
+            <br />
+            <ListItem>
+              Click your account icon inside the MetaMask extension (top-right corner)
+            </ListItem>
+            <br />
+            <ListItem>
+              Then navigate to:
+              <br />
+              Settings &rarr; Networks &rarr; Add A Network
+            </ListItem>
+          </UnorderedList>
+        </Text>
       </Flex>
-
-
+      <br />
       <Accordion
-        // h="100%"
-        // w="100%"
+        h="100%"
+        w="100%"
         defaultIndex={2}
+
       >
-        <AccordionItem>
-          <AccordionButton>
+        <AccordionItem
+          w="100%"
+        >
+          <AccordionButton
+          // w="50%"
+          >
             <Heading
               as="h4"
               fontSize="md"
@@ -76,7 +95,9 @@ const ConnectionHowTo = (props) => {
             Block Explorer URL: https://explorer.testnet.harmony.one/
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem>
+        <AccordionItem
+          w="100%"
+        >
           <AccordionButton>
             <Heading
               as="h4"
@@ -107,7 +128,9 @@ const ConnectionHowTo = (props) => {
             Block Explorer URL: https://testnet.bscscan.com/
           </AccordionPanel>
         </AccordionItem>
-        <AccordionItem>
+        <AccordionItem
+          w="100%"
+        >
           <AccordionButton>
             <Heading
               as="h4"
@@ -121,68 +144,59 @@ const ConnectionHowTo = (props) => {
           <AccordionPanel>
             <UnorderedList>
               <ListItem>
-                Report Issues To: <a href="mailto:development@legendarylabs.net"> Devs </a>
+                Report Issues To:
+                <br />
+                development@legendarylabs.net
               </ListItem>
               <ListItem>
                 <Link
                   isExternal
-                  href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"
+                  href="https://github.com/LegendaryLabsBSC/LegendaryLabs"
                   style={{ textDecoration: 'none' }
                   }
                   color="blue.500"
                 >
-                  Main Repo: https://github.com/LegendaryLabsBSC/LegendaryLabs
+                  Main Repo
                 </Link>
               </ListItem>
               <ListItem>
                 <Link
                   isExternal
-                  href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"
+                  href="https://github.com/LegendaryLabsBSC/Testing-Lab"
                   style={{ textDecoration: 'none' }
                   }
                   color="blue.500"
                 >
-                  Testing-Lab Repo: https://github.com/LegendaryLabsBSC/Testing-Lab
+                  Testing Lab Repo (this)
                 </Link>
               </ListItem>
               <ListItem>
                 <Link
                   isExternal
-                  href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"
+                  href="https://docs.legendarylabs.net"
                   style={{ textDecoration: 'none' }
                   }
                   color="blue.500"
                 >
-                  Docs: https://docs.legendarylabs.net
-                </Link>
-              </ListItem>
-              <ListItem>
-                <Link
-                  isExternal
-                  href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"
-                  style={{ textDecoration: 'none' }
-                  }
-                  color="blue.500"
-                >
-                  DApp: http://legendarylabs.net
-                </Link>
-              </ListItem>
-              <ListItem>
-                <Link
-                  isExternal
-                  href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"
-                  style={{ textDecoration: 'none' }
-                  }
-                  color="blue.500"
-                >
-                  Telegram: https://t.me/LegendaryLabsTesting
-                </Link>
-              </ListItem>
-            </UnorderedList>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-    </Flex>
+                Docs Site
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link
+                isExternal
+                href="http://legendarylabs.net"
+                style={{ textDecoration: 'none' }
+                }
+                color="blue.500"
+              >
+                DApp
+              </Link>
+            </ListItem>
+          </UnorderedList>
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
+    </Flex >
   )
 }
 

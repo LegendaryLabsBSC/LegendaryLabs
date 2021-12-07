@@ -36,6 +36,7 @@ const homeConfig = {
       </Text >,
       <Text
         mb={2}
+
       >
         Keep this in mind while testing, as some functions on the Official DApp
         will have set parameters than can not be specified by the end user.
@@ -44,59 +45,38 @@ const homeConfig = {
       </Text>,
       <Text
         mb={2}
+
       >
         Parsing directly from the contract ABIs also allows for painless updates of the
         contract testing interface. When new changes are merged into the Smart Contracts
-        (prior to launch) the Testing-Lab will automatically update as needed.
+        (prior to launch) the Testing Lab will automatically update as needed.
       </Text>
     ]
   },
   subpanel: {
-    metamask:
-      [
-        <Text>
-          To use the Testing Lab install
-          To add a new Testnet to Metamask:
-          <br />
-          <Text
-            ml={2}
-          >
-            <UnorderedList>
-              <ListItem>
-                Click your account icon inside the MetaMask extension
-              </ListItem>
-              <ListItem>
-                Then navigate to Settings &rarr; Networks &rarr; Add A Network
-              </ListItem>
-            </UnorderedList>
-          </Text>
-        </Text>
-      ],
     certs:
-      <Text>
-        More resources and certification guides will be be added here shortly.
-        I plan to include guides that will walk the tester through the flow of the contract functionalities.
+      <Text
+        lineHeight={7}
+      >
+        <br />
+        More resources and certification guides will be be added shortly. I plan to 
+        include guides that will walk the tester through the flow of the contract functionalities.
+        <br /><br />
         In addition to testing following the guides, simply calling the contract functions with the mindset of exploiting
-        them is encouraged.For any potential issues or exploits discovered please email a log and description of the issue to ###.
+        them is encouraged.
       </Text >,
-    resources:
-      <Text>
-        The Testing-Lab includes a output console, while testing the contracts any questionable, problematic, or otherwise concerning output can easily be saved
-        into a text file by clicking Download Log <Icon as={FiDownload} color="green.400" />. The file can then be emailed to ### for ... . A more direct method of submitting
-        output-logs will be released in a future update.
-
-        {/* Report Issues & Bugs: development@legendarylabs.net
-        Main Repo: https://github.com/LegendaryLabsBSC/LegendaryLabs
-        Testing-Lab Repo: https://github.com/LegendaryLabsBSC/Testing-Lab
-        Docs: https://docs.legendarylabs.net
-        DApp: http://legendarylabs.net
-        Telegram: https://t.me/LegendaryLabsTesting */}
+    logs:
+      <Text
+        lineHeight={7}
+      >
+         <br />
+        The Testing Lab includes a built-in output console. While testing the contracts any questionable, problematic, or otherwise concerning output can easily be saved
+        into a text file by clicking Download Log <Icon as={FiDownload} color="green.400" />.
+        <br /> <br />
+        The file can then be emailed to the specified address for analysis.
+        A more direct method of submitting output-logs will be released in a future update.
       </Text>
   },
-
-
-
-
   softwareLink: {
     metamask:
       <Link
