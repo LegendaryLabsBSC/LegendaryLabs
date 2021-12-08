@@ -1,17 +1,10 @@
 import React from 'react'
-import SimpleSubpanel from '../SimpleSubpanel'
-import ConnectionHowTo from './components/ConnectionHowTo'
-import {
-  Flex,
-  Heading,
-} from '@chakra-ui/react'
+import { Flex, Heading, } from '@chakra-ui/react'
 
 const WelcomePanel = (props) => {
 
   return (
     <Flex
-      h="100%"
-      w="100%"
       flexDir="column"
       alignItems="center"
     >
@@ -31,11 +24,6 @@ const WelcomePanel = (props) => {
         textAlign="justify"
       >
         {props.blurb}
-      </Flex>
-      <Flex
-        h="100%"
-        w="100%"
-      >
       </Flex>
     </Flex>
   )

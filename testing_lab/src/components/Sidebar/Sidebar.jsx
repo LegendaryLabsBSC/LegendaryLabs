@@ -1,10 +1,10 @@
 import React from 'react'
-import { Divider, Flex, IconButton, Spacer, Badge } from '@chakra-ui/react'
-import { FiMenu, FiHome, FiSettings } from "react-icons/fi";
 import NavItem from "./components/NavItem"
-import { GrDocumentTest } from "react-icons/gr"
 import MetaMaskConnect from '../MetaMaskConnect/MetaMaskConnect';
 import { Link as RouteLink } from "react-router-dom";
+import { FiMenu, FiHome, FiSettings } from "react-icons/fi";
+import { GrDocumentTest } from "react-icons/gr"
+import { Divider, Flex, IconButton, Spacer, Badge } from '@chakra-ui/react'
 
 
 const Sidebar = (props) => {
@@ -74,14 +74,10 @@ const Sidebar = (props) => {
         <Divider
           display={props.navSize === "small" ? "none" : "flex"}
         />
-
         <Flex
-        mt={1.5}
-        // flexDir="column"
-        // alignItems="center"
-        >
+          mt={1.5}>
           {/* <Badge backgroundColor="#02f2d5" color="#2535a0">Harmony</Badge> */}
-        <Badge backgroundColor="#fcd535">Binance</Badge>
+          <Badge backgroundColor="#fcd535">Binance</Badge>
         </Flex>
         <MetaMaskConnect navSize={props.navSize} />
       </Flex>

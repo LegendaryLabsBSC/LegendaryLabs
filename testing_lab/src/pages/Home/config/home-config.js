@@ -1,11 +1,9 @@
 import { FiDownload } from 'react-icons/fi'
 import {
   Text,
+  Icon,
   Link,
   Heading,
-  Icon,
-  UnorderedList,
-  ListItem
 } from '@chakra-ui/react'
 
 const homeConfig = {
@@ -58,7 +56,6 @@ const homeConfig = {
       <Text
         lineHeight={7}
       >
-        <br />
         More resources and certification guides will be be added shortly. I plan to 
         include guides that will walk the tester through the flow of the contract functionalities.
         <br /><br />
@@ -69,7 +66,6 @@ const homeConfig = {
       <Text
         lineHeight={7}
       >
-         <br />
         The Testing Lab includes a built-in output console. While testing the contracts any questionable, problematic, or otherwise concerning output can easily be saved
         into a text file by clicking Download Log <Icon as={FiDownload} color="green.400" />.
         <br /> <br />

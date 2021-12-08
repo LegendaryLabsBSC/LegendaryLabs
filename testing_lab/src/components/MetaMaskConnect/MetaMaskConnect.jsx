@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Flex, Icon, Text, Tooltip, useToast } from '@chakra-ui/react'
 import { IoWallet } from 'react-icons/io5'
+import { Button, Flex, Icon, Text, Tooltip, useToast } from '@chakra-ui/react'
 
 // const testNetwork = { name: 'Harmony Testnet', chainId: '0x6357d2e0' }
 const testNetwork = { name: 'Binance Testnet', chainId: '0x61' }

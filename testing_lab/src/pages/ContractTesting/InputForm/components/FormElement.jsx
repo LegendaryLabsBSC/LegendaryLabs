@@ -1,27 +1,22 @@
 import React, { useState } from "react";
 import {
+  Flex,
+  Text,
   Input,
+  Stack,
   Radio,
   RadioGroup,
-  Stack,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Flex,
-  Text,
 } from "@chakra-ui/react";
 
 const Element = (
-  {
-    input: {
-      internalType,
-      name,
-      type
-    },
-    register }
-) => {
+  { input: { internalType, name, type },
+    register
+  }) => {
 
   const [value, setValue] = useState({
     radio: "false",
@@ -48,7 +43,6 @@ const Element = (
           />
         </Flex>
       );
-
     case "bool":
       return (
         <Flex>
@@ -75,7 +69,6 @@ const Element = (
           </RadioGroup >
         </Flex>
       );
-
     case "uint256":
       return (
         <Flex>
@@ -94,7 +87,6 @@ const Element = (
           </NumberInput>
         </Flex>
       )
-
     default:
       console.log(`Error: ${type} not supported`)
       return (

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Flex } from "@chakra-ui/react";
-import Sidebar from "./components/Sidebar/Sidebar";
-import ContractTesting from "./pages/ContractTesting/ContractTesting";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import Settings from "./pages/Settings/Settings";
+import { Flex } from "@chakra-ui/react";
 import BackDrop from "./components/BackDrop";
+import Sidebar from "./components/Sidebar/Sidebar";
+import Home from "./pages/Home/Home";
+import ContractTesting from "./pages/ContractTesting/ContractTesting";
+// import Settings from "./pages/Settings/Settings";
 
 const App = () => {
   const [navSize, changeNavSize] = useState("large");
@@ -21,7 +21,7 @@ const App = () => {
               path="/contract-testing"
               element={<ContractTesting navSize={navSize} />}
             />
-            <Route path="/settings" element={<Settings navSize={navSize} />} />
+            {/* <Route path="/settings" element={<Settings navSize={navSize} />} /> */}
           </Routes>
         </BackDrop>
       </Router>

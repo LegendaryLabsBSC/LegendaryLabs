@@ -1,11 +1,11 @@
 import React from 'react'
 import {
   Flex,
+  Text,
+  Icon,
   Link,
   Menu,
   MenuButton,
-  Icon,
-  Text
 } from '@chakra-ui/react'
 
 const NavItem = (props) => {

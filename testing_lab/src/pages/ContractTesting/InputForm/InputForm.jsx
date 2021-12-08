@@ -143,7 +143,7 @@ const InputForm = (props) => {
   return (
     <Flex
       mr={5}
-      mt="2.5vh"
+      mt={5}
       h="90vh"
       w={props.navSize === "small" ? "33vw" : "25vw"}
       background="white"

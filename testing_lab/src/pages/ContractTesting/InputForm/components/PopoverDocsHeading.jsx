@@ -1,12 +1,12 @@
 import React from 'react'
 import {
   Flex,
-  Popover,
-  PopoverTrigger,
-  Heading,
   Button,
+  Heading,
+  Popover,
+  PopoverBody,
+  PopoverTrigger,
   PopoverContent,
-  PopoverBody
 } from '@chakra-ui/react'
 
 const PopoverDocsHeading = (props) => {

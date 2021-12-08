@@ -1,15 +1,9 @@
 import React from 'react'
 import homeConfig from './config/home-config'
-import WelcomePanel from './components/WelcomePanel/WelcomePanel'
-import InfoPanel from './components/InfoPanel/InfoPanel'
-import {
-  Divider,
-  Flex,
-  Heading,
-  HStack,
-} from '@chakra-ui/react'
-import ConnectionHowTo from './components/WelcomePanel/components/ConnectionHowTo'
+import WelcomePanel from './components/WelcomePanel'
+import ConnectionHowTo from './components/ConnectionHowTo'
 import SimpleSubpanel from './components/SimpleSubpanel'
+import { Flex, Heading, } from '@chakra-ui/react'
 
 
 const Home = (props) => {
@@ -37,8 +31,8 @@ const Home = (props) => {
 
   return (
     <Flex
-      mt="2.5vh"
       ml={10}
+      mt={5}
       h="90vh"
       w={props.navSize === "small" ? "82vw" : "75vw"}
       background="white"
@@ -50,53 +44,35 @@ const Home = (props) => {
       <Flex
         id="body"
         mt={1}
-        h="100%"
-        w="100%"
       >
-
         <Flex
-          flexDir="column"
+          id="mainPanel"
           h="100%"
           w="65%"
+          flexDir="column"
         >
-
-          <Flex
-            id="mainPanel"
-            h="100%"
-            w="100%"
-          >
-            <WelcomePanel
-              title={homeConfig.welcomePanel.title}
-              blurb={homeConfig.welcomePanel.blurb}
-            />
-          </Flex>
-
-          <Flex
-            h="100%"
-            w="100%"
-          // flexDir="column"
-          >
-
+          <WelcomePanel
+            title={homeConfig.welcomePanel.title}
+            blurb={homeConfig.welcomePanel.blurb}
+          />
+          <Flex>
             <Flex
               ml={3}
               pr={2}
-              h="100%"
               w="100%"
               flexDir="column"
               borderRightWidth={1}
               borderRightColor="black"
-              borderRight
             >
               <SimpleSubpanel
                 id="certs"
                 title={homeConfig.subtitle({ title: "Testing Certs" })}
                 body={homeConfig.subpanel.certs}
-
               />
             </Flex>
             <Flex
               ml={3}
-              h="100%"
+              pr={2}
               w="100%"
               flexDir="column"
             >
@@ -108,7 +84,6 @@ const Home = (props) => {
             </Flex>
           </Flex>
         </Flex>
-
         <Flex
           id="auxPanel"
           h="100%"
@@ -126,8 +101,6 @@ const Home = (props) => {
             />
           </Flex>
         </Flex>
-
-
       </Flex>
     </Flex>
   )
