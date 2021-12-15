@@ -133,7 +133,7 @@ var options = {
   enableShortcuts: true,
   enableFadeBetweenPages: true,
   enableMouseParallax: true,
-  enableCookieAlert: true,
+  enableCookieAlert: false,
   scrollToAnchorSpeed: 700,
   parallaxSpeed: 0.6,
   templates: {
