@@ -114,7 +114,7 @@ var options = {
   enableShortcuts: true,
   enableFadeBetweenPages: true,
   enableMouseParallax: true,
-  enableCookieAlert: true,
+  enableCookieAlert: false,
   scrollToAnchorSpeed: 700,
   parallaxSpeed: 0.6,
   templates: {
@@ -253,7 +253,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _parts_initFacebook__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(35);
 /* harmony import */ var _parts_initInstagram__WEBPACK_IMPORTED_MODULE_32__ = __webpack_require__(36);
 /* harmony import */ var _parts_initTwitter__WEBPACK_IMPORTED_MODULE_33__ = __webpack_require__(37);
-/* harmony import */ var _parts_initCookieAlert__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(38);
+// /* harmony import */ var _parts_initCookieAlert__WEBPACK_IMPORTED_MODULE_34__ = __webpack_require__(38);
 /* harmony import */ var _parts_initPluginObjectFitImages__WEBPACK_IMPORTED_MODULE_35__ = __webpack_require__(39);
 /* harmony import */ var _parts_initPluginStickySidebar__WEBPACK_IMPORTED_MODULE_36__ = __webpack_require__(40);
 /* harmony import */ var _parts_initPluginFastClick__WEBPACK_IMPORTED_MODULE_37__ = __webpack_require__(41);
@@ -370,7 +370,7 @@ var GODLIKE = /*#__PURE__*/function () {
       self.initInstagram();
       self.initTwitter();
       self.initShortcuts();
-      self.initCookieAlert(); // init plugins
+      // self.initCookieAlert(); // init plugins
 
       self.initPluginObjectFitImages();
       self.initPluginStickySidebar();
@@ -582,12 +582,14 @@ var GODLIKE = /*#__PURE__*/function () {
     value: function initTwitter() {
       return _parts_initTwitter__WEBPACK_IMPORTED_MODULE_33__["initTwitter"].call(this);
     }
-  }, {
-    key: "initCookieAlert",
-    value: function initCookieAlert() {
-      return _parts_initCookieAlert__WEBPACK_IMPORTED_MODULE_34__["initCookieAlert"].call(this);
-    }
-  }, {
+  }, 
+  // {
+  //   key: "initCookieAlert",
+  //   value: function initCookieAlert() {
+  //     return _parts_initCookieAlert__WEBPACK_IMPORTED_MODULE_34__["initCookieAlert"].call(this);
+  //   }
+  // }, 
+  {
     key: "initPluginObjectFitImages",
     value: function initPluginObjectFitImages() {
       return _parts_initPluginObjectFitImages__WEBPACK_IMPORTED_MODULE_35__["initPluginObjectFitImages"].call(this);
@@ -5052,7 +5054,7 @@ function initTwitter() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initCookieAlert", function() { return initCookieAlert; });
+// /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initCookieAlert", function() { return initCookieAlert; });
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 
 /*------------------------------------------------------------------
