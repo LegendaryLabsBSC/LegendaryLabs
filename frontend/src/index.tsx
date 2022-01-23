@@ -11,5 +11,5 @@ ReactDOM.render(
     <App />
     {/* <Farms /> */}
   </React.StrictMode>,
-  document.getElementById('root-react-app')
+  document.getElementById('root-react-app'),
 )
