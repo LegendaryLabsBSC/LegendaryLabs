@@ -1,19 +1,11 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import { useWallet } from '@binance-chain/bsc-use-wallet'
-// import { ResetCSS } from '@legendarylabs/uikit'
-import BigNumber from 'bignumber.js'
-// import AllLegends from 'components/all-legends/all-legends'
-// import Menu from './components/Menu'
-// import NftGlobalNotification from './views/Nft/components/NftGlobalNotification'
 import Team from 'components/team/team'
 import Home from 'components/home/home'
+import AllLegends from 'components/all-legends/all-legends'
 import ComingSoon from './components/coming-soon/coming-soon'
-// import Menu from './components/Menu'
-// import FarmsApp from './views/Farms'
 
 const App: React.FC = () => {
-
   useEffect(() => {
     const path = document.location.pathname
     const tab = document.getElementById(path === '/' ? '/home' : path)

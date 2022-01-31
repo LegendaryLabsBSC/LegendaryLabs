@@ -1,15 +1,14 @@
-import React, { lazy } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
+import { ApolloProvider } from '@apollo/client'
+import client from 'components/apollo-client/apollo-client'
 import App from './App'
-// import App from './views/Farms'
-
-// const Farms = lazy(() => import('./views/Farms'))
 
 ReactDOM.render(
   <React.StrictMode>
-    {/* <h1>Placeholder for Farms Component</h1> */}
-    <App />
-    {/* <Farms /> */}
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
   </React.StrictMode>,
-  document.getElementById('root-react-app')
+  document.getElementById('root-react-app'),
 )

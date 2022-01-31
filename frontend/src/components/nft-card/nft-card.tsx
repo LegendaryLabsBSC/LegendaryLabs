@@ -13,7 +13,7 @@ const StyledCard = styled.div`
     background-color: whiteSmoke;
     border-radius: 10%;
     h3 {
-      color: #000
+      color: #000;
     }
   }
 `
