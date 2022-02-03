@@ -18,12 +18,12 @@ const App: React.FC = () => {
         <Route path={['/', '/home']} exact>
           <Home />
         </Route>
-        <Route path={['/legends', '/marketplace', '/arena']} exact>
+        <Route path={['/marketplace', '/arena']} exact>
           <ComingSoon />
         </Route>
-        {/* <Route path={['/legends']} exact>
+        <Route path={['/legends']} exact>
           <AllLegends />
-        </Route> */}
+        </Route>
         <Route path={['/team']} exact>
           <Team />
         </Route>
