@@ -4,6 +4,7 @@ import Team from './components/team/team'
 import Home from './components/home/home'
 import AllLegends from './components/all-legends/all-legends'
 import ComingSoon from './components/coming-soon/coming-soon'
+import { Forum } from './components/forum/forum'
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -21,6 +22,7 @@ const App: React.FC = () => {
         <Route path='/marketplace' element={<ComingSoon />} />
         <Route path='/arena' element={<ComingSoon />} />
         <Route path='/team' element={<Team />} />
+        <Route path='/forum' element={<Forum />} />
         {/* <Route path={['/legends']} exact>
           <AllLegends />
         </Route> */}
