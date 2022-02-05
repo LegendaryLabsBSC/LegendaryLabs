@@ -17,13 +17,11 @@ const App: React.FC = () => {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/home' element={<Home />} />
-        <Route path='/legends' element={<ComingSoon />} />
+        {/* <Route path='/legends' element={<ComingSoon />} /> */}
+        <Route path='/legends' element={<AllLegends />} />
         <Route path='/marketplace' element={<ComingSoon />} />
         <Route path='/arena' element={<ComingSoon />} />
         <Route path='/team' element={<Team />} />
-        {/* <Route path={['/legends']} exact>
-          <AllLegends />
-        </Route> */}
       </Routes>
     </Router>
   )

@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { useQuery, gql } from '@apollo/client'
+import eater from '@/eater.gif'
 
 declare global {
   interface Window {
@@ -35,7 +36,7 @@ const AllLegends: React.FC = () => {
 
   const res = useQuery(BLENDING_RULES)
 
-  return <NftContainer>{res.data ? JSON.stringify(res.data) : <div>ya dun fucked up</div>}</NftContainer>
+  return <NftContainer>{res.data ? JSON.stringify(res.data) : <img src={eater} />}</NftContainer>
 }
 
 export default AllLegends
