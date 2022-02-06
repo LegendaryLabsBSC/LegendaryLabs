@@ -1,40 +1,13 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { useQuery, gql } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import gif from '@/eater.gif'
 import { NftCard } from '../nft-card/nft-card'
+import { legendById } from '@/functions'
 
-declare global {
-  interface Window {
-    ethereum: any
-  }
-}
-
-const BLENDING_RULES = (id: string) => gql`
-query {
-  legendNFT(id: "${id}") {
-    id
-    image
-    season
-    prefix
-    postfix
-    parent1
-    parent2
-    birthday
-    blendingInstancesUsed
-    totalOffspring
-    legendCreator
-    isLegendary
-    isHatched
-    isDestroyed
-  }
-}
-`
-
-
-const AllLegends: React.FC = () => {
+export const AllLegends: React.FC = () => {
   const [legendId, setLegendId] = useState<string>('1')
-  const res = useQuery(BLENDING_RULES(legendId)).data
+  const res = useQuery(legendById(legendId)).data
 
   const NftContainer = styled.div`
     & {
@@ -57,8 +30,6 @@ const AllLegends: React.FC = () => {
         <button type='button' onClick={() => setLegendId((Number(legendId) + 1).toString())}>{'Next >'}</button>
       </div>
       {res ? JSON.stringify(res, null, 2) : <img src={gif} alt="eater" />}
-      {res && <NftCard><img src={res.legendNFT.image} alt="nft" width={600}/></NftCard>}
+      {res && <NftCard><img src={res.legendNFT.image} alt="nft" width={600} /></NftCard>}
     </NftContainer>)
 }
-
-export default AllLegends

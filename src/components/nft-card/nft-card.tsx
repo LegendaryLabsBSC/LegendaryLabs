@@ -16,6 +16,7 @@ const StyledCard = styled.div`
     h3 {
       color: #000;
     }
+    color: #000;
   }
 `
 
