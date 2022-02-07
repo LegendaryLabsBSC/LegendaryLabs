@@ -1,50 +1,33 @@
-import { legendById } from "@/functions"
 import { useQuery, gql } from "@apollo/client"
-import { useEffect, useState } from "react"
 
-const listings = gql`{
+const listingsQuery = gql`{
   allLegendListings(filter: "all") {
     listingId
     createdAt
     nftContract
     legendId
-    seller
-    buyer
-    price
-    isOffer
-    isAuction
-    status
-    auctionDetails {
-      duration
-      startingPrice
-      highestBid
-      highestBidder
-      isInstantBuy
-      durationInDays
-      instantBuyPrice
-      bidders
-      isExpired
-    }
-    offerDetails {
-      expirationTime
-      legendOwner
-      isAccepted
+    legendDetails{
+      id
+      image
     }
   }
 }`
 
 const useMarketplace = () => {
-    const [images, setImages] = useState<string[]>([])
-    const res = useQuery(listings).data
+    const res = useQuery(listingsQuery).data
   
-    useEffect(() => {
-      res && res.allLegendListings.forEach((listing: any) => {
-        const image = useQuery(legendById(listing.legendId)).data
-        image && setImages([...images, image.legendNFT.image])
-      })
-    }, [res])
+    const listings = res && res.allLegendListings
 
-    return 'hello form ump hook'
+    // forEach((listing: any) => {
+    //   const image = 
+    //   image && setImages([...images, image.legendNFT.image])
+    // })
+    // useEffect(() => {
+    // }, [res])
+
+    // const legend = listings && useQuery(legendById(listings[0].legendId)).data
+
+    return listings
 }
 
 export { useMarketplace }
