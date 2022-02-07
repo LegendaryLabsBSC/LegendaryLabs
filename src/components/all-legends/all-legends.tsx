@@ -6,11 +6,6 @@ import { NftCard } from '../nft-card/nft-card'
 import { legendById } from '@/functions'
 import { Legend } from '@/types'
 
-export const AllLegends: React.FC = () => {
-  const [legendId, setLegendId] = useState<string>('1')
-  const [listing, setListing] = useState<boolean>(false)
-  const res: { legendNFT: Legend } = useQuery(legendById(legendId)).data
-
   const NftContainer = styled.div`
     & {
       padding: 25px;
@@ -24,6 +19,12 @@ export const AllLegends: React.FC = () => {
       }
     }
   `
+
+export const AllLegends: React.FC = () => {
+  const [legendId, setLegendId] = useState<string>('1')
+  const [listing, setListing] = useState<boolean>(false)
+  const [listingPrice, setListingPrice] = useState<number>()
+  const res: { legendNFT: Legend } = useQuery(legendById(legendId)).data
 
   const listLegend = (): void => {
     // signer code 
@@ -41,10 +42,15 @@ export const AllLegends: React.FC = () => {
           <img src={res.legendNFT.image} alt="nft" width={600} />
           {!listing && <button onClick={() => setListing(true)}>List Legend</button>}
           {listing &&
-            <>
-              <input type='number' placeholder='price ($USD)' />
-              <button onClick={listLegend}>List Legend</button>
-            </>
+            <form>
+              <input
+                value={listingPrice}
+                key="listingPrice"
+                placeholder='price ($USD)'
+                onChange={(e) => setListingPrice(Number(e.currentTarget.value))}
+              />
+              <button type="submit" onClick={listLegend} disabled={!listingPrice}>List Legend</button>
+            </form>
           }
         </NftCard>
       }
