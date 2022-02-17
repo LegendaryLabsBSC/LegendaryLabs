@@ -1,7 +1,8 @@
 import React from 'react'
 
-export interface ForumTopicBaseProps {
+export interface ForumThreadBaseProps {
     id: string
+    topic: string
     title: string
     subtitle: string
     numberThreads: number
@@ -9,18 +10,18 @@ export interface ForumTopicBaseProps {
     previewDate: string
 }
 
-export interface ForumTopicProps extends ForumTopicBaseProps {
-    setTopic: (id: string) => void
+export interface ForumThreadProps extends ForumThreadBaseProps {
+    setThread: (id: string) => void
 }
 
-export const ForumTopic: React.FC<ForumTopicProps> = ({
+export const ForumThread: React.FC<ForumThreadProps> = ({
     id,
     title,
     subtitle,
     numberThreads,
     previewTitle,
     previewDate,
-    setTopic
+    setThread
 }) => {
     return (
         <li>
@@ -28,7 +29,7 @@ export const ForumTopic: React.FC<ForumTopicProps> = ({
                 <span className="ion-ios-game-controller-b" />
             </div>
             <div className="nk-forum-title">
-                <h3><a onClick={() => setTopic(id)}>{ title }</a></h3>
+                <h3><a onClick={() => setThread(id)}>{ title }</a></h3>
                 <div className="nk-forum-title-sub">{ subtitle }</div>
             </div>
             <div className="nk-forum-count">{ numberThreads } threads </div>
@@ -37,7 +38,7 @@ export const ForumTopic: React.FC<ForumTopicProps> = ({
             </div>
             <div className="nk-forum-activity">
                 <div className="nk-forum-activity-title" title={ previewTitle }>
-                    <a onClick={() => setTopic(id)}>{ previewTitle }</a>
+                    <a  onClick={() => setThread(id)}>{ previewTitle }</a>
                 </div>
                 <div className="nk-forum-activity-date"> { new Date(previewDate).toDateString() } </div>
             </div>
