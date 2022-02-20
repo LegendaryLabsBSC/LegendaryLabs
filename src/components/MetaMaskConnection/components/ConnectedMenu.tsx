@@ -19,7 +19,7 @@ import {
   Text,
   Spinner,
 } from "@chakra-ui/react";
-import { ethereum, BlockchainNetwork } from "../../../common/types";
+import { ethereum, BlockchainNetwork } from "../../../types";
 
 type UserBalances = {
   native: string;

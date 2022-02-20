@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, createStandaloneToast } from "@chakra-ui/react";
-import { ethereum, BlockchainNetwork } from "../../../common/types";
+import { ethereum, BlockchainNetwork } from "../../../types";
 
 const toast = createStandaloneToast();
 

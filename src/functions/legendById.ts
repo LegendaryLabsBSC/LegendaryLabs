@@ -17,6 +17,7 @@ query {
     isLegendary
     isHatched
     isDestroyed
+    ownerOf
   }
 }
 `

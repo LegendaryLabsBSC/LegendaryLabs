@@ -13,7 +13,7 @@ import {
 import { LegendsMarketplace, LegendsNFT } from "../../config/contract-ABIs";
 import MetaMaskConnection from "../MetaMaskConnection/MetaMaskConnection";
 import { Button } from "@chakra-ui/react";
-import { ethereum } from "../../common/types";
+import { ethereum } from "../../types";
 
 const provider: ethers.providers.Web3Provider =
   new ethers.providers.Web3Provider(ethereum);
@@ -54,7 +54,7 @@ export const AllLegends: React.FC = () => {
   const [listingPrice, setListingPrice] = useState<string>();
   const [approving, setApproving] = useState(false);
   const res: { legendNFT: Legend } = useQuery(legendById(legendId)).data;
-
+ 
   const approveListing = async () => {
     await legendNFTContract.approve(legendsMarketplace, legendId);
     // can probably put a spinner or loading state while approval going through
@@ -63,16 +63,18 @@ export const AllLegends: React.FC = () => {
   const listLegend = async (e: any): Promise<void> => {
     e.preventDefault();
 
+    console.log(res);
+
     // price needs to be sent through as "eth" units
     const price = ethers.utils.parseEther(listingPrice ?? "");
 
-    const legendSale = await marketplaceContract.createLegendSale(
-      nftContract, //* should be pulled from gql data
-      legendId,
-      price
-    );
+    // const legendSale = await marketplaceContract.createLegendSale(
+    //   res.legendNFT.nftcontract,
+    //   legendId,
+    //   price
+    // );
 
-    console.log(legendSale);
+    // console.log(legendSale);
 
     // const legendOffer = await marketplaceContract.makeLegendOffer(
     //   nftContract,
@@ -122,7 +124,10 @@ export const AllLegends: React.FC = () => {
                   placeholder="price ($ETH)"
                   onChange={(e) => setListingPrice(e.currentTarget.value)}
                 />
-                <Button onClick={approveListing} disabled={!listingPrice}>
+                <Button
+                  onClick={approveListing}
+                  disabled={!listingPrice}
+                >
                   Approve
                 </Button>
                 <button

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ConnectButton from "./components/ConnectButton";
 import ConnectedMenu from "./components/ConnectedMenu";
-import { ethereum } from "../../common/types";
+import { ethereum } from "@/types";
 
 async function checkCorrectNetwork(chainId: string) {
   await ethereum.request({
