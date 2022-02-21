@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Image, Text } from "@chakra-ui/react";
+import { Box, Button, Typography } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { legendById } from "@/functions";
 import { Legend, ethereum } from "@/types";
@@ -77,29 +77,29 @@ const NftCard = ({
 
   return legendData && !filteredOut ? (
     <Box
-      pt={25}
-      w={600}
-      h={500}
+      pt={5}
+      m={1}
+      width={500}
+      height={500}
       textAlign="center"
-      bg="whitesmoke"
+      bgcolor="whitesmoke"
       borderRadius={10}
     >
       <>
         {legendData.prefix.length === 0 && legendData.postfix.length === 0 ? (
-          <Text>Specimen #{legendData.id}</Text>
+          <Typography>Specimen #{legendData.id}</Typography>
         ) : (
-          <Text>
+          <Typography>
             {legendData.prefix}
             {legendData.postfix}
-          </Text>
+          </Typography>
         )}
-        <Image
+        <img
           alt="nft"
           src={legendData.image}
-          w={width ? width : 600}
-          h={legendData.isHatched ? undefined : 400} // incubating legend imgs need to be same resolution/dimensions as legends
-          p={padding ? padding : 25}
-          borderRadius={borderRadius ? borderRadius : "2em"}
+          width={width ? width : 500}
+          height={legendData.isHatched ? undefined : 400} // incubating legend imgs need to be same resolution/dimensions as legends
+          style={{ padding: padding ? padding : 25, borderRadius: borderRadius ? borderRadius : "2em" }}
         />
         {/* {!legendData.isHatched && (
           <Button onClick={() => hatchLegend(legendId)}>Hatch</Button>

@@ -8,9 +8,9 @@ import { ChakraProvider } from "@chakra-ui/react";
 ReactDOM.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <ChakraProvider>
+      {/* <ChakraProvider> */}
         <App />
-      </ChakraProvider>
+      {/* </ChakraProvider> */}
     </ApolloProvider>
   </React.StrictMode>,
   document.getElementById("root-react-app")

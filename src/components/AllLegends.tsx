@@ -5,7 +5,7 @@ import NftCard from "./NftCard";
 import { ethereum } from "@/types";
 import { BigNumber, ethers } from "ethers";
 import MetaMaskConnection from "./MetaMaskConnection/MetaMaskConnection";
-import { Flex, HStack, Select, SimpleGrid } from "@chakra-ui/react";
+import { Select, Grid } from "@mui/material";
 import TOTAL_NFT_SUPPLY from "@/graphql/total-nft-supply";
 import { AllLegendsEnum } from "@/enums";
 import ReactPaginate from "react-paginate";
@@ -89,11 +89,11 @@ export const AllLegends = ({ itemsPerPage }: AllLegendsProps) => {
 
   return (
     <>
-      <HStack pos="absolute" right={0}>
+      <Grid display="flex" justifyContent="flex-end" px={5} >
         <LegendsSorting setFilter={setFilter} />
         <MetaMaskConnection />
-      </HStack>
-      <SimpleGrid columns={3} spacing={10} pt={100}>
+      </Grid>
+      <Grid pt={10} display="flex" justifyContent="center" flexWrap="wrap">
         {data &&
           [...Array(legendTotal)].map((empty: any, legendId: any) => (
             // currentItems?.map((legendId: any, itemIndex: any) => (
@@ -123,7 +123,7 @@ export const AllLegends = ({ itemsPerPage }: AllLegendsProps) => {
           activeClassName="active"
           renderOnZeroPageCount={undefined}
         />
-      </SimpleGrid>
+      </Grid>
     </>
   );
 };
