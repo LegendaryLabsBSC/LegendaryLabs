@@ -76,11 +76,11 @@ export const AllLegends: React.FC = () => {
 
     // console.log(legendSale);
 
-    // const legendOffer = await marketplaceContract.makeLegendOffer(
-    //   nftContract,
-    //   legendId,
-    //   { value: price }
-    // );
+    const legendOffer = await marketplaceContract.makeLegendOffer(
+      nftContract,
+      legendId,
+      { value: price }
+    );
 
     // const legendAuction = await marketplaceContract.createLegendSale(
     //   nftContract,

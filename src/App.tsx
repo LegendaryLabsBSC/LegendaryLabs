@@ -5,6 +5,8 @@ import Home from './components/home/home'
 import {AllLegends} from './components/AllLegends'
 import ComingSoon from './components/coming-soon/coming-soon'
 import { Marketplace } from './components/marketplace/marketplace'
+import TempAdmin from './components/TempAdmin/TempAdmin'
+import CreatePromoForm from './components/TempAdmin/forms/CreatePromoForm'
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -22,7 +24,9 @@ const App: React.FC = () => {
         <Route path='/legends' element={<AllLegends itemsPerPage={9} />} />
         <Route path='/marketplace' element={<Marketplace />} />
         {/* <Route path='/marketplace' element={<ComingSoon />} /> */}
-        <Route path='/arena' element={<ComingSoon />} />
+        {/* <Route path='/arena' element={<ComingSoon />} /> */}
+        <Route path='/arena' element={<TempAdmin />} />
+        {/* <Route path='/arena' element={<CreatePromoForm />} /> */}
         <Route path='/team' element={<Team />} />
       </Routes>
     </Router>

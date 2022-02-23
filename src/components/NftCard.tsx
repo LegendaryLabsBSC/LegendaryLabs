@@ -8,7 +8,7 @@ import {
   legendsMarketplace,
   legendsMatchingBoard,
 } from "@/config/contract-addresses";
-import { hatchLegend } from "@/functions/legend-actions";
+// import { hatchLegend } from "@/functions/legend-actions";
 import isHatchable from "@/graphql/is-hatchable";
 
 type NftCardProps = {
@@ -115,7 +115,9 @@ const NftCard = ({
         )}
         {iHD?.isHatchable.hatchable && (
           // todo: if not hatchable, and not already hatched, show incubation countdown
-          <Button onClick={() => hatchLegend(legendId)}>Hatch</Button>
+          <Button
+          //  onClick={() => hatchLegend(legendId)}
+           >Hatch</Button>
         )}
       </>
     </Box>
