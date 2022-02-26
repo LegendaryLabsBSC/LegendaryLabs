@@ -3,6 +3,8 @@ import { Button, Center, useDisclosure } from "@chakra-ui/react";
 import TempAdminModal from "./components/TempAdminModal";
 import CreatePromoForm from "./forms/CreatePromoForm";
 
+// todo: convert chakra to mui
+
 type AdminForm = {
   title: string;
   form: any;

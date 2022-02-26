@@ -26,6 +26,8 @@ import {
 } from "@chakra-ui/react";
 import { createPromoEvent } from "@/functions/promo-actions";
 
+// todo: convert chakra to mui
+
 type CreatePromoEvent = {
   eventName: string;
   duration: string;
@@ -55,10 +57,7 @@ const CreatePromoForm = () => {
       <VStack>
         <FormControl display="flex" alignItems="right" justifyContent="right">
           <FormLabel mb="0">Legends Skip Incubation?</FormLabel>
-          <Switch
-            id="skipIncubation"
-            {...register("skipIncubation")}
-          />
+          <Switch id="skipIncubation" {...register("skipIncubation")} />
         </FormControl>
         <FormControl>
           <FormLabel>Event Name</FormLabel>
