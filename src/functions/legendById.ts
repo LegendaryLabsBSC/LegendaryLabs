@@ -16,6 +16,7 @@ query {
     legendCreator
     isLegendary
     isHatched
+    isHatchable
     isDestroyed
     ownerOf
   }

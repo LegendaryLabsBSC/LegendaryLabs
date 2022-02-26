@@ -5,6 +5,7 @@ interface Legend {
   image: string;
   isDestroyed: boolean;
   isHatched: boolean;
+  isHatchable: boolean;
   isLegendary: boolean;
   legendCreator: string;
   parent1: string;

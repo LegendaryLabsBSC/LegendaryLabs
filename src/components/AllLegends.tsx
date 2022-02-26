@@ -95,13 +95,14 @@ export const AllLegends = ({ itemsPerPage }: AllLegendsProps) => {
       </HStack>
       <SimpleGrid columns={3} spacing={10} pt={100}>
         {data &&
-          [...Array(legendTotal)].map((empty: any, legendId: any) => (
+          [...Array(21)].map((empty: any, legendId: any) => (
+            // [...Array(legendTotal)].map((empty: any, legendId: any) => (
             // currentItems?.map((legendId: any, itemIndex: any) => (
-              <NftCard
-                key={legendId}
-                filter={filter}
-                legendId={`${legendId + 1}`}
-              />
+            <NftCard
+              key={legendId}
+              filter={filter}
+              legendId={`${legendId + 1}`}
+            />
           ))}
         <ReactPaginate
           nextLabel="next >"

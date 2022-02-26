@@ -8,8 +8,7 @@ import {
   legendsMarketplace,
   legendsMatchingBoard,
 } from "@/config/contract-addresses";
-// import { hatchLegend } from "@/functions/legend-actions";
-import isHatchable from "@/graphql/is-hatchable";
+import { hatchLegend } from "@/functions/legend-actions";
 
 type NftCardProps = {
   legendId: string;
@@ -30,13 +29,6 @@ const NftCard = ({
   const [filteredOut, setFilteredOut] = useState<boolean>();
 
   const { data, loading, error } = useQuery(legendById(legendId));
-
-  const {
-    data: iHD,
-    loading: iHL,
-    error: iHE,
-  } = useQuery(isHatchable(legendId));
-
 
   const handleFilter = () => {
     setFilteredOut(false); // clear any previous selections
@@ -101,9 +93,7 @@ const NftCard = ({
           p={padding ? padding : 25}
           borderRadius={borderRadius ? borderRadius : "2em"}
         />
-        {/* {!legendData.isHatched && (
-          <Button onClick={() => hatchLegend(legendId)}>Hatch</Button>
-        )} */}
+
         {legendData.isHatched && (
           <>
             {/* //todo: conditional on isBlendable: disable with tooltip/info */}
@@ -113,11 +103,9 @@ const NftCard = ({
             <Button>Rejuvenate</Button>
           </>
         )}
-        {iHD?.isHatchable.hatchable && (
+        {legendData.isHatchable && (
           // todo: if not hatchable, and not already hatched, show incubation countdown
-          <Button
-          //  onClick={() => hatchLegend(legendId)}
-           >Hatch</Button>
+          <Button onClick={() => hatchLegend(legendId)}>Hatch</Button>
         )}
       </>
     </Box>

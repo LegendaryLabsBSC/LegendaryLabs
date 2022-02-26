@@ -17,6 +17,31 @@ type CreatePromoEvent = {
   promoDNA?: string;
 };
 
+const pinPromoToPinata = async (
+  promoId: any,
+  promoDNA: any,
+  eventName: string
+) => {
+  try {
+    promoId = promoId.toString();
+    const content = JSON.stringify({ promoId, promoDNA });
+
+    const {
+      data: { pinJSONtoIPFS },
+    } = await client.mutate({
+      mutation: IPFS_PROMO,
+      variables: {
+        pinName: `${eventName} - Promo Event`,
+        pinContent: content,
+      },
+    });
+
+    console.log(pinJSONtoIPFS);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export async function createPromoEvent({
   eventName,
   duration,
@@ -25,81 +50,47 @@ export async function createPromoEvent({
   skipIncubation,
   promoDNA,
 }: CreatePromoEvent) {
-  console.log(
-    eventName,
-    duration,
-    isUnrestricted,
-    maxTickets,
-    skipIncubation,
-    promoDNA
-  );
+  // console.log(
+  //   eventName,
+  //   duration,
+  //   isUnrestricted,
+  //   maxTickets,
+  //   skipIncubation,
+  //   promoDNA
+  // );
 
   duration = `${parseInt(duration) * 86400}`;
 
   if (maxTickets === undefined) maxTickets = "0";
-  const gdf =
-    "0x000000000000000000000000000000000000000000000000000000000000000b";
 
   const abiCoder = new ethers.utils.AbiCoder();
 
   try {
-    console.log(
-      eventName,
-      duration,
-      isUnrestricted,
-      maxTickets,
-      skipIncubation,
-      promoDNA
-    );
-    //contract call
-    //todo: contract needs to return promoId
-    const ff = await legendLaboratoryContract.createPromoEvent(
+    // console.log(
+    //   eventName,
+    //   duration,
+    //   isUnrestricted,
+    //   maxTickets,
+    //   skipIncubation,
+    //   promoDNA
+    // );
+
+    const createPromo = await legendLaboratoryContract.createPromoEvent(
       eventName,
       duration,
       isUnrestricted,
       maxTickets,
       skipIncubation
     );
-    // console.log(ff);
 
-    // legendLaboratoryContract.once("PromoCreated", (eventId) => {
-    //   console.log(eventId.toString());
-    // });
+    provider.once(createPromo.hash, (eventId) => {
+      let promoId: any = eventId.logs[0].topics[1];
 
-    provider.on(ff.hash, (eventId) => {
-      console.log(eventId.logs[0].topics[1].toString(), "gsgdg");
+      promoId = abiCoder.decode(["uint"], promoId);
 
-      const promoId: any = eventId.logs[0].topics[1];
-      const tt = abiCoder.decode(["uint"], promoId);
-
-      console.log(tt.toString(), "tt");
-
-      // console.log(promoId);
-      // console.log(promoId.toString());
-
-
-      
+      pinPromoToPinata(promoId, promoDNA, eventName);
     });
-
-    // const promoId: string = "1";
-    // // const cc = { promoId, promoDNA };
-
-const gg = async (promoId) =>{
-
-  
-  const content = JSON.stringify({ promoId, promoDNA });
-  
-  // //backend call to create event on IPFS
-  const {
-    data: { pinJSONtoIPFS },
-  } = await client.mutate({
-    mutation: IPFS_PROMO,
-    variables: { pinName: `${eventName} - Promo Event`, pinContent: content },
-  });
-  
-  console.log(pinJSONtoIPFS);
-} catch (error) {
-  }
+  } catch (error) {
     console.log(error);
   }
 }
