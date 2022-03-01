@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import {styled} from "@mui/material/styles";
 import { useQuery } from "@apollo/client";
 import NftCard from "./NftCard";
 import { ethereum } from "@/types";
 import { BigNumber, ethers } from "ethers";
 import MetaMaskConnection from "./MetaMaskConnection/MetaMaskConnection";
-import { Select, Grid } from "@mui/material";
+import { Select, Grid, FormControl, MenuItem, InputLabel } from "@mui/material";
 import TOTAL_NFT_SUPPLY from "@/graphql/total-nft-supply";
 import { AllLegendsEnum } from "@/enums";
 import ReactPaginate from "react-paginate";
@@ -15,7 +15,7 @@ const provider: ethers.providers.Web3Provider =
 
 const signer: any = provider.getSigner();
 
-const NftContainer = styled.div`
+const NftContainer = styled('div')`
   & {
     padding: 25px;
     display: flex;
@@ -30,25 +30,31 @@ const NftContainer = styled.div`
 `;
 
 type LegendsSortingProps = {
-  setFilter: any;
+  setFilter: (value: string) => void;
+  value?: string;
 };
 
-const LegendsSorting = ({ setFilter }: LegendsSortingProps) => {
-  const handleSetFilter = (value: any) => {
-    setFilter(value);
-  };
+const LegendsSorting: React.FC<LegendsSortingProps> = ({ setFilter, value }) => {
+
+  const StyledSelect = styled(Select)`
+    border: 'solid 1px hotpink';
+    background-color: 'hotpink';
+  `
 
   return (
-    <Select onChange={(e) => handleSetFilter(e.target.value)}>
-      <option value={undefined}>All</option>
-      <option value={AllLegendsEnum.Hatched}>Hatched</option>
-      <option value={AllLegendsEnum.Unhatched}>Unhatched</option>
-      {/* <option value={AllLegendsEnum.Blendable}>Blendable</option> //todo: */}
-      <option value={AllLegendsEnum.InMarketplace}>In Marketplace</option>
-      <option value={AllLegendsEnum.OnMatchingBoard}>On Matching Board</option>
-      <option value={AllLegendsEnum.Legendary}>Legendary</option>
-      <option value={AllLegendsEnum.Destroyed}>Destroyed</option>
-    </Select>
+    <FormControl style={{ width: 200, borderRadius: '10px' }}>
+      <InputLabel style={{ color: 'whitesmoke' }}>Filter</InputLabel>
+      <Select label="Filter" value={value} onChange={(e) => setFilter(e.target.value)}>
+        <MenuItem value={undefined}>All</MenuItem>
+        <MenuItem value={AllLegendsEnum.Hatched}>Hatched</MenuItem>
+        <MenuItem value={AllLegendsEnum.Unhatched}>Unhatched</MenuItem>
+        {/* <option value={AllLegendsEnum.Blendable}>Blendable</option> //todo: */}
+        <MenuItem value={AllLegendsEnum.InMarketplace}>In Marketplace</MenuItem>
+        <MenuItem value={AllLegendsEnum.OnMatchingBoard}>On Matching Board</MenuItem>
+        <MenuItem value={AllLegendsEnum.Legendary}>Legendary</MenuItem>
+        <MenuItem value={AllLegendsEnum.Destroyed}>Destroyed</MenuItem>
+      </Select>
+    </FormControl>
   );
 };
 
@@ -58,7 +64,7 @@ type AllLegendsProps = {
 
 export const AllLegends = ({ itemsPerPage }: AllLegendsProps) => {
   const [legendTotal, setLegendTotal] = useState<number>();
-  const [filter, setFilter] = useState<AllLegendsEnum | undefined>();
+  const [filter, setFilter] = useState<string>();
 
   const { data, loading, error, refetch, fetchMore } =
     useQuery(TOTAL_NFT_SUPPLY);
@@ -89,8 +95,8 @@ export const AllLegends = ({ itemsPerPage }: AllLegendsProps) => {
 
   return (
     <>
-      <Grid display="flex" justifyContent="flex-end" px={5} >
-        <LegendsSorting setFilter={setFilter} />
+      <Grid display="flex" justifyContent="space-between" p={5} >
+        <LegendsSorting setFilter={setFilter} value={filter} />
         <MetaMaskConnection />
       </Grid>
       <Grid pt={10} display="flex" justifyContent="center" flexWrap="wrap">
