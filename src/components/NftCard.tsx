@@ -12,7 +12,7 @@ import { hatchLegend } from "@/functions/legend-actions";
 
 type NftCardProps = {
   legendId: string;
-  filter: AllLegendsEnum | undefined;
+  filter?: string;
   width?: string | number;
   padding?: string | number;
   borderRadius?: number;
