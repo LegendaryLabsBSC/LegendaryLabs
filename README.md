@@ -1,3 +1,7 @@
+# LegendaryLabs
+
+Legendary Labs is a unique NFT breeding platform, launching Winter 2021. Utilizing a proprietary 3D model protocol, Legendary Labs will allow for greater genetic variation, making for a more interesting breeding and collecting experience than currently-available platforms. Beginning with a series of beautifully-designed phoenixes, Legendary Labs aims to release new seasons of NFTs in the future, while restricting breeding on prior seasons to allow for increasing value. Future additions to the platform will include NFT training, an arena, accessories, and more!
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
