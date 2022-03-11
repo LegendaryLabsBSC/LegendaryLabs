@@ -4,17 +4,19 @@ import styled from 'styled-components'
 
 const StyledCard = styled.div`
   & {
-    width: 300px;
+    width: 600px;
     text-align: center;
     padding-top: 25px;
     img {
       padding: 25px;
+      border-radius: 2em;
     }
     background-color: whiteSmoke;
-    border-radius: 10%;
+    border-radius: 10px;
     h3 {
       color: #000;
     }
+    color: #000;
   }
 `
 

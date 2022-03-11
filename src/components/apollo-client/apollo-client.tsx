@@ -1,6 +1,12 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client'
 
 export const client = new ApolloClient({
-  uri: 'http://api.dev.legendarylabs.net/graphql',
+  uri: 'https://legendary-labs-graphql-api.herokuapp.com/graphql',
   cache: new InMemoryCache(),
 })
+
+// export const client = new ApolloClient({
+//     uri: 'http://192.168.1.213:3003/graphql',
+//     cache: new InMemoryCache(),
+//   })
+  
