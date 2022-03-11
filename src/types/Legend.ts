@@ -6,6 +6,7 @@ interface Legend {
   isDestroyed: boolean;
   isHatched: boolean;
   isHatchable: boolean;
+  isBlendable: boolean;
   isLegendary: boolean;
   legendCreator: string;
   parent1: string;

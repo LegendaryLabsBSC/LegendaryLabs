@@ -1,54 +1,134 @@
-import React, { useState, useEffect } from "react";
-import ConnectButton from "./components/ConnectButton";
-import ConnectedMenu from "./components/ConnectedMenu";
-import { ethereum } from "@/types";
-
-async function checkCorrectNetwork(chainId: string) {
-  await ethereum.request({
-    method: "wallet_switchEthereumChain",
-    params: [{ chainId: "0x61" }],
-  }); //todo: if not connected add network
-
-  ethereum.on("chainChanged", () => {
-    window.location.reload();
-  }); // ? remove listener
-}
-
-async function checkWalletConnection(setUserWallet: any) {
-  if (ethereum) {
-    const accounts: string[] = await ethereum.request({
-      method: "eth_requestAccounts",
-    });
-
-    if (accounts.length > 0) {
-      await checkCorrectNetwork(ethereum.chainId);
-
-      const wallet = accounts[0];
-      setUserWallet(wallet);
-
-      return;
-    }
-  }
-}
+import React, { useState, useEffect, useContext } from "react";
+import {
+  MetaMaskContext,
+  MetaMaskContextType,
+} from "@/context/metaMaskContext";
+import {
+  // Button,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuGroup,
+  MenuItem,
+  MenuDivider,
+  Flex,
+  Icon,
+  Spacer,
+  Text,
+  Spinner,
+} from "@chakra-ui/react";
+import { Button } from "@mui/material";
+import { RiLogoutCircleRLine, RiSettings4Fill } from "react-icons/ri";
+import { FaWallet, FaChevronDown } from "react-icons/fa";
 
 const MetaMaskConnection = () => {
-  const [userWallet, setUserWallet] = useState<string | undefined>();
+  const { wallet, balances, connectWallet, fetchBalances, dappNetwork } =
+    useContext(MetaMaskContext) as MetaMaskContextType;
+
+  const displayWallet: string = `0x...${wallet.slice(-4)}`;
 
   useEffect(() => {
-    checkWalletConnection(setUserWallet);
+    connectWallet();
   }, []);
 
-  return userWallet ? (
-    <ConnectedMenu walletAddress={userWallet} setUserWallet={setUserWallet} />
+  useEffect(() => {
+    fetchBalances();
+  }, [wallet]);
+
+  return wallet.length > 0 ? (
+    // <ConnectedMenu />
+    <Flex align="center">
+      <Menu>
+        <MenuButton
+          // as={Button}
+          // size="sm"
+          color="success"
+          fontSize="md"
+          borderRadius={30}
+          background="white"
+          // leftIcon={<FaWallet />}
+          // rightIcon={<FaChevronDown />}
+          _hover={{ background: "blue.300" }}
+        >
+          {displayWallet}
+        </MenuButton>
+        <MenuList borderRadius={20}>
+          <MenuGroup>
+            <MenuItem _hover={{ background: "none", cursor: "auto" }}>
+              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                {dappNetwork.nativeCurrency.symbol}
+              </Text>
+              <Spacer />
+              {balances.native.length > 0 ? (
+                <Text>{balances?.native}</Text>
+              ) : (
+                <Spinner color="blue.500" />
+              )}
+            </MenuItem>
+            <MenuItem _hover={{ background: "none", cursor: "auto" }}>
+              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                LGND
+              </Text>
+              <Spacer />
+              {balances.dapp.length > 0 ? (
+                <Text>{balances?.dapp}</Text>
+              ) : (
+                <Spinner color="blue.500" />
+              )}
+            </MenuItem>
+            <MenuItem _hover={{ background: "none", cursor: "auto" }}>
+              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                NFTs
+              </Text>
+              <Spacer />
+              {balances.nft.length > 0 ? (
+                <Text>{balances?.nft} Legends</Text>
+              ) : (
+                <Spinner color="blue.500" />
+              )}
+            </MenuItem>
+          </MenuGroup>
+          <MenuDivider />
+          <MenuGroup>
+            <MenuItem _hover={{ background: "none" }}>
+              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                Profile
+              </Text>
+              <Spacer />
+              <Icon as={RiSettings4Fill} w={5} h={5} color="gray.500" />
+            </MenuItem>
+          </MenuGroup>
+          <MenuDivider />
+          <MenuGroup>
+            <MenuItem
+              // onClick={() => handleDisconnection()}
+              _hover={{ background: "none" }}
+            >
+              <Text fontSize="sm" fontWeight="bold" color="blue.500">
+                Disconnect Wallet
+              </Text>
+              <Spacer />
+              <Icon as={RiLogoutCircleRLine} w={5} h={5} color="red.500" />
+            </MenuItem>
+          </MenuGroup>
+        </MenuList>
+      </Menu>
+    </Flex>
   ) : (
-    <ConnectButton setUserWallet={setUserWallet} />
+    <Button
+      // size="sm"
+      // color="white"
+      color="info"
+      variant="contained"
+      // fontSize="md"
+      // borderRadius={30}
+      // background="blue.600"
+      onClick={() => connectWallet()}
+      // _hover={{ background: "blue.300" }}
+    >
+      Connect Wallet
+    </Button>
   );
 };
 
 export default MetaMaskConnection;
-
-//todo: ensure connection switch occurs(bnb-main wasnt triggering when it should be bnb-test)
-// ;; doesnt switch on check connection
-// todo: export types that can be exported ;; add types where needed
-// spooky swap & this tried to switch networks on others dapps, but not pancake
-//todo: accounts changed event listener

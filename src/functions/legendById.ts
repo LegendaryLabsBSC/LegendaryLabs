@@ -17,12 +17,11 @@ query {
     isLegendary
     isHatched
     isHatchable
+    isBlendable
     isDestroyed
     ownerOf
   }
 }
-`
+`;
 
-export {
-    legendById
-}
+export { legendById };
