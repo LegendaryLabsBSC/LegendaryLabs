@@ -17,11 +17,12 @@ const App: React.FC = () => {
     const tab = document.getElementById(path === "/" ? "/home" : path);
     if (tab) tab.classList.add("active");
   }, []);
-
+  console.log(document.location.pathname);
+  
   return (
     <MetaMaskProvider>
       <Box position="absolute" right={50}>
-        <MetaMaskConnection />
+        {document.location.pathname === '/home' || '/' && <MetaMaskConnection />}
       </Box>
       <Router>
         <Routes>
