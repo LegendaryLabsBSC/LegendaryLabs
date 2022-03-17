@@ -42,9 +42,9 @@ const LegendsSorting: React.FC<LegendsSortingProps> = ({ setFilter, value }) => 
   `
 
   return (
-    <FormControl style={{ width: 200, borderRadius: '10px' }}>
-      <InputLabel style={{ color: 'whitesmoke' }}>Filter</InputLabel>
-      <Select label="Filter" value={value} onChange={(e) => setFilter(e.target.value)}>
+    <FormControl style={{ width: 200, borderRadius: '10px', backgroundColor: 'whitesmoke' }}>
+      {!value && <InputLabel shrink={false} style={{ color: 'black' }}>Filter</InputLabel>}
+      <Select value={value} onChange={(e) => setFilter(e.target.value)}>
         <MenuItem value={undefined}>All</MenuItem>
         <MenuItem value={AllLegendsEnum.Hatched}>Hatched</MenuItem>
         <MenuItem value={AllLegendsEnum.Unhatched}>Unhatched</MenuItem>
