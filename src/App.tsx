@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Team from "./components/team/team";
 import Home from "./components/home/home";
@@ -8,21 +8,25 @@ import { Marketplace } from "./components/marketplace/marketplace";
 import TempAdmin from "./components/TempAdmin/TempAdmin";
 import CreatePromoForm from "./components/TempAdmin/forms/CreatePromoForm";
 import MetaMaskConnection from "./components/MetaMaskConnection/MetaMaskConnection";
-import { Box } from "@mui/material";
+import { Grid } from "@mui/material";
 import MetaMaskProvider from "./context/metaMaskContext";
 
 const App: React.FC = () => {
+  const [home, setHome] = useState(false)
   useEffect(() => {
     const path = document.location.pathname;
+    if (path === '/home') setHome(true)
+    else if (path === '/') setHome(true)
+    else setHome(false)
     const tab = document.getElementById(path === "/" ? "/home" : path);
     if (tab) tab.classList.add("active");
   }, []);
-
+  
   return (
     <MetaMaskProvider>
-      <Box position="absolute" right={50}>
+      {home && <Grid display='flex' justifyContent="flex-end" p={5}>
         <MetaMaskConnection />
-      </Box>
+      </Grid>}
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
