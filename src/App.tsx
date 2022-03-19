@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Team from "./components/team/team";
 import Home from "./components/home/home";
-import { AllLegends } from "./components/AllLegends";
+import { AllLegends } from "./components/all-legends/AllLegends";
 import ComingSoon from "./components/coming-soon/coming-soon";
 import { Marketplace } from "./components/marketplace/marketplace";
 import TempAdmin from "./components/TempAdmin/TempAdmin";

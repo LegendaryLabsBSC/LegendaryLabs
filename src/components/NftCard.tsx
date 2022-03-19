@@ -76,10 +76,11 @@ const NftCard = ({
       textAlign="center"
       bgcolor="whitesmoke"
       borderRadius={10}
+      style={{color: 'black'}}
     >
       <>
         {legendData.prefix.length === 0 && legendData.postfix.length === 0 ? (
-          <Typography>Specimen #{legendData.id}</Typography>
+          <Typography >Specimen #{legendData.id}</Typography>
         ) : (
           <Typography>
             {legendData.prefix}
