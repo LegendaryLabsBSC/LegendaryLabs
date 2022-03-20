@@ -67,10 +67,23 @@ export const Forum: React.FC = () => {
                 <ul className="nk-forum">
                     { !topic && topics.map((topic: ForumTopicBaseProps) => <ForumTopic { ...topic } setTopic={setTopic} />) }
                     { !!topic && !thread && threads.filter((x) => x.topic === topic).map((topic: ForumThreadBaseProps) => <ForumThread { ...topic } setThread={setThread} />) }
-                    { !!topic && !!thread && (
-                            <ul className='nk-forum-topic'>
-                               { posts.filter((x) => x.thread === thread).map((topic: ForumPostBaseProps) => <ForumPost { ...topic } />) }
-                            </ul>
+                    { !!topic && !!thread && (<>
+                                <div className="text-right"> {/* col-md-3 order-md-2  */}
+                                    <a href="#forum-reply" className="nk-btn nk-btn-lg link-effect-4 nk-anchor">Reply</a>
+                                </div>
+                                <ul className='nk-forum-topic'>
+                                { posts.filter((x) => x.thread === thread).map((topic: ForumPostBaseProps) => <ForumPost { ...topic } />) }
+                                </ul>
+                                <div id="forum-reply"></div>
+                                <div className="nk-gap-4"></div>
+                                <h3 className="h4">Reply</h3>
+                                <form action="#">
+                                    <div className="nk-gap-1"></div>
+                                    <textarea className="nk-summernote" name="content"></textarea>
+                                    <div className="nk-gap-1"></div>
+                                    <button className="nk-btn nk-btn-lg link-effect-4">Reply</button>
+                                </form>
+                            </>
                         )
                     }
                 </ul>
