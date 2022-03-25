@@ -14,7 +14,7 @@ import {
   MetaMaskContext,
   MetaMaskContextType,
 } from "@/context/metaMaskContext";
-import { BlendingDialog } from "../blending-dialog/BlendingDialog";
+// import { BlendingDialog } from "../blending-dialog/BlendingDialog";
 
 type LegendCardProps = {
   legendId: string;
