@@ -7,26 +7,29 @@ import ComingSoon from "./components/coming-soon/coming-soon";
 import { Marketplace } from "./components/marketplace/marketplace";
 import TempAdmin from "./components/TempAdmin/TempAdmin";
 import CreatePromoForm from "./components/TempAdmin/forms/CreatePromoForm";
-import MetaMaskConnection from "./components/MetaMaskConnection/MetaMaskConnection";
+import MetaMaskConnection from "./components/metamask-connection/MetaMaskConnection";
 import { Grid } from "@mui/material";
 import MetaMaskProvider from "./context/metaMaskContext";
+import { MyLegends } from "./components/my-legends/MyLegends";
 
 const App: React.FC = () => {
-  const [home, setHome] = useState(false)
+  const [home, setHome] = useState(false);
   useEffect(() => {
     const path = document.location.pathname;
-    if (path === '/home') setHome(true)
-    else if (path === '/') setHome(true)
-    else setHome(false)
+    if (path === "/home") setHome(true);
+    else if (path === "/") setHome(true);
+    else setHome(false);
     const tab = document.getElementById(path === "/" ? "/home" : path);
     if (tab) tab.classList.add("active");
   }, []);
-  
+
   return (
     <MetaMaskProvider>
-      {home && <Grid display='flex' justifyContent="flex-end" p={5}>
-        <MetaMaskConnection />
-      </Grid>}
+      {home && (
+        <Grid display="flex" justifyContent="flex-end" p={5}>
+          <MetaMaskConnection />
+        </Grid>
+      )}
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -36,8 +39,8 @@ const App: React.FC = () => {
           <Route path="/marketplace" element={<Marketplace />} />
           {/* <Route path='/marketplace' element={<ComingSoon />} /> */}
           {/* <Route path='/arena' element={<ComingSoon />} /> */}
-          <Route path="/arena" element={<TempAdmin />} />
-          {/* <Route path='/arena' element={<CreatePromoForm />} /> */}
+          {/* <Route path="/arena" element={<TempAdmin />} /> */}
+          <Route path="/arena" element={<MyLegends itemsPerPage={9}/>} />
           <Route path="/team" element={<Team />} />
         </Routes>
       </Router>

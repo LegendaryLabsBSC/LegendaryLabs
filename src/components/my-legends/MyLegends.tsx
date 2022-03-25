@@ -1,70 +1,67 @@
-import React, { useEffect, useState } from "react";
-import { useQuery } from "@apollo/client";
-import { LegendNFTCard } from "../legend-nft-card/LegendNFTCard";
-import { ethereum } from "@/types";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  MetaMaskContext,
+  MetaMaskContextType,
+} from "@/context/metaMaskContext";
 import { BigNumber, ethers } from "ethers";
 import MetaMaskConnection from "../metamask-connection/MetaMaskConnection";
 import { Grid } from "@mui/material";
-import TOTAL_NFT_SUPPLY from "@/graphql/total-nft-supply";
 import ReactPaginate from "react-paginate";
-import { LegendSorting } from "./components/LegendSorting";
+import { TokenOfOwnerByIndex } from "../legend-nft-card/withOwner";
+// import { LegendSorting } from "./components/LegendSorting";
 
-const provider: ethers.providers.Web3Provider =
-  new ethers.providers.Web3Provider(ethereum);
-
-const signer: any = provider.getSigner();
-
-type AllLegendsProps = {
+type MyLegendsProps = {
   itemsPerPage: number;
 };
 
-export const AllLegends: React.FC<AllLegendsProps> = ({ itemsPerPage }) => {
-  const [legendTotal, setLegendTotal] = useState<number[]>();
+export const MyLegends: React.FC<MyLegendsProps> = ({ itemsPerPage }) => {
+  const [userTotal, setUserTotal] = useState<number[]>();
   const [filter, setFilter] = useState<string>();
 
-  const { data, loading, error, refetch, fetchMore } =
-    useQuery(TOTAL_NFT_SUPPLY);
+  const { wallet, balances } = useContext(
+    MetaMaskContext
+  ) as MetaMaskContextType;
 
   useEffect(() => {
-    if (!loading) {
-      const legends: number[] = [...Array(data.totalNFTSupply.total).keys()];
-      setLegendTotal(legends);
+    if (balances.nft) {
+      const total: number[] = [...Array(Number(balances.nft)).keys()];
+      setUserTotal(total);
     }
-  }, [data, error]);
+  }, [balances.nft]);
 
   const [currentItems, setCurrentItems] = useState<number[] | null>(null);
   const [pageCount, setPageCount] = useState<number>(0);
   const [itemOffset, setItemOffset] = useState<number>(0);
 
   const handlePageClick = (event: any) => {
-    const newOffset = (event.selected * itemsPerPage) % legendTotal!.length;
+    const newOffset = (event.selected * itemsPerPage) % userTotal!.length;
 
     setItemOffset(newOffset);
   };
 
   useEffect(() => {
-    if (legendTotal) {
+    if (userTotal) {
       const endOffset = itemOffset + itemsPerPage;
-      setCurrentItems(legendTotal.slice(itemOffset, endOffset));
-      setPageCount(Math.ceil(legendTotal.length / itemsPerPage));
+      setCurrentItems(userTotal.slice(itemOffset, endOffset));
+      setPageCount(Math.ceil(userTotal.length / itemsPerPage));
     }
-  }, [itemOffset, itemsPerPage, legendTotal]);
+  }, [itemOffset, itemsPerPage, userTotal]);
 
   return (
     <>
       <Grid display="flex" justifyContent="space-between" p={5}>
-        <LegendSorting setFilter={setFilter} value={filter} />
         <MetaMaskConnection />
+        {/* <LegendSorting setFilter={setFilter} value={filter} /> */}
       </Grid>
       <Grid display="flex" justifyContent="center" flexWrap="wrap">
-        {legendTotal &&
-          legendTotal.map(
-            (empty, legendId): Record<never, string> => (
-              // currentItems?.map((legendId: any, itemIndex: any) => (
-              <LegendNFTCard
-                key={legendId}
-                filter={filter}
-                legendId={`${legendId + 1}`}
+        {userTotal &&
+          userTotal.map(
+            (empty, index): Record<never, string> => (
+              <TokenOfOwnerByIndex
+                key={index}
+                filter={""}
+                address={wallet}
+                legendIndex={`${index}`}
               />
             )
           )}
