@@ -33,6 +33,7 @@ const App: React.FC = () => {
           <Route path="/home" element={<Home />} />
           {/* <Route path='/legends' element={<ComingSoon />} /> */}
           <Route path="/legends" element={<AllLegends itemsPerPage={9} />} />
+          <Route path="/my-legends" element={<TempAdmin />} />
           <Route path="/marketplace" element={<Marketplace />} />
           {/* <Route path='/marketplace' element={<ComingSoon />} /> */}
           {/* <Route path='/arena' element={<ComingSoon />} /> */}
