@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { legendById } from "@/functions";
 import { Legend, ethereum } from "@/types";
@@ -30,7 +30,8 @@ const NftCard = ({
 }: NftCardProps) => {
   const [legendData, setLegendData] = useState<Legend>();
   const [filteredOut, setFilteredOut] = useState(false);
-  const [expandMenu, setExpandMenu] = useState(false);
+  const [hatchedFunction, setHatchedFunction] = useState<string>();
+  const [unhatchedFunction, setUnhatchedFunction] = useState<string>();
   const [flipCard, setFlipCard] = useState(false);
 
   const { data, loading, error } = useQuery(legendById(legendId));
@@ -62,6 +63,17 @@ const NftCard = ({
     }
   };
 
+  const hatchedFunctions: {[key: string]: () => void} = {
+    Blend: () => alert('Blent!'),
+    Trade: () => alert('Traded!'),
+    Match: () => alert('Matched!'),
+    Rejuvenate: () => alert('Rejuvenated!'),
+  }
+
+  const unhatchedFunctions: {[key: string]: () => void} = {
+    Hatch: () => alert('Hatched!'),
+  }
+
   useEffect(() => {
     handleFilter();
   }, [filter, filteredOut]);
@@ -75,12 +87,15 @@ const NftCard = ({
   return legendData && !filteredOut ? (
     <Box
       m={1}
-      width={314}
-      height={expandMenu ? 286.5 : 250}
+      width={250}
+      height={300}
       textAlign="center"
       bgcolor="whitesmoke"
       borderRadius={1}
-      style={{color: 'black'}}
+      style={{
+        color: 'black',
+        border: 'solid 1px whitesmoke'
+      }}
     >
       {/* <Grid container item display="flex" justifyContent="flex-end">
         {legendData.prefix.length === 0 && legendData.postfix.length === 0 ? (
@@ -93,48 +108,64 @@ const NftCard = ({
         )}
       </Grid> */}
       <Grid container item display="flex" justifyContent="flex-start" md={12}>
-        <Box height="250px" width="250px">
-          <Box height="250px" width="250px" onClick={() => setFlipCard(false)} className={`animate__animated ${flipCard ? 'animate__fadeIn' : 'animate__fadeOut'}`}>
-            <Typography>Season: {legendData.season}</Typography>
-            <Typography>ID: {legendData.id}</Typography>
-            <Typography>Offspring: {legendData.totalOffspring}</Typography>
-            <Typography>Brithday: {legendData.birthday}</Typography>
-            <Typography>Legendary: {legendData.isLegendary ? 'Yes' : 'No'}</Typography>
-          </Box>
-          <img
-            className={`animate__animated ${flipCard ? 'animate__fadeOutDown' : 'animate__fadeInUp'}`}
-            onClick={() => setFlipCard(true)}
-            alt="nft"
-            src={legendData.image}
-            // width={width ? width : 400}
-            // height={legendData.isHatched ? undefined : 400} // incubating legend imgs need to be same resolution/dimensions as legends
-            style={{
-              // padding: padding ? padding : 25,
-              borderRadius: borderRadius ? borderRadius : expandMenu ? '3px 0 3px 0' : '3px 0 0 3px',
-              objectFit: 'cover',
-              height: '250px',
-              width: '250px',
-              marginTop: '-280px'
-            }}
-          />
-        </Box>
-        <Button style={{ padding: 0, height: 64 }} onClick={() => setExpandMenu(!expandMenu)}>
-          {expandMenu ? <MenuOpenIcon /> : <MenuIcon />}
-        </Button>
-        {expandMenu && legendData.isHatched && (
-          <div className="animate__animated animate__fadeInDown animate__faster">
-            {/* //todo: conditional on isBlendable: disable with tooltip/info */}
-            <Button>Blend</Button>
-            <Button>Trade</Button>
-            <Button>Match</Button>
-            <Button>Rejuvenate</Button>
-          </div>
+        <img
+          alt="nft"
+          src={legendData.image}
+          // width={width ? width : 400}
+          // height={legendData.isHatched ? undefined : 400} // incubating legend imgs need to be same resolution/dimensions as legends
+          style={{
+            borderRadius: '3px 3px 0 0',
+            objectFit: 'cover',
+            height: '250px',
+            width: '248px',
+          }}
+        />
+        {/* <Box height="250px" width="248px">
+          <Typography>Season: {legendData.season}</Typography>
+          <Typography>ID: {legendData.id}</Typography>
+          <Typography>Offspring: {legendData.totalOffspring}</Typography>
+          <Typography>Brithday: {legendData.birthday}</Typography>
+          <Typography>Legendary: {legendData.isLegendary ? 'Yes' : 'No'}</Typography>
+        </Box> */}
+        {legendData.isHatched && (
+          <Grid display="flex" md={12} p={1}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Action</InputLabel>
+              <Select label="Action" onChange={(e) => setHatchedFunction(String(e.target.value))}>
+                <MenuItem value="Blend">Blend</MenuItem>
+                <MenuItem value="Trade">Trade</MenuItem>
+                <MenuItem value="Match">Match</MenuItem>
+                <MenuItem value="Rejuvenate">Rejuvenate</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              sx={{ borderRadius: 8,
+              backgroundColor: 'lightgray', marginLeft: 1 }}
+              onClick={() => hatchedFunction && hatchedFunctions[hatchedFunction]()}
+              disabled={!hatchedFunction}
+            >
+              {'>>'}
+            </Button>
+          </Grid>
         )}
-        {expandMenu && legendData.isHatchable && (
+        {legendData.isHatchable && (
           // todo: if not hatchable, and not already hatched, show incubation countdown
-          <div className="animate__animated animate__fadeInDown animate__faster">
-            <Button onClick={() => hatchLegend(legendId)}>Hatch</Button>
-          </div>
+          <Grid display="flex" md={12}>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Action</InputLabel>
+              <Select label="Action" onChange={(e) => setUnhatchedFunction(String(e.target.value))}>
+                <MenuItem value="Hatch">Hatch</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              sx={{ borderRadius: 8,
+              backgroundColor: 'lightgray', marginLeft: 1 }}
+              onClick={() => unhatchedFunction && unhatchedFunctions[unhatchedFunction]()}
+              disabled={!unhatchedFunction}
+            >
+              {'>>'}
+            </Button>
+          </Grid>
         )}
       </Grid>
     </Box>
