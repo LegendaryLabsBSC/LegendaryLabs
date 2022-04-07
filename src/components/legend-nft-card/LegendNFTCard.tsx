@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Box, Button, Modal, Typography } from "@mui/material";
+import { Box, Button, Grid, Modal, Typography } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { legendById } from "@/functions";
 import { Legend, ethereum } from "@/types";
@@ -167,7 +167,7 @@ export const LegendNFTCard: React.FC<LegendCardProps> = ({
                 <BlendingDialog parentOne={legendData} />
               </Box>
             </Modal> */}
-          </>
+          </div>
         )}
         {expandMenu && legendData.isHatchable && (
           // todo: if not hatchable, and not already hatched, show incubation countdown
