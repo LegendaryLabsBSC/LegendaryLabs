@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import React, { useState, useEffect, useContext } from "react";
+import { Box, Button, Modal, Typography } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { legendById } from "@/functions";
 import { Legend, ethereum } from "@/types";
@@ -11,9 +11,14 @@ import {
   legendsMatchingBoard,
 } from "@/config/contract-addresses";
 import { hatchLegend } from "@/functions/legend-actions";
-import 'animate.css'
+import { legendsNFTContract } from "@/config/legendary-labs-contracts";
+import {
+  MetaMaskContext,
+  MetaMaskContextType,
+} from "@/context/metaMaskContext";
+// import { BlendingDialog } from "../blending-dialog/BlendingDialog";
 
-type NftCardProps = {
+type LegendCardProps = {
   legendId: string;
   filter?: string;
   width?: string | number;
@@ -21,17 +26,39 @@ type NftCardProps = {
   borderRadius?: number;
 };
 
-const NftCard = ({
+const style = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "50%",
+  height: "50%",
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
+
+export const LegendNFTCard: React.FC<LegendCardProps> = ({
   legendId,
   filter,
   width,
   padding,
   borderRadius,
-}: NftCardProps) => {
+}) => {
   const [legendData, setLegendData] = useState<Legend>();
   const [filteredOut, setFilteredOut] = useState(false);
   const [expandMenu, setExpandMenu] = useState(false);
   const [flipCard, setFlipCard] = useState(false);
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const { wallet, balances } = useContext(
+    MetaMaskContext
+  ) as MetaMaskContextType;
 
   const { data, loading, error } = useQuery(legendById(legendId));
 
@@ -56,6 +83,8 @@ const NftCard = ({
       case "destroyed":
         if (!legendData?.isDestroyed) setFilteredOut(true);
         break;
+      case "owned":
+        break;
 
       default:
         break;
@@ -79,12 +108,12 @@ const NftCard = ({
       height={expandMenu ? 286.5 : 250}
       textAlign="center"
       bgcolor="whitesmoke"
-      borderRadius={1}
-      style={{color: 'black'}}
+      borderRadius={10}
+      style={{ color: "black" }}
     >
       {/* <Grid container item display="flex" justifyContent="flex-end">
         {legendData.prefix.length === 0 && legendData.postfix.length === 0 ? (
-          <Typography >Specimen #{legendData.id}</Typography>
+          <Typography>Specimen #{legendData.id}</Typography>
         ) : (
           <Typography>
             {legendData.prefix}
@@ -124,11 +153,21 @@ const NftCard = ({
         {expandMenu && legendData.isHatched && (
           <div className="animate__animated animate__fadeInDown animate__faster">
             {/* //todo: conditional on isBlendable: disable with tooltip/info */}
-            <Button>Blend</Button>
+            <Button onClick={handleOpen}>Blend</Button>
             <Button>Trade</Button>
             <Button>Match</Button>
             <Button>Rejuvenate</Button>
-          </div>
+            {/* <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box sx={style}>
+                <BlendingDialog parentOne={legendData} />
+              </Box>
+            </Modal> */}
+          </>
         )}
         {expandMenu && legendData.isHatchable && (
           // todo: if not hatchable, and not already hatched, show incubation countdown
@@ -140,5 +179,3 @@ const NftCard = ({
     </Box>
   ) : null; //todo: skeleton card ;; move nft container to here
 };
-
-export default NftCard;
