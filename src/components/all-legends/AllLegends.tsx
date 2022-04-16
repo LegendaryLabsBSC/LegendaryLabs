@@ -8,6 +8,7 @@ import { Grid } from "@mui/material";
 import TOTAL_NFT_SUPPLY from "@/graphql/total-nft-supply";
 import ReactPaginate from "react-paginate";
 import { LegendSorting } from "./components/LegendSorting";
+import NftCard from "./components/nft-card";
 
 const provider: ethers.providers.Web3Provider =
   new ethers.providers.Web3Provider(ethereum);
@@ -61,7 +62,7 @@ export const AllLegends: React.FC<AllLegendsProps> = ({ itemsPerPage }) => {
           legendTotal.map(
             (empty, legendId): Record<never, string> => (
               // currentItems?.map((legendId: any, itemIndex: any) => (
-              <LegendNFTCard
+              <NftCard
                 key={legendId}
                 filter={filter}
                 legendId={`${legendId + 1}`}
