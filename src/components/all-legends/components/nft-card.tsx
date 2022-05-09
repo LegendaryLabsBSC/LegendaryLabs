@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, SpeedDial, SpeedDialAction, SxProps, Theme, Typography } from "@mui/material";
+import { Box, Button, Grid, Link, SpeedDial, SpeedDialAction, SxProps, Theme, Typography } from "@mui/material";
 import { useQuery } from "@apollo/client";
 import { legendById } from "@/functions";
 import { Legend, ethereum } from "@/types";
@@ -129,7 +129,7 @@ const NftCard = ({
           </Typography>
         )}
       </Grid> */}
-      <Grid container item display="flex" justifyContent="flex-start" md={12}>
+      <Grid container item display="flex" justifyContent="flex-start" md={12} position="relative">
           <img
             onClick={() => setFlipCard(true)}
             alt="nft"
@@ -144,6 +144,19 @@ const NftCard = ({
               width: '250px',
             }}
           />
+          <Link
+            underline="hover"
+            position="absolute"
+            bottom={0}
+            mb={5}
+            ml={5}
+            display="flex"
+            flexDirection="row"
+            justifySelf="center"
+            href={`/legends/${legendData.id}`}
+          >
+            <Typography color="white">{legendData.name || 'NAME'}</Typography>
+          </Link>
           <SpeedDial
             ariaLabel="speed"
             direction="down"

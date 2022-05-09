@@ -16,6 +16,7 @@ interface Legend {
   season: string;
   totalOffspring: number;
   ownerOf: string;
+  name: string;
 }
 
 export { type Legend };

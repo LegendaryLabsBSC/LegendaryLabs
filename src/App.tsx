@@ -11,6 +11,7 @@ import MetaMaskConnection from "./components/metamask-connection/MetaMaskConnect
 import { Grid } from "@mui/material";
 import MetaMaskProvider from "./context/metaMaskContext";
 import { MyLegends } from "./components/my-legends/MyLegends";
+import { SingleLegend } from "./components/single-legend/SingleLegend";
 
 const App: React.FC = () => {
   const [home, setHome] = useState(false);
@@ -36,6 +37,7 @@ const App: React.FC = () => {
           <Route path="/home" element={<Home />} />
           {/* <Route path='/legends' element={<ComingSoon />} /> */}
           <Route path="/legends" element={<AllLegends itemsPerPage={9} />} />
+          <Route path="/legends/:id" element={<SingleLegend />} />
           <Route path="/marketplace" element={<Marketplace />} />
           {/* <Route path='/marketplace' element={<ComingSoon />} /> */}
           {/* <Route path='/arena' element={<ComingSoon />} /> */}
